@@ -2000,7 +2000,12 @@ export default function Ventas() {
                     <td className="td-suave" data-label="Fecha">{v.fecha}</td>
                     <td className="td-suave" data-label="Dirección">{v.direccion}</td>
                     <td data-label="Total" style={{ fontWeight: 800, color: '#16a34a' }}>${Number(v.total).toLocaleString('es-CO')}</td>
-                    <td data-label="Estado"><span className="estado-badge" style={{ background: est.bg, color: est.color }}>{ESTADO_LABELS[v.estado] || v.estado}</span></td>
+                    <td data-label="Estado">
+                      <span className="estado-badge" style={{ background: est.bg, color: est.color }}>{ESTADO_LABELS[v.estado] || v.estado}</span>
+                      {v.nombreDomiciliario && (v.estado === 'despachado' || v.estado === 'entregado') && (
+                        <div style={{ fontSize: 11, color: '#6b7280', marginTop: 3 }}>{v.nombreDomiciliario}</div>
+                      )}
+                    </td>
                     <td data-label="Acciones">
                       <div className="acciones">
                         <button className="btn-accion ver"     onClick={() => api.obtenerVenta(v.id_venta).then(d=>setDetalle(mapVenta(d))).catch(()=>setDetalle(v))} title="Ver detalle"><Eye size={14} /></button>
