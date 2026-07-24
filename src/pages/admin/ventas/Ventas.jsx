@@ -2011,8 +2011,8 @@ export default function Ventas() {
                           </button>
                         )}
                         <button className="btn-accion permisos" onClick={() => setConfirmarImpresion(v)} title="Generar comprobante"><FileText size={14} /></button>
-                        {v.estado === 'despachado' && (
-                          <button className="btn-accion" style={{ background: '#fef3c7', color: '#ca8a04' }} onClick={() => setDevolviendo(v)} title="Devolver a Listo (cancelar despacho)"><RotateCcw size={14} /></button>
+                        {(v.estado === 'despachado' || v.estado === 'entregado') && (
+                          <button className="btn-accion" style={{ background: '#fef3c7', color: '#ca8a04' }} onClick={() => setDevolviendo(v)} title="Devolver a Listo"><RotateCcw size={14} /></button>
                         )}
                         {tienePermiso('anular_venta') && v.estado !== 'anulado' && v.estado !== 'entregado' && v.estado !== 'despachado' && (
                           <button className="btn-accion eliminar" onClick={() => setAnulando(v)} title="Anular venta"><X size={14} /></button>
