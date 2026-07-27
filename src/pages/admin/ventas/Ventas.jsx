@@ -473,8 +473,9 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
         setDireccionesCliente(activas);
         if (activas.length > 0) {
           setModoDir('guardada'); setDireccion(activas[0]);
-          // Calcular domicilio automáticamente si la dirección tiene coordenadas
-          calcularDomicilioAdmin(activas[0]);
+          const precioAuto = activas[0].barrioRel?.precio_domicilio ?? activas[0].costo_domicilio;
+          if (precioAuto) setCostoEnvio(precioAuto);
+          else calcularDomicilioAdmin(activas[0]);
         } else setModoDir('nueva');
       })
       .catch(() => setDireccionesCliente([]));
@@ -693,7 +694,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {direccionesCliente.map((d) => (
                         <button key={d.id_direccion} type="button"
-                          onClick={() => { setDireccion(d); calcularDomicilioAdmin(d); }}
+                          onClick={() => { setDireccion(d); const p = d.barrioRel?.precio_domicilio ?? d.costo_domicilio; if (p) setCostoEnvio(p); else calcularDomicilioAdmin(d); }}
                           style={{ textAlign: 'left', padding: '12px 16px', border: `2px solid ${direccion?.id_direccion === d.id_direccion ? '#CA0B0B' : '#e5e7eb'}`, borderRadius: 12, background: direccion?.id_direccion === d.id_direccion ? '#fff5f5' : '#fff', cursor: 'pointer', fontFamily: 'inherit' }}>
                           <div style={{ fontWeight: 700, fontSize: 13 }}>{d.direccion_linea}</div>
                           <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{d.barrio}{d.ciudad ? `, ${d.ciudad}` : ''}</div>
@@ -703,18 +704,24 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                   )}
 
                   {modoDir === 'nueva' && (
-                    <FormDireccion value={nuevaDireccion} onChange={(field, value) => setNuevaDireccion((p) => ({ ...p, [field]: value }))} />
+                    <FormDireccion value={nuevaDireccion} onChange={(field, value) => {
+                      setNuevaDireccion((p) => ({ ...p, [field]: value }));
+                      if (field === 'costo_domicilio') setCostoEnvio(Number(value) || 0);
+                    }} />
                   )}
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, padding: '10px 14px', background: '#f9fafb', borderRadius: 10, border: '1px solid #e5e7eb' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>Costo domicilio $</span>
-                    {calculandoDom
-                      ? <span style={{ fontSize: 12, color: '#888' }}>Calculando...</span>
-                      : <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
-                          onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                          onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                          style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit' }} />
-                    }
+                  <div style={{ marginTop: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#f9fafb', borderRadius: 10, border: '1px solid #e5e7eb' }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>Costo domicilio $</span>
+                      {calculandoDom
+                        ? <span style={{ fontSize: 12, color: '#888' }}>Calculando...</span>
+                        : <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
+                            onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
+                            onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
+                            style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
+                      }
+                    </div>
+                    {costoEnvio > 0 && !calculandoDom && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 3, textAlign: 'right', fontWeight: 700 }}>Domicilio: ${Number(costoEnvio).toLocaleString('es-CO')}</div>}
                   </div>
                 </div>
               )}
@@ -881,8 +888,9 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                             onChange={(e) => handleEfMixto(e.target.value)}
                             onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                             onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                          {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
+                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
+                          {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
+                          {montoEfectivo > 0 && (total - montoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoEfectivo).toLocaleString('es-CO')} para transf.</div>}
                         </div>
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: 11, color: '#888', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 4 }}><LogoBancolombia size={11} /><LogoNequi size={11} /> Transfer.</label>
@@ -890,8 +898,9 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                             onChange={(e) => handleTrMixto(e.target.value)}
                             onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                             onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                          {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
+                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
+                          {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
+                          {montoTransfer > 0 && (total - montoTransfer) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoTransfer).toLocaleString('es-CO')} para efectivo.</div>}
                         </div>
                       </div>
                       <div style={{ padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: pagoCompleto ? '#f0fdf4' : '#fff5f5', border: `1px solid ${pagoCompleto ? '#bbf7d0' : '#fecaca'}`, color: pagoCompleto ? '#166534' : '#CA0B0B', display: 'flex', justifyContent: 'space-between' }}>
@@ -1347,8 +1356,9 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                         onChange={(e) => { setMontoEfectivo(Number(e.target.value) || 0); setMontoTransfer(Math.max(0, total - (Number(e.target.value) || 0))); }}
                         onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                         onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoEfectivo <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                      {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
+                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoEfectivo <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
+                      {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
+                      {montoEfectivo > 0 && (total - montoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoEfectivo).toLocaleString('es-CO')} para transf.</div>}
                     </div>
                     <div style={{ flex: 1 }}>
                       <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems:'center', gap:4, marginBottom: 3 }}><LogoBancolombia size={12}/><LogoNequi size={12}/>Transferencia *</label>
@@ -1356,8 +1366,9 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                         onChange={(e) => { setMontoTransfer(Number(e.target.value) || 0); setMontoEfectivo(Math.max(0, total - (Number(e.target.value) || 0))); }}
                         onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                         onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoTransfer <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                      {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
+                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoTransfer <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
+                      {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
+                      {montoTransfer > 0 && (total - montoTransfer) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoTransfer).toLocaleString('es-CO')} para efectivo.</div>}
                     </div>
                   </div>
                   <div style={{ marginTop: 6, padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, background: ok ? '#f0fdf4' : (intentoGuardar ? '#fff5f5' : '#f9f9f9'), border: `1px solid ${ok ? '#bbf7d0' : (intentoGuardar ? '#fecaca' : '#e5e7eb')}`, color: ok ? '#166534' : '#CA0B0B', display: 'flex', justifyContent: 'space-between' }}>
@@ -1540,9 +1551,10 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                       }}
                       onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                       onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeEf}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeEf}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }}
                     />
-                    {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
+                    {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
+                    {montoEfectivo > 0 && (total - montoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoEfectivo).toLocaleString('es-CO')} para transf.</div>}
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems:'center', gap:4, marginBottom: 3 }}>
@@ -1560,9 +1572,10 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                       }}
                       onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                       onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeTr}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeTr}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }}
                     />
-                    {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
+                    {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
+                    {montoTransfer > 0 && (total - montoTransfer) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoTransfer).toLocaleString('es-CO')} para efectivo.</div>}
                   </div>
                 </div>
                 {/* Indicador: verde cuando cuadra, rojo solo si ya intentó guardar */}

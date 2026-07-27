@@ -487,9 +487,11 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
                 <span className="checkout-precio-simbolo">$</span>
                 <input className="checkout-input checkout-input-precio input-monto" type="number" step="1" min="0" placeholder="0" value={pagoEfectivo} onChange={(e) => handleEfectivoMixto(e.target.value)}
                   onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                  onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }} />
+                  onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
+                  style={{ MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
               </div>
-              {Number(pagoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 3, textAlign: 'right', fontWeight: 600 }}>${Number(pagoEfectivo).toLocaleString('es-CO')}</div>}
+              {Number(pagoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 3, textAlign: 'right', fontWeight: 700 }}>${Number(pagoEfectivo).toLocaleString('es-CO')}</div>}
+              {Number(pagoEfectivo) > 0 && (total - Number(pagoEfectivo)) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - Number(pagoEfectivo)).toLocaleString('es-CO')} para transf.</div>}
             </div>
             <div className="checkout-campo" style={{ margin: 0 }}>
               <label className="checkout-label" style={{display:'flex',alignItems:'center',gap:5}}><LogoBancolombia size={14}/><LogoNequi size={14}/>Transferencia</label>
@@ -497,9 +499,11 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
                 <span className="checkout-precio-simbolo">$</span>
                 <input className="checkout-input checkout-input-precio input-monto" type="number" step="1" min="0" placeholder="0" value={pagoTransfer} onChange={(e) => handleTransferMixto(e.target.value)}
                   onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                  onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }} />
+                  onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
+                  style={{ MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
               </div>
-              {Number(pagoTransfer) > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 3, textAlign: 'right', fontWeight: 600 }}>${Number(pagoTransfer).toLocaleString('es-CO')}</div>}
+              {Number(pagoTransfer) > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 3, textAlign: 'right', fontWeight: 700 }}>${Number(pagoTransfer).toLocaleString('es-CO')}</div>}
+              {Number(pagoTransfer) > 0 && (total - Number(pagoTransfer)) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - Number(pagoTransfer)).toLocaleString('es-CO')} para efectivo.</div>}
             </div>
           </div>
           <div className="checkout-campo" style={{ marginTop: 12 }}>
