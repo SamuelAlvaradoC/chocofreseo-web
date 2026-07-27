@@ -205,7 +205,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
   const total             = Math.max(0, subtotalProductos - descuentoPuntos) + Number(costoDomicilio);
   const totalPagado       = (Number(pagoEfectivo) || 0) + (Number(pagoTransfer) || 0);
 
-  const FORMATOS_PERMITIDOS = ['image/jpeg', 'image/png', 'application/pdf'];
+  const FORMATOS_PERMITIDOS = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
   const MAX_SIZE_MB = 5;
 
   const handleComprobante = (e) => {

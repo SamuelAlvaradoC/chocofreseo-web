@@ -26,11 +26,13 @@ function UploadImagen({ value, onChange }) {
     if (!file) return;
     const FORMATOS = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
     if (!FORMATOS.includes(file.type)) {
+      setErrorImg('Formato no permitido. Solo JPG, PNG o PDF');
       toast.error('Formato no permitido. Solo JPG, PNG o PDF');
       e.target.value = '';
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
+      setErrorImg('El archivo supera el tamaño máximo de 5 MB');
       toast.error('El archivo supera el tamaño máximo de 5 MB');
       e.target.value = '';
       return;
