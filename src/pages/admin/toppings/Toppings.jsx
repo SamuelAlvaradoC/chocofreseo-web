@@ -24,6 +24,17 @@ function UploadImagen({ value, onChange }) {
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const FORMATOS = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!FORMATOS.includes(file.type)) {
+      toast.error('Formato no permitido. Solo JPG, PNG o PDF');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('El archivo supera el tamaño máximo de 5 MB');
+      e.target.value = '';
+      return;
+    }
     setSubiendo(true); setErrorImg('');
     try { const url = await uploadToCloudinary(file); onChange(url); }
     catch (err) { setErrorImg(err?.message || 'Error al subir imagen'); }
@@ -52,7 +63,7 @@ function UploadImagen({ value, onChange }) {
             <span>Subir imagen</span>
           </div>
         )}
-        <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+        <input ref={inputRef} type="file" accept=".jpg,.jpeg,.png,.pdf" style={{ display: 'none' }} onChange={handleFile} />
       </div>
       {errorImg && <span className="form-error" style={{ display: 'block', marginTop: 4 }}>{errorImg}</span>}
     </div>

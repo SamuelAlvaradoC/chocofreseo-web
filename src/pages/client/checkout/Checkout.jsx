@@ -212,10 +212,14 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
     const file = e.target.files[0];
     if (!file) return;
     if (!FORMATOS_PERMITIDOS.includes(file.type)) {
-      setComprobanteErr('Formato no permitido. Solo JPG, PNG o PDF.'); return;
+      setComprobanteErr('Formato no permitido. Solo JPG, PNG o PDF.');
+      e.target.value = '';
+      return;
     }
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      setComprobanteErr(`El archivo supera el límite de ${MAX_SIZE_MB} MB.`); return;
+      setComprobanteErr(`El archivo supera el límite de ${MAX_SIZE_MB} MB.`);
+      e.target.value = '';
+      return;
     }
     setComprobanteErr('');
     setComprobante(file);
@@ -435,9 +439,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
           <label className="checkout-label">Monto en efectivo (total pre-llenado)</label>
           <div className="checkout-precio-wrap">
             <span className="checkout-precio-simbolo">$</span>
-            <input className="checkout-input checkout-input-precio input-monto" type="number" step="1" min="0" value={total} readOnly style={{ background: '#f9fafb', cursor: 'not-allowed' }}
-              onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-              onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }} />
+            <input className="checkout-input checkout-input-precio input-monto" type="text" value={total.toLocaleString('es-CO')} readOnly style={{ background: '#f9fafb', cursor: 'not-allowed' }} />
           </div>
         </div>
       )}
@@ -448,9 +450,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
             <label className="checkout-label">Monto por transferencia (total pre-llenado)</label>
             <div className="checkout-precio-wrap">
               <span className="checkout-precio-simbolo">$</span>
-              <input className="checkout-input checkout-input-precio input-monto" type="number" step="1" min="0" value={total} readOnly style={{ background: '#f9fafb', cursor: 'not-allowed' }}
-                onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }} />
+              <input className="checkout-input checkout-input-precio input-monto" type="text" value={total.toLocaleString('es-CO')} readOnly style={{ background: '#f9fafb', cursor: 'not-allowed' }} />
             </div>
           </div>
           <div className="checkout-campo" style={{ marginTop: 12 }}>
