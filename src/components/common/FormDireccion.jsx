@@ -6,9 +6,11 @@ const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/
 const fetchPublic = (url) => fetch(url).then((r) => r.json()).then((d) => d.data || []).catch(() => []);
 
 const TIPOS_VIA = [
-  'Calle', 'Carrera', 'Transversal', 'Diagonal',
-  'Avenida', 'Avenida Calle', 'Avenida Carrera',
-  'Circular', 'Circunvalar',
+  'Calle',
+  'Carrera',
+  'Diagonal',
+  'Avenida',
+  'Transversal',
 ];
 
 function SearchableBarrio({ barrios, value, onChange, disabled, inputCls, error }) {
@@ -190,9 +192,9 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
 
       {/* Costo domicilio (solo modo cliente) */}
       {!isAdmin && value.costo_domicilio > 0 && (
-        <div style={{ marginBottom: 12, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span>Costo de domicilio</span>
-          <span style={{ fontSize: 16 }}>${Number(value.costo_domicilio).toLocaleString('es-CO')}</span>
+        <div style={{ marginBottom: 10, padding: '6px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 12, color: '#166534', fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>Domicilio</span>
+          <span style={{ fontWeight: 800 }}>${Number(value.costo_domicilio).toLocaleString('es-CO')}</span>
         </div>
       )}
 

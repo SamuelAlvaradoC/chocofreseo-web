@@ -45,23 +45,12 @@ function ModalFormulario({ open, onClose, onGuardar, editando, procesando, ciuda
         </div>
 
         <div className="form-grupo">
-          <label className="form-label">Nombre del barrio *</label>
-          <input
-            className={`form-input${errores.nombre ? ' input-error' : ''}`}
-            placeholder="Ej: Laureles, El Poblado..."
-            value={nombre}
-            onChange={(e) => { setNombre(e.target.value); setErrores((p) => ({ ...p, nombre: '' })); }}
-            autoFocus
-          />
-          {errores.nombre && <span className="form-error">{errores.nombre}</span>}
-        </div>
-
-        <div className="form-grupo">
           <label className="form-label">Ciudad / Municipio *</label>
           <select
             className={`form-input${errores.ciudad ? ' input-error' : ''}`}
             value={idCiudad}
             onChange={(e) => { setIdCiudad(e.target.value); setErrores((p) => ({ ...p, ciudad: '' })); }}
+            autoFocus
           >
             <option value="">Seleccionar ciudad...</option>
             {ciudades.map((c) => <option key={c.id_ciudad} value={c.id_ciudad}>{c.nombre}</option>)}
@@ -70,7 +59,18 @@ function ModalFormulario({ open, onClose, onGuardar, editando, procesando, ciuda
         </div>
 
         <div className="form-grupo">
-          <label className="form-label">Precio domicilio (COP) *</label>
+          <label className="form-label">Nombre del barrio *</label>
+          <input
+            className={`form-input${errores.nombre ? ' input-error' : ''}`}
+            placeholder="Ej: Laureles, El Poblado..."
+            value={nombre}
+            onChange={(e) => { setNombre(e.target.value); setErrores((p) => ({ ...p, nombre: '' })); }}
+          />
+          {errores.nombre && <span className="form-error">{errores.nombre}</span>}
+        </div>
+
+        <div className="form-grupo">
+          <label className="form-label">Precio domicilio *</label>
           <input
             className={`form-input${errores.precio ? ' input-error' : ''}`}
             placeholder="Ej: 5000"
@@ -78,12 +78,12 @@ function ModalFormulario({ open, onClose, onGuardar, editando, procesando, ciuda
             type="number"
             min="0"
             step="500"
-            style={{ MozAppearance: 'textfield' }}
+            style={{ MozAppearance: 'textfield', WebkitAppearance: 'none' }}
             onChange={(e) => { setPrecio(e.target.value); setErrores((p) => ({ ...p, precio: '' })); }}
           />
-          {precio && !isNaN(Number(precio)) && (
-            <span style={{ fontSize: 12, color: '#6b7280', marginTop: 4, display: 'block' }}>
-              Vista previa: {fmt(precio)}
+          {precio && !isNaN(Number(precio)) && Number(precio) > 0 && (
+            <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 700, marginTop: 3, display: 'block' }}>
+              {fmt(precio)}
             </span>
           )}
           {errores.precio && <span className="form-error">{errores.precio}</span>}

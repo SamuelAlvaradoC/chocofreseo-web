@@ -169,7 +169,7 @@ function SeccionDirecciones({ usuario }) {
   const [direcciones,      setDirecciones]      = useState([]);
   const [cargando,         setCargando]         = useState(true);
   const [agregando,        setAgregando]        = useState(false);
-  const [nuevaDireccion,   setNuevaDireccion]   = useState({ direccion_linea: '', barrio: '', ciudad: '', referencia: '', tipo_via: '', numero: '', numeral: '', complemento: '' });
+  const [nuevaDireccion,   setNuevaDireccion]   = useState({ direccion_linea: '', barrio: '', ciudad: '', id_barrio: null, id_ciudad: null, referencia: '', tipo_via: '', numero: '', numeral: '', complemento: '' });
   const [errDir,           setErrDir]           = useState({});
   const [error,            setError]            = useState('');
   const [procesando,       setProcesando]       = useState(false);
@@ -190,19 +190,20 @@ function SeccionDirecciones({ usuario }) {
     if (!nuevaDireccion.numeral?.trim())             errs.numeral         = 'Ingresa el numeral';
     if (!nuevaDireccion.complemento?.trim())         errs.complemento     = 'Ingresa el complemento';
     if (!nuevaDireccion.direccion_linea?.trim())     errs.direccion_linea = 'Ingresa la dirección';
-    if (!nuevaDireccion.barrio.trim())               errs.barrio          = 'Ingresa el barrio';
-    if (!nuevaDireccion.ciudad.trim())               errs.ciudad          = 'Selecciona el municipio';
-    if (!nuevaDireccion.lat || !nuevaDireccion.lng)  errs.mapa            = 'Ubica tu dirección en el mapa';
+    if (!nuevaDireccion.id_barrio)                   errs.barrio          = 'Selecciona el barrio';
+    if (!nuevaDireccion.ciudad?.trim())              errs.ciudad          = 'Selecciona el municipio';
     if (Object.keys(errs).length > 0) { setErrDir(errs); return; }
     setProcesando(true);
     try {
       const nueva = await api.crearMiDireccion({
-        ...nuevaDireccion,
-        lat: nuevaDireccion.lat || null,
-        lng: nuevaDireccion.lng || null,
+        direccion_linea: nuevaDireccion.direccion_linea,
+        barrio:          nuevaDireccion.barrio       || null,
+        ciudad:          nuevaDireccion.ciudad       || null,
+        id_barrio:       nuevaDireccion.id_barrio    || null,
+        referencia:      nuevaDireccion.referencia   || null,
       });
       setDirecciones((p) => [...p, nueva]);
-      setNuevaDireccion({ direccion_linea: '', barrio: '', ciudad: '', referencia: '' });
+      setNuevaDireccion({ direccion_linea: '', barrio: '', ciudad: '', id_barrio: null, id_ciudad: null, referencia: '', tipo_via: '', numero: '', numeral: '', complemento: '' });
       setErrDir({});
       setAgregando(false);
       setError('');
@@ -240,8 +241,8 @@ function SeccionDirecciones({ usuario }) {
           <FormDireccion
             value={nuevaDireccion}
             onChange={(f, v) => {
-              if (f === 'costo_domicilio') { /* el FormDireccion ya muestra el costo */ }
-              else { setNuevaDireccion((p) => ({ ...p, [f]: v })); setErrDir((p) => ({ ...p, [f]: '', ...(f === 'lat' || f === 'lng' ? { mapa: '' } : {}) })); if (f === 'lat' || f === 'lng') setError(''); }
+              setNuevaDireccion((p) => ({ ...p, [f]: v }));
+              setErrDir((p) => ({ ...p, [f]: '' }));
             }}
             errors={errDir}
             layout="client"
@@ -256,7 +257,7 @@ function SeccionDirecciones({ usuario }) {
       <div className="direcciones-lista">
         {cargando ? (
           <div className="perfil-vacio"><p>Cargando...</p></div>
-        ) : direcciones.length === 0 ? (
+        ) : direcciones.length === 0 && !agregando ? (
           <div className="perfil-vacio"><span style={{ fontSize: 36 }}>📍</span><p>No tienes direcciones guardadas</p></div>
         ) : (
           direcciones.map((dir) => (
