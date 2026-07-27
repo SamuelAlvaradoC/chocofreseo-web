@@ -175,7 +175,7 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
               <div key={i} className="revision-producto-item">
                 <div className="revision-producto-header">
                   <span className="revision-producto-nombre">{p.cantidad}x {p.nombre}</span>
-                  <span className="revision-producto-precio">${Number(p.subtotal).toLocaleString()}</span>
+                  <span className="revision-producto-precio">${Number(p.subtotal).toLocaleString('es-CO')}</span>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
                   {p.chocolate && (
@@ -189,22 +189,22 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
                   ))}
                   {p.adiciones.map((a, ai) => (
                     <span key={ai} style={{ background: '#d97706', color: '#fff', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>
-                      +{a.nombre}{a.cantidad > 1 ? ` ×${a.cantidad}` : ''}{a.precio > 0 ? ` $${(a.precio * a.cantidad).toLocaleString()}` : ''}
+                      +{a.nombre}{a.cantidad > 1 ? ` ×${a.cantidad}` : ''}{a.precio > 0 ? ` $${(a.precio * a.cantidad).toLocaleString('es-CO')}` : ''}
                     </span>
                   ))}
                 </div>
               </div>
             ))}
             <div className="revision-total">
-              <div className="carrito-resumen-fila"><span>Subtotal productos</span><span>${subtotalBruto.toLocaleString()}</span></div>
+              <div className="carrito-resumen-fila"><span>Subtotal productos</span><span>${subtotalBruto.toLocaleString('es-CO')}</span></div>
               {descuentoPuntos > 0 && (
                 <div className="carrito-resumen-fila" style={{ color: '#16a34a', fontWeight: 700 }}>
                   <span>Descuento puntos ({pedido.puntos_usados} pts)</span>
-                  <span>-${descuentoPuntos.toLocaleString()}</span>
+                  <span>-${descuentoPuntos.toLocaleString('es-CO')}</span>
                 </div>
               )}
-              <div className="carrito-resumen-fila"><span>Domicilio</span><span>${costodomicilio.toLocaleString()}</span></div>
-              <div className="carrito-resumen-fila total"><span>Total</span><span>${Number(pedido.total).toLocaleString()}</span></div>
+              <div className="carrito-resumen-fila"><span>Domicilio</span><span>${costodomicilio.toLocaleString('es-CO')}</span></div>
+              <div className="carrito-resumen-fila total"><span>Total</span><span>${Number(pedido.total).toLocaleString('es-CO')}</span></div>
             </div>
           </div>
 
@@ -219,8 +219,8 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
               </div>
               {pedido.metodo_pago === 'mixto' && (
                 <div style={{ fontSize: 13, marginTop: 4 }}>
-                  <div style={{display:'flex',alignItems:'center',gap:4}}><LogoEfectivo size={12}/>Efectivo: <strong>${Number(pedido.monto_efectivo || 0).toLocaleString()}</strong></div>
-                  <div style={{display:'flex',alignItems:'center',gap:4}}><LogoBancolombia size={12}/><LogoNequi size={12}/>Transferencia: <strong>${Number(pedido.monto_transferencia || 0).toLocaleString()}</strong></div>
+                  <div style={{display:'flex',alignItems:'center',gap:4}}><LogoEfectivo size={12}/>Efectivo: <strong>${Number(pedido.monto_efectivo || 0).toLocaleString('es-CO')}</strong></div>
+                  <div style={{display:'flex',alignItems:'center',gap:4}}><LogoBancolombia size={12}/><LogoNequi size={12}/>Transferencia: <strong>${Number(pedido.monto_transferencia || 0).toLocaleString('es-CO')}</strong></div>
                 </div>
               )}
               {(pedido.metodo_pago === 'transferencia' || pedido.metodo_pago === 'mixto') && (
@@ -369,7 +369,7 @@ export default function Domicilios() {
                 )}
 
                 <div className="domi-card-footer">
-                  <span className="domi-card-total">${d.total.toLocaleString()}</span>
+                  <span className="domi-card-total">${d.total.toLocaleString('es-CO')}</span>
                   <div className="domi-card-acciones">
                     <a href={urlWpp(d.telefono?.replace(/\D/g,''), d.id_venta)} target="_blank" rel="noopener noreferrer" title="Contactar por WhatsApp"
                       style={{ width:34, height:34, borderRadius:8, background:'#25D366', border:'none', display:'flex', alignItems:'center', justifyContent:'center', textDecoration:'none', flexShrink:0 }}>

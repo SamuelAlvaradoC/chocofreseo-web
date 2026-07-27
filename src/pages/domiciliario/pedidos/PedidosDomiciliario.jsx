@@ -191,7 +191,7 @@ function ModalDetalle({ pedido, onClose }) {
             <div key={i} className="pd-modal-prod">
               <div className="pd-modal-prod-row">
                 <span className="pd-modal-prod-nombre">{p.cantidad}× {p.nombre}</span>
-                <span className="pd-modal-prod-precio">${p.subtotal.toLocaleString()}</span>
+                <span className="pd-modal-prod-precio">${p.subtotal.toLocaleString('es-CO')}</span>
               </div>
               {(p.chocolate || p.salsas?.length > 0 || p.toppings.length > 0 || p.adiciones.length > 0) && (
                 <div className="pd-chips">
@@ -208,21 +208,21 @@ function ModalDetalle({ pedido, onClose }) {
         <div className="pd-modal-total-bloque">
           <div className="pd-modal-total-fila">
             <span>Subtotal productos</span>
-            <span>${pedido.subtotalBruto.toLocaleString()}</span>
+            <span>${pedido.subtotalBruto.toLocaleString('es-CO')}</span>
           </div>
           {pedido.descuento_puntos > 0 && (
             <div className="pd-modal-total-fila" style={{ color: '#16a34a', fontWeight: 700 }}>
               <span>Descuento puntos ({pedido.puntos_usados} pts)</span>
-              <span>-${pedido.descuento_puntos.toLocaleString()}</span>
+              <span>-${pedido.descuento_puntos.toLocaleString('es-CO')}</span>
             </div>
           )}
           <div className="pd-modal-total-fila">
             <span>Domicilio</span>
-            <span>${Number(pedido.costo_domicilio ?? 3000).toLocaleString()}</span>
+            <span>${Number(pedido.costo_domicilio ?? 3000).toLocaleString('es-CO')}</span>
           </div>
           <div className="pd-modal-total-fila pd-modal-total-fila--total">
             <span>Total</span>
-            <strong>${Number(pedido.valor).toLocaleString()}</strong>
+            <strong>${Number(pedido.valor).toLocaleString('es-CO')}</strong>
           </div>
         </div>
       </div>
@@ -260,9 +260,7 @@ function ModalConfirmarEntrega({ pedido, onClose, onConfirmar }) {
 function PedidoCard({ pedido, tipo, onCoger, onDevolver, onEntregar, onVerDetalle, procesando = false }) {
   const tel  = (pedido.telefono || '').replace(/\D/g, '');
   const wpp  = tel ? `https://wa.me/57${tel}?text=${encodeURIComponent('Hola')}` : null;
-  const maps = pedido.lat && pedido.lng
-    ? `https://www.google.com/maps/search/?api=1&query=${pedido.lat},${pedido.lng}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([pedido.direccion, pedido.barrio, pedido.ciudad, 'Medellín'].filter(Boolean).join(', '))}`;
+  const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([pedido.direccion, pedido.barrio, pedido.ciudad].filter(Boolean).join(', '))}`;
 
   return (
     <div className={`pd-card ${pedido.facturado ? 'pd-card--ok' : ''}`}>
@@ -297,7 +295,7 @@ function PedidoCard({ pedido, tipo, onCoger, onDevolver, onEntregar, onVerDetall
 
       {/* Fila 5: total + botones */}
       <div className="pd-card-footer">
-        <span className="pd-total">${pedido.valor.toLocaleString()}</span>
+        <span className="pd-total">${pedido.valor.toLocaleString('es-CO')}</span>
 
         <div className="pd-btns">
           <a href={maps} target="_blank" rel="noopener noreferrer"

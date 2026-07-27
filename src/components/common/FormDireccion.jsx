@@ -1,28 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Bike, Info } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { useState, useEffect, useRef } from 'react';
+import { Info } from 'lucide-react';
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
 
-const MUNICIPIOS = [
-  'Medellín',
-  'Bello',
-  'Itagüí',
-  'Envigado',
-  'Sabaneta',
-  'La Estrella',
-  'Copacabana',
-  'Girardota',
-  'Caldas',
-  'Barbosa',
-];
+const fetchPublic = (url) => fetch(url).then((r) => r.json()).then((d) => d.data || []).catch(() => []);
 
 const TIPOS_VIA = [
   'Calle', 'Carrera', 'Transversal', 'Diagonal',
@@ -30,41 +11,71 @@ const TIPOS_VIA = [
   'Circular', 'Circunvalar',
 ];
 
-const ORIGEN = { lat: 6.2897, lng: -75.5557 };
-const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
+function SearchableBarrio({ barrios, value, onChange, disabled, inputCls, error }) {
+  const [texto,   setTexto]   = useState(value || '');
+  const [abierto, setAbierto] = useState(false);
+  const ref = useRef(null);
 
-const iconoRojo = L?.icon ? L.icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
-}) : null;
+  useEffect(() => { setTexto(value || ''); }, [value]);
 
-const CENTROS_CIUDAD = {
-  'Medellín':   [6.2527, -75.5619],
-  'Bello':      [6.3358, -75.5556],
-  'Itagüí':     [6.1845, -75.5990],
-  'Envigado':   [6.1752, -75.5920],
-  'Sabaneta':   [6.1511, -75.6164],
-  'La Estrella':[6.1577, -75.6440],
-  'Copacabana': [6.3517, -75.5081],
-  'Girardota':  [6.3763, -75.4509],
-  'Caldas':     [6.0938, -75.6368],
-  'Barbosa':    [6.4396, -75.3314],
-};
-
-function PinMapa({ onCambio }) {
-  useMapEvents({ click(e) { onCambio(e.latlng.lat, e.latlng.lng); } });
-  return null;
-}
-
-function RecentrarMapa({ ciudad }) {
-  const map = useMap();
   useEffect(() => {
-    if (ciudad && CENTROS_CIUDAD[ciudad]) {
-      map.setView(CENTROS_CIUDAD[ciudad], 15);
-    }
-  }, [ciudad, map]);
-  return null;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setAbierto(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtrados = barrios.filter((b) => b.nombre.toLowerCase().includes(texto.toLowerCase()));
+
+  const seleccionar = (b) => {
+    setTexto(b.nombre);
+    setAbierto(false);
+    onChange(b);
+  };
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <input
+        className={inputCls}
+        placeholder={disabled ? 'Primero selecciona ciudad' : 'Buscar barrio...'}
+        value={texto}
+        disabled={disabled}
+        style={{ border: error ? '1px solid #CA0B0B' : '1px solid #e5e7eb' }}
+        onChange={(e) => { setTexto(e.target.value); setAbierto(true); onChange(null); }}
+        onFocus={() => !disabled && setAbierto(true)}
+      />
+      {abierto && filtrados.length > 0 && (
+        <ul style={{
+          position: 'absolute', zIndex: 999, top: '100%', left: 0, right: 0,
+          background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8,
+          maxHeight: 200, overflowY: 'auto', margin: 0, padding: 0,
+          listStyle: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+        }}>
+          {filtrados.map((b) => (
+            <li
+              key={b.id_barrio}
+              onMouseDown={() => seleccionar(b)}
+              style={{
+                padding: '9px 14px', cursor: 'pointer', fontSize: 13,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+            >
+              <span>{b.nombre}</span>
+              <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
+                ${Number(b.precio_domicilio).toLocaleString('es-CO')}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {abierto && texto && filtrados.length === 0 && (
+        <div style={{ position: 'absolute', zIndex: 999, top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#888', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}>
+          No se encontró el barrio
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function FormDireccion({ value = {}, onChange, errors = {}, layout = 'admin' }) {
@@ -72,20 +83,24 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
   const inputCls = isAdmin ? 'form-input'  : 'perfil-input';
   const labelCls = isAdmin ? 'form-label'  : 'perfil-label';
   const grupoCls = isAdmin ? 'form-grupo'  : 'perfil-campo';
-  const errorCls = isAdmin ? 'form-error'  : 'perfil-alerta-err';
 
-  // ── Estado mapa ──────────────────────────────────────────
-  const [pin, setPin] = useState({ lat: null, lng: null });
-  const [costoDomicilioCalculado, setCostoDomicilioCalculado] = useState(null);
-  const [calculando, setCalculando] = useState(false);
-
-  // ── Los 4 campos que componen direccion_linea ─────────────
-  const [tipoVia,     setTipoVia]     = useState('');
-  const [numeroVia,   setNumeroVia]   = useState('');
-  const [numeral,     setNumeral]     = useState('');
+  const [ciudades,  setCiudades]  = useState([]);
+  const [barrios,   setBarrios]   = useState([]);
+  const [tipoVia,   setTipoVia]   = useState('');
+  const [numeroVia, setNumeroVia] = useState('');
+  const [numeral,   setNumeral]   = useState('');
   const [complemento, setComplemento] = useState('');
 
-  // Construir y emitir direccion_linea cuando cambia algún campo
+  useEffect(() => {
+    fetchPublic(`${API_BASE}/ciudades/activas`).then(setCiudades);
+  }, []);
+
+  useEffect(() => {
+    const id = value?.id_ciudad;
+    if (!id) { setBarrios([]); return; }
+    fetchPublic(`${API_BASE}/barrios/activos?id_ciudad=${id}`).then(setBarrios);
+  }, [value?.id_ciudad]);
+
   const direccionPreview = [
     tipoVia,
     numeroVia,
@@ -100,69 +115,54 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tipoVia, numeroVia, numeral, complemento]);
 
-  // ── Geocerca ──────────────────────────────────────────────
-  const calcularDomicilio = async (lat, lng) => {
-    setCalculando(true);
-    setCostoDomicilioCalculado(null);
-    try {
-      const resp = await fetch(`${API_BASE}/domicilio/calcular`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat, lng, ciudad: value?.ciudad || '' }),
-      });
-      const data = await resp.json();
-      if (data.success && data.data?.costo_domicilio) {
-        setCostoDomicilioCalculado(data.data.costo_domicilio);
-        if (onChange) onChange('costo_domicilio', data.data.costo_domicilio);
-        if (onChange) onChange('distancia_km', data.data.distancia_km || 0);
-      } else {
-        setCostoDomicilioCalculado(5500);
-        if (onChange) onChange('costo_domicilio', 5500);
-        if (onChange) onChange('distancia_km', 0);
-      }
-    } catch (e) {
-      setCostoDomicilioCalculado(5500);
-      if (onChange) onChange('costo_domicilio', 5500);
-      if (onChange) onChange('distancia_km', 0);
-    } finally {
-      setCalculando(false);
+  const handleCiudad = (e) => {
+    const ciudad = ciudades.find((c) => String(c.id_ciudad) === e.target.value);
+    onChange('id_ciudad', ciudad?.id_ciudad || null);
+    onChange('ciudad',    ciudad?.nombre    || '');
+    onChange('id_barrio', null);
+    onChange('barrio',    '');
+    onChange('costo_domicilio', 0);
+  };
+
+  const handleBarrio = (barrio) => {
+    if (!barrio) {
+      onChange('id_barrio', null);
+      onChange('barrio',    '');
+      onChange('costo_domicilio', 0);
+      return;
     }
+    onChange('id_barrio',        barrio.id_barrio);
+    onChange('barrio',           barrio.nombre);
+    onChange('costo_domicilio',  barrio.precio_domicilio);
+    onChange('distancia_km',     0);
   };
 
-  const handlePinCambio = (lat, lng) => {
-    if (!value.ciudad) return;
-    setPin({ lat, lng });
-    onChange('lat', lat);
-    onChange('lng', lng);
-    calcularDomicilio(lat, lng);
-  };
-
-  // Estilo para inputs con prefijo
   const prefixWrap = { position: 'relative' };
   const prefixSpan = { position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: '#888', fontSize: 13, pointerEvents: 'none', fontWeight: 700 };
 
   return (
     <>
-      {/* Aviso municipios Valle de Aburrá */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}>
         <Info size={14} color="#0369a1" style={{ flexShrink: 0 }} />
         <span style={{ fontSize: 12, color: '#0369a1', fontWeight: 600, lineHeight: 1.4 }}>
-          Llegamos a estos municipios del Valle de Aburrá
+          El costo de domicilio depende del barrio seleccionado
         </span>
       </div>
 
-      {/* FILA 2: Ciudad | Barrio */}
+      {/* Ciudad | Barrio */}
       <div className="direccion-grid" style={{ marginBottom: 12 }}>
         <div>
           <label className={labelCls}>Ciudad / Municipio *</label>
           <select
             className={inputCls}
-            value={value.ciudad || ''}
-            onChange={(e) => onChange('ciudad', e.target.value)}
+            value={value.id_ciudad ? String(value.id_ciudad) : ''}
+            onChange={handleCiudad}
             style={{ border: errors.ciudad ? '1px solid #CA0B0B' : '1px solid #e5e7eb' }}
           >
             <option value="">Seleccionar...</option>
-            {MUNICIPIOS.map((m) => <option key={m} value={m}>{m}</option>)}
+            {ciudades.map((c) => (
+              <option key={c.id_ciudad} value={c.id_ciudad}>{c.nombre}</option>
+            ))}
           </select>
           {errors.ciudad && (
             <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 4, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -172,12 +172,13 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
         </div>
         <div>
           <label className={labelCls}>Barrio *</label>
-          <input
-            className={inputCls}
-            placeholder="Ej: Laureles, Aranjuez..."
+          <SearchableBarrio
+            barrios={barrios}
             value={value.barrio || ''}
-            onChange={(e) => onChange('barrio', e.target.value)}
-            style={{ border: errors.barrio ? '1px solid #CA0B0B' : '1px solid #e5e7eb' }}
+            onChange={handleBarrio}
+            disabled={!value.id_ciudad}
+            inputCls={inputCls}
+            error={errors.barrio}
           />
           {errors.barrio && (
             <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 4, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -187,7 +188,15 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
         </div>
       </div>
 
-      {/* FILA 3: Tipo vía | Número | #Numeral | -Complemento */}
+      {/* Costo domicilio (solo modo cliente) */}
+      {!isAdmin && value.costo_domicilio > 0 && (
+        <div style={{ marginBottom: 12, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>Costo de domicilio</span>
+          <span style={{ fontSize: 16 }}>${Number(value.costo_domicilio).toLocaleString('es-CO')}</span>
+        </div>
+      )}
+
+      {/* Tipo vía | Número | #Numeral | -Complemento */}
       <div className="direccion-grid-4" style={{ marginBottom: 12 }}>
         <div>
           <label className={labelCls}>Tipo de vía *</label>
@@ -259,19 +268,19 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
         </div>
       </div>
 
-      {/* FILA 4: Preview */}
+      {/* Preview dirección */}
       {direccionPreview && (
         <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 13, color: '#555', fontStyle: 'italic' }}>
           📍 {direccionPreview}{value.barrio ? `, ${value.barrio}` : ''}{value.ciudad ? `, ${value.ciudad}` : ''}
         </div>
       )}
-      {/* Mostrar dirección existente si viene precargada */}
       {!direccionPreview && value.direccion_linea && (
         <div style={{ background: '#f5f5f5', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: 13, color: '#555' }}>
           📍 Dirección actual: <strong>{value.direccion_linea}</strong>
         </div>
       )}
-      {/* FILA 5: Referencia */}
+
+      {/* Referencia */}
       <div className={grupoCls}>
         <label className={labelCls}>Referencia / Indicaciones adicionales</label>
         <textarea
@@ -284,68 +293,6 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
           style={{ resize: 'none', overflow: 'hidden', fontFamily: 'inherit', minHeight: 36 }}
         />
       </div>
-
-      {/* FILA 6: Mapa siempre visible en modo cliente */}
-      {!isAdmin && (
-        <div style={{ marginTop: 16 }}>
-          <label className={labelCls}>
-            📍 Confirma tu ubicación en el mapa
-            <span style={{ color: '#888', fontWeight: 400, fontSize: 11, display: 'block', marginTop: 2 }}>
-              Toca el mapa para poner el pin en tu puerta exacta
-            </span>
-          </label>
-          {/* z-index controlado para no tapar el header */}
-          <div className="form-mapa-container" style={{ position: 'relative', zIndex: 1, borderRadius: 12, overflow: 'hidden', border: errors.mapa ? '1px solid #CA0B0B' : '1px solid #e5e7eb', marginTop: 8 }}>
-            <MapContainer
-              key={value.ciudad || 'default'}
-              center={
-                value.ciudad && CENTROS_CIUDAD[value.ciudad]
-                  ? CENTROS_CIUDAD[value.ciudad]
-                  : [pin.lat || ORIGEN.lat, pin.lng || ORIGEN.lng]
-              }
-              zoom={16}
-              style={{ height: '100%', width: '100%', opacity: value.ciudad ? 1 : 0.45, pointerEvents: value.ciudad ? 'auto' : 'none' }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                maxZoom={19}
-              />
-              <RecentrarMapa ciudad={value.ciudad} />
-              <PinMapa onCambio={handlePinCambio} />
-              {pin.lat && <Marker position={[pin.lat, pin.lng]} icon={iconoRojo || undefined} />}
-            </MapContainer>
-            {!value.ciudad && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: 'rgba(255,255,255,0.15)', cursor: 'not-allowed' }}>
-                <div style={{ background: '#fff', borderRadius: 10, padding: '10px 18px', fontSize: 13, fontWeight: 700, color: '#CA0B0B', border: '1px solid #fecaca', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 12px rgba(0,0,0,0.12)' }}>
-                  ⚠ Selecciona primero el municipio
-                </div>
-              </div>
-            )}
-          </div>
-          {errors.mapa && (
-            <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 4, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-              ⚠ {errors.mapa}
-            </div>
-          )}
-          {calculando && (
-            <div style={{ marginTop: 8, padding: '8px 12px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, fontSize: 13, color: '#1e40af', fontWeight: 600 }}>
-              ⏳ Calculando costo de domicilio...
-            </div>
-          )}
-          {!calculando && costoDomicilioCalculado && (
-            <div style={{ marginTop: 8, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{display:'flex',alignItems:'center',gap:6}}><Bike size={15}/>Costo de domicilio</span>
-              <span style={{ fontSize: 16 }}>${costoDomicilioCalculado.toLocaleString('es-CO')}</span>
-            </div>
-          )}
-          {!calculando && !costoDomicilioCalculado && (
-            <div style={{ marginTop: 8, padding: '8px 14px', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 8, fontSize: 12, color: '#92400e' }}>
-              💡 Toca el mapa para calcular el costo de domicilio a tu dirección
-            </div>
-          )}
-        </div>
-      )}
     </>
   );
 }

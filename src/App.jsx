@@ -13,6 +13,8 @@ import EmpleadosPage  from './pages/admin/empleados';
 import RolesPage      from './pages/admin/roles';
 import VentasPage     from './pages/admin/ventas';
 import DomiciliosPage from './pages/admin/domicilios';
+import CiudadesPage   from './pages/admin/ciudades';
+import BarriosPage    from './pages/admin/barrios';
 import ResenasPage    from './pages/admin/resenas';
 
 // ── Domiciliario ───────────────────────────────────────────────
@@ -114,6 +116,8 @@ function App() {
         <Route path="/admin/roles"      element={<RutaAdmin><RolesPage /></RutaAdmin>} />
         <Route path="/admin/ventas"     element={<RutaAdminOConfirmador><VentasPage /></RutaAdminOConfirmador>} />
         <Route path="/admin/domicilios" element={<RutaAdminOConfirmador><DomiciliosPage /></RutaAdminOConfirmador>} />
+        <Route path="/admin/ciudades"   element={<RutaAdmin><CiudadesPage /></RutaAdmin>} />
+        <Route path="/admin/barrios"    element={<RutaAdmin><BarriosPage /></RutaAdmin>} />
         <Route path="/admin/resenas"   element={<RutaAdmin><ResenasPage /></RutaAdmin>} />
 
         {/* ── Domiciliario — requiere rol domiciliario ── */}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { LogoWhatsApp, LogoBancolombia, LogoEfectivo } from '../../../components/common/LogosApps';
 import Navbar from '../../../components/layout/Navbar/Navbar';
 import Footer from '../../../components/layout/Footer/Footer';
@@ -103,7 +103,7 @@ export default function MisPedidos() {
                             <span className="historial-fecha">{fechaFmt}</span>
                           </div>
                           <div className="historial-item-der">
-                            <span className="historial-total">${Number(v.total).toLocaleString()}</span>
+                            <span className="historial-total">${Number(v.total).toLocaleString('es-CO')}</span>
                             <span className="historial-estado" style={{ background: est.bg, color: est.color }}>{ESTADO_LABELS[estadoNombre] || estadoNombre}</span>
                             {(estadoNombre === 'pendiente' || estadoNombre === 'en_proceso') && (
                               <span style={{ fontSize: 11, color: '#888', marginLeft: 6 }}>⏱️ {tiempoEspera}–{tiempoEspera + 20} min</span>

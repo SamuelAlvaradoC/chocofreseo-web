@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Check, AlertTriangle, Bike, User } from 'lucide-react';
 import { LogoBancolombia, LogoNequi, LogoEfectivo } from '../../../components/common/LogosApps';
@@ -71,47 +71,16 @@ function PasoDatos({ usuario, onNext, onActualizarUsuario }) {
   );
 }
 
-const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
-
 function PasoDireccion({ usuario, onNext, onBack }) {
   const [direcciones,    setDirecciones]    = useState([]);
   const [cargando,       setCargando]       = useState(true);
   const [tieneDirs,      setTieneDirs]      = useState(false);
   const [modo,           setModo]           = useState('nueva');
   const [dirSelec,       setDirSelec]       = useState(null);
-  const [nuevaDireccion, setNuevaDireccion] = useState({ direccion_linea: '', barrio: '', ciudad: '', referencia: '', tipo_via: '', numero: '', numeral: '', complemento: '' });
+  const [nuevaDireccion, setNuevaDireccion] = useState({ direccion_linea: '', barrio: '', ciudad: '', id_barrio: null, id_ciudad: null, referencia: '', tipo_via: '', numero: '', numeral: '', complemento: '' });
   const [errDir,         setErrDir]         = useState({});
   const [error,          setError]          = useState('');
   const [costoDomicilio, setCostoDomicilio] = useState(COSTO_DOMICILIO_DEFAULT);
-  const [distKm,         setDistKm]         = useState(0);
-  const [calculandoCosto, setCalculandoCosto] = useState(false);
-
-  const calcularCostoDireccionGuardada = async (dir) => {
-    if (!dir?.lat || !dir?.lng) {
-      setCostoDomicilio(COSTO_DOMICILIO_DEFAULT);
-      setDistKm(0);
-      return;
-    }
-    setCalculandoCosto(true);
-    try {
-      const resp = await fetch(`${API_BASE}/domicilio/calcular`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: dir.lat, lng: dir.lng, ciudad: dir.ciudad || '' }),
-      });
-      const data = await resp.json();
-      if (data.success) {
-        setCostoDomicilio(data.data.costo_domicilio);
-        setDistKm(data.data.distancia_km || 0);
-      }
-    } catch (e) {
-      console.error('Error calculando costo:', e);
-      setCostoDomicilio(COSTO_DOMICILIO_DEFAULT);
-      setDistKm(0);
-    } finally {
-      setCalculandoCosto(false);
-    }
-  };
 
   useEffect(() => {
     api.misDirecciones()
@@ -129,7 +98,8 @@ function PasoDireccion({ usuario, onNext, onBack }) {
 
   const seleccionarDireccion = (d) => {
     setDirSelec(d);
-    calcularCostoDireccionGuardada(d);
+    const precio = d.barrioRel?.precio_domicilio ?? d.costo_domicilio ?? COSTO_DOMICILIO_DEFAULT;
+    setCostoDomicilio(precio);
   };
 
   const handleNext = () => {
@@ -141,15 +111,14 @@ function PasoDireccion({ usuario, onNext, onBack }) {
       if (!nuevaDireccion.numeral?.trim())             errs.numeral         = 'Ingresa el numeral';
       if (!nuevaDireccion.complemento?.trim())         errs.complemento     = 'Ingresa el complemento';
       if (!nuevaDireccion.direccion_linea?.trim())     errs.direccion_linea = 'Ingresa la dirección';
-      if (!nuevaDireccion.barrio.trim())               errs.barrio          = 'Ingresa el barrio';
-      if (!nuevaDireccion.ciudad.trim())               errs.ciudad          = 'Selecciona el municipio';
-      if (!nuevaDireccion.lat || !nuevaDireccion.lng)  errs.mapa            = 'Ubica tu dirección en el mapa';
+      if (!nuevaDireccion.id_barrio)                   errs.barrio          = 'Selecciona el barrio';
+      if (!nuevaDireccion.ciudad?.trim())              errs.ciudad          = 'Selecciona el municipio';
       if (Object.keys(errs).length > 0) { setErrDir(errs); return; }
     }
     setError('');
     const dir = modo === 'guardada'
-      ? { ...dirSelec, costo_domicilio: costoDomicilio, distancia_km: distKm }
-      : { ...nuevaDireccion, esNueva: true };
+      ? { ...dirSelec, costo_domicilio: costoDomicilio }
+      : { ...nuevaDireccion, costo_domicilio: nuevaDireccion.costo_domicilio || COSTO_DOMICILIO_DEFAULT, esNueva: true };
     onNext(dir);
   };
 
@@ -187,20 +156,10 @@ function PasoDireccion({ usuario, onNext, onBack }) {
                 ))}
               </div>
               {dirSelec && (
-                calculandoCosto ? (
-                  <div style={{ marginTop: 10, padding: '8px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, fontSize: 13, color: '#1e40af', fontWeight: 600 }}>
-                    ⏳ Calculando costo de domicilio...
-                  </div>
-                ) : !dirSelec.lat ? (
-                  <div style={{ marginTop: 10, padding: '8px 14px', background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 8, fontSize: 12, color: '#92400e', display:'flex', alignItems:'flex-start', gap:8 }}>
-                    <AlertTriangle size={14} style={{flexShrink:0, marginTop:1}}/><span>Esta dirección no tiene ubicación guardada. El costo base es <strong>${COSTO_DOMICILIO_DEFAULT.toLocaleString()}</strong>. Para un cálculo exacto usa "Nueva dirección" con el mapa.</span>
-                  </div>
-                ) : (
-                  <div style={{ marginTop: 10, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{display:'flex',alignItems:'center',gap:6}}><Bike size={14}/>Costo de domicilio estimado</span>
-                    <span style={{ fontSize: 16 }}>${costoDomicilio.toLocaleString('es-CO')}</span>
-                  </div>
-                )
+                <div style={{ marginTop: 10, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{display:'flex',alignItems:'center',gap:6}}><Bike size={14}/>Costo de domicilio</span>
+                  <span style={{ fontSize: 16 }}>${costoDomicilio.toLocaleString('es-CO')}</span>
+                </div>
               )}
             </>
           )}
@@ -219,9 +178,9 @@ function PasoDireccion({ usuario, onNext, onBack }) {
       {error && <div className="checkout-error">{error}</div>}
       <div className="checkout-botones">
         <button className="checkout-btn-sec" onClick={onBack}>← Atrás</button>
-        <button className="checkout-btn-pri" onClick={handleNext} disabled={calculandoCosto}>
-          {calculandoCosto ? 'Calculando...' : 'Continuar'}
-          {!calculandoCosto && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>}
+        <button className="checkout-btn-pri" onClick={handleNext}>
+          Continuar
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
     </div>
@@ -287,7 +246,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
   const pagoCompleto = metodoPago === 'efectivo' || metodoPago === 'transferencia' || Math.abs(totalPagado - total) < 1;
 
   const handleConfirmar = () => {
-    if (!pagoCompleto) { setError(`Falta $${(total - totalPagado).toLocaleString()} por cubrir`); return; }
+    if (!pagoCompleto) { setError(`Falta $${(total - totalPagado).toLocaleString('es-CO')} por cubrir`); return; }
     const ef = metodoPago === 'efectivo' ? total : metodoPago === 'mixto' ? (Number(pagoEfectivo) || 0) : 0;
     const tr = metodoPago === 'transferencia' ? total : metodoPago === 'mixto' ? (Number(pagoTransfer) || 0) : 0;
     onConfirmar({ metodoPago, pagoEfectivo: String(ef), pagoTransfer: String(tr), comprobante, observaciones, puntosAUsar });
@@ -565,10 +524,10 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
           <div className="checkout-cambio">
             <div className="checkout-cambio-fila">
               <span>Total cubierto</span>
-              <span style={{ color: pagoCompleto ? '#16a34a' : '#CA0B0B', fontWeight: 800 }}>${totalPagado.toLocaleString()} / ${total.toLocaleString()}</span>
+              <span style={{ color: pagoCompleto ? '#16a34a' : '#CA0B0B', fontWeight: 800 }}>${totalPagado.toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')}</span>
             </div>
             {!pagoCompleto && (
-              <div className="checkout-cambio-fila"><span>Falta</span><span style={{ color: '#CA0B0B', fontWeight: 800 }}>${(total - totalPagado).toLocaleString()}</span></div>
+              <div className="checkout-cambio-fila"><span>Falta</span><span style={{ color: '#CA0B0B', fontWeight: 800 }}>${(total - totalPagado).toLocaleString('es-CO')}</span></div>
             )}
           </div>
         </>
@@ -726,10 +685,9 @@ export default function Checkout() {
           direccion_linea: direccion.direccion_linea,
           barrio:          direccion.barrio       || null,
           ciudad:          direccion.ciudad       || null,
+          id_barrio:       direccion.id_barrio    || null,
           departamento:    direccion.departamento || null,
           referencia:      direccion.referencia   || null,
-          lat:             direccion.lat          || null,
-          lng:             direccion.lng          || null,
         };
       }
 
@@ -741,10 +699,9 @@ export default function Checkout() {
           direccion_linea: direccion.direccion_linea,
           barrio:          direccion.barrio       || null,
           ciudad:          direccion.ciudad       || null,
+          id_barrio:       direccion.id_barrio    || null,
           departamento:    direccion.departamento || null,
           referencia:      direccion.referencia   || null,
-          lat:             direccion.lat || null,
-          lng:             direccion.lng || null,
         }).catch(() => {}); // no bloquear si falla
       }
 

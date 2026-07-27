@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { DollarSign, ShoppingCart, Truck, Clock, TrendingUp, Star, Power, CalendarClock, Wallet, Plus, Trash2, Printer } from 'lucide-react';
@@ -351,7 +351,7 @@ export default function Dashboard() {
 
       {/* Stats — 4 tarjetas: 3 métricas + tiempo estimado editable */}
       <div className="stats-grid">
-        <TarjetaStat icono={<DollarSign size={20} />} color="#059669" titulo="Ingresos hoy"       valor={`$${Number(stats.ingresos_hoy || 0).toLocaleString()}`} sub="Efectivo neto + transferencia" />
+        <TarjetaStat icono={<DollarSign size={20} />} color="#059669" titulo="Ingresos hoy"       valor={`$${Number(stats.ingresos_hoy || 0).toLocaleString('es-CO')}`} sub="Efectivo neto + transferencia" />
         <TarjetaStat icono={<ShoppingCart size={20} />} color="#2563eb" titulo="Ventas hoy"       valor={stats.ventas_hoy ?? 0}                                  sub="Pedidos del día" />
         <TarjetaStat icono={<Truck size={20} />} color="#7c3aed" titulo="Domicilios activos"      valor={stats.domicilios_activos ?? 0}                          sub="En camino" />
         {/* Card tiempo estimado editable */}
@@ -386,9 +386,9 @@ export default function Dashboard() {
 
       {/* FILA 2 — Cards financieras */}
       <div className="dash-cards-financieras">
-        <TarjetaFinanciera icono={<DollarSign size={18} />} titulo="Efectivo del día (neto)"  valor={`$${Number(stats.total_efectivo || 0).toLocaleString()}`}      color="#065f46" />
-        <TarjetaFinanciera icono={<TrendingUp size={18} />} titulo="Transferencia del día"     valor={`$${Number(stats.total_transferencia || 0).toLocaleString()}`}  color="#1e40af" />
-        <TarjetaFinanciera icono={<Truck size={18} />}      titulo="Total domicilios"          valor={`$${Number(stats.total_domicilios || 0).toLocaleString()}`}     color="#5b21b6" />
+        <TarjetaFinanciera icono={<DollarSign size={18} />} titulo="Efectivo del día (neto)"  valor={`$${Number(stats.total_efectivo || 0).toLocaleString('es-CO')}`}      color="#065f46" />
+        <TarjetaFinanciera icono={<TrendingUp size={18} />} titulo="Transferencia del día"     valor={`$${Number(stats.total_transferencia || 0).toLocaleString('es-CO')}`}  color="#1e40af" />
+        <TarjetaFinanciera icono={<Truck size={18} />}      titulo="Total domicilios"          valor={`$${Number(stats.total_domicilios || 0).toLocaleString('es-CO')}`}     color="#5b21b6" />
       </div>
 
       <ModalGasto open={modalGastoAbierto} onClose={() => setModalGastoAbierto(false)} onGuardar={agregarGasto} procesando={guardandoGasto} />
@@ -440,7 +440,7 @@ export default function Dashboard() {
                   <div style={{ fontSize: 12, fontWeight: 800, color: '#1a1a1a' }}>Base inicial del día</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div style={{ fontSize: 18, fontWeight: 900, color: '#1a1a1a' }}>
-                      ${Number(resumenCierre.base_inicial).toLocaleString()}
+                      ${Number(resumenCierre.base_inicial).toLocaleString('es-CO')}
                     </div>
                     {esFechaHoy && (
                       <button className="btn-accion editar" onClick={abrirEdicionBase} title="Editar base inicial">
@@ -464,7 +464,7 @@ export default function Dashboard() {
                       <span style={{ flex: 1, color: '#444', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         • {g.descripcion} <span style={{ color: '#aaa' }}>({TIPO_GASTO_INFO[g.tipo]?.label || g.tipo})</span>
                       </span>
-                      <span style={{ fontWeight: 800, color: '#CA0B0B', whiteSpace: 'nowrap' }}>${Number(g.valor).toLocaleString()}</span>
+                      <span style={{ fontWeight: 800, color: '#CA0B0B', whiteSpace: 'nowrap' }}>${Number(g.valor).toLocaleString('es-CO')}</span>
                       {esFechaHoy && (
                         <button onClick={() => eliminarGasto(g.id_gasto)} disabled={eliminandoGastoId === g.id_gasto}
                           style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#CA0B0B', display: 'flex', alignItems: 'center', padding: 0 }}>
@@ -486,12 +486,12 @@ export default function Dashboard() {
             {/* Totales + imprimir */}
             <div style={{ borderTop: '1px solid #f5f5f5', paddingTop: 14, marginTop: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, fontWeight: 700, color: '#666', marginBottom: 4 }}>
-                <span>Total gastos</span><span>${Number(resumenCierre.total_gastos).toLocaleString()}</span>
+                <span>Total gastos</span><span>${Number(resumenCierre.total_gastos).toLocaleString('es-CO')}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: '#888' }}>Efectivo en Caja</span>
                 <span style={{ fontSize: 22, fontWeight: 800, color: resumenCierre.saldo_final >= 0 ? '#15803d' : '#CA0B0B' }}>
-                  ${Number(resumenCierre.saldo_final || 0).toLocaleString()}
+                  ${Number(resumenCierre.saldo_final || 0).toLocaleString('es-CO')}
                 </span>
               </div>
               <button
@@ -633,9 +633,9 @@ export default function Dashboard() {
                     <tr key={d.nombre} style={{ borderBottom: '1px solid #f5f5f5' }}>
                       <td style={{ padding: '10px 12px', fontWeight: 700 }}>{d.nombre}</td>
                       <td style={{ padding: '10px 12px', color: '#3b82f6', fontWeight: 700 }}>{d.entregas}</td>
-                      <td style={{ padding: '10px 12px', color: '#16a34a', fontWeight: 700 }}>${Number(d.efectivo).toLocaleString()}</td>
-                      <td style={{ padding: '10px 12px', color: '#7c3aed', fontWeight: 700 }}>${Number(d.transferencia).toLocaleString()}</td>
-                      <td style={{ padding: '10px 12px', color: '#CA0B0B', fontWeight: 800 }}>${Number(d.total).toLocaleString()}</td>
+                      <td style={{ padding: '10px 12px', color: '#16a34a', fontWeight: 700 }}>${Number(d.efectivo).toLocaleString('es-CO')}</td>
+                      <td style={{ padding: '10px 12px', color: '#7c3aed', fontWeight: 700 }}>${Number(d.transferencia).toLocaleString('es-CO')}</td>
+                      <td style={{ padding: '10px 12px', color: '#CA0B0B', fontWeight: 800 }}>${Number(d.total).toLocaleString('es-CO')}</td>
                     </tr>
                   ))}
                 </tbody>

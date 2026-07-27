@@ -671,7 +671,7 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
                         </div>
                       )}
                       <span className="carrito-item-precio-unit">
-                        ${(item.subtotal / item.cantidad).toLocaleString()} c/u
+                        ${(item.subtotal / item.cantidad).toLocaleString('es-CO')} c/u
                       </span>
                     </div>
                     <div className="carrito-controles">
@@ -679,7 +679,7 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
                       <span className="carrito-ctrl-num">{item.cantidad}</span>
                       <button className="carrito-ctrl-btn" onClick={() => onCambiarCantidad(item.lineaId, item.cantidad + 1)}>+</button>
                     </div>
-                    <span className="carrito-item-precio-total">${item.subtotal.toLocaleString()}</span>
+                    <span className="carrito-item-precio-total">${item.subtotal.toLocaleString('es-CO')}</span>
                     <button className="carrito-item-quitar" onClick={() => onQuitar(item.lineaId)} title="Quitar">×</button>
                   </div>
                 ))}
@@ -764,7 +764,7 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
             </svg>
           </div>
           <div className="carrito-barra-der">
-            <span className="carrito-barra-subtotal">${subtotal.toLocaleString()}</span>
+            <span className="carrito-barra-subtotal">${subtotal.toLocaleString('es-CO')}</span>
             <button className="carrito-barra-btn-checkout" onClick={(e) => { e.stopPropagation(); onIrCheckout(); }}>
               Hacer pedido
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -856,7 +856,7 @@ function CardProducto({ p, onAgregar }) {
           </p>
         )}
         <div className="producto-card-footer">
-          <span className="producto-card-precio">${Number(p.precio).toLocaleString()}</span>
+          <span className="producto-card-precio">${Number(p.precio).toLocaleString('es-CO')}</span>
           <button className="producto-card-btn" onClick={() => onAgregar(p)}>+ Agregar</button>
         </div>
       </div>

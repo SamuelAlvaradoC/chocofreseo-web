@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Banknote, Smartphone, Zap, Bike, Check } from 'lucide-react';
 import DomiciliarioLayout from '../../../components/layout/DomiciliarioLayout/DomiciliarioLayout';
 import * as api from '../../../services/api';
@@ -108,7 +108,7 @@ export default function CierreCaja() {
             >
               <div className="cc-tarjeta-icono"><t.Icon size={22} color={t.border}/></div>
               <div className="cc-tarjeta-info">
-                <div className="cc-tarjeta-valor">${t.valor.toLocaleString()}</div>
+                <div className="cc-tarjeta-valor">${t.valor.toLocaleString('es-CO')}</div>
                 <div className="cc-tarjeta-titulo">{t.titulo}</div>
               </div>
             </div>
@@ -149,12 +149,12 @@ export default function CierreCaja() {
                           {v.forma_pago === 'efectivo' ? <><Banknote size={11} style={{marginRight:3}}/>Efectivo</> : v.forma_pago === 'transferencia' ? <><Smartphone size={11} style={{marginRight:3}}/>Transf.</> : <><Zap size={11} style={{marginRight:3}}/>Mixto</>}
                         </span>
                       </td>
-                      <td className="cc-td-suave">${v.costo_domicilio.toLocaleString()}</td>
+                      <td className="cc-td-suave">${v.costo_domicilio.toLocaleString('es-CO')}</td>
                       <td className="cc-td-valor">
-                        ${v.valor.toLocaleString()}
+                        ${v.valor.toLocaleString('es-CO')}
                         {v.forma_pago === 'mixto' && (
                           <div style={{ fontSize: 10, color: '#888', fontWeight: 400 }}>
-                            <Banknote size={9} style={{display:'inline',verticalAlign:'middle'}}/>${v.monto_efectivo.toLocaleString()} + <Smartphone size={9} style={{display:'inline',verticalAlign:'middle'}}/>${v.monto_transferencia.toLocaleString()}
+                            <Banknote size={9} style={{display:'inline',verticalAlign:'middle'}}/>${v.monto_efectivo.toLocaleString('es-CO')} + <Smartphone size={9} style={{display:'inline',verticalAlign:'middle'}}/>${v.monto_transferencia.toLocaleString('es-CO')}
                           </div>
                         )}
                       </td>
@@ -175,16 +175,16 @@ export default function CierreCaja() {
         <div className="cc-resumen-final">
           <div className="cc-resumen-fila">
             <span>Total recaudado en efectivo</span>
-            <span>${totalEfectivo.toLocaleString()}</span>
+            <span>${totalEfectivo.toLocaleString('es-CO')}</span>
           </div>
           <div className="cc-resumen-fila">
             <span>Menos costo domicilios</span>
-            <span className="cc-menos">− ${totalDomicilios.toLocaleString()}</span>
+            <span className="cc-menos">− ${totalDomicilios.toLocaleString('es-CO')}</span>
           </div>
           <div className="cc-resumen-divisor" />
           <div className="cc-resumen-fila cc-resumen-fila--total">
             <span>Efectivo a entregar</span>
-            <strong>${totalAEntregar.toLocaleString()}</strong>
+            <strong>${totalAEntregar.toLocaleString('es-CO')}</strong>
           </div>
         </div>
 

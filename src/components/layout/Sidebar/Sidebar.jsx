@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Settings, Users, ShoppingBag,
   ClipboardList, CheckCircle, ChefHat, MessageSquare,
-  ChevronRight, ChevronDown,
+  ChevronRight, ChevronDown, MapPin,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import './Sidebar.css';
@@ -62,6 +62,14 @@ const menu = [
     path: '/cocina',
     hijos: [],
     permiso: 'gestionar_cocina',
+  },
+  {
+    icon: <MapPin size={18} />,
+    label: 'Zonas',
+    hijos: [
+      { label: 'Ciudades', path: '/admin/ciudades', permiso: 'gestionar_categorias' },
+      { label: 'Barrios',  path: '/admin/barrios',  permiso: 'gestionar_categorias' },
+    ],
   },
   {
     icon: <MessageSquare size={18} />,

@@ -177,6 +177,22 @@ export const cogerPedido         = (id)   => patch(`/domicilios/${id}/coger`);
 export const despacharPedido     = (id,d) => patch(`/domicilios/${id}/despachar`, d);
 export const entregarPedido      = (id,d) => patch(`/domicilios/${id}/entregar`, d);
 
+// ── Ciudades ──────────────────────────────────────────────────
+export const listarCiudades        = ()     => get('/ciudades');
+export const listarCiudadesActivas = ()     => get('/ciudades/activas');
+export const crearCiudad           = (d)    => post('/ciudades', d);
+export const actualizarCiudad      = (id,d) => patch(`/ciudades/${id}`, d);
+export const eliminarCiudad        = (id)   => del(`/ciudades/${id}`);
+export const estadoCiudad          = (id,d) => patch(`/ciudades/${id}/estado`, d);
+
+// ── Barrios ───────────────────────────────────────────────────
+export const listarBarrios         = (id_ciudad) => get('/barrios', id_ciudad ? { id_ciudad } : undefined);
+export const listarBarriosActivos  = (id_ciudad) => get('/barrios/activos', id_ciudad ? { id_ciudad } : undefined);
+export const crearBarrio           = (d)    => post('/barrios', d);
+export const actualizarBarrio      = (id,d) => patch(`/barrios/${id}`, d);
+export const eliminarBarrio        = (id)   => del(`/barrios/${id}`);
+export const estadoBarrio          = (id,d) => patch(`/barrios/${id}/estado`, d);
+
 // ── Reseñas ───────────────────────────────────────────────────
 export const crearResena        = (d)  => post('/resenas', d);
 export const listarResenas      = ()   => get('/resenas');
