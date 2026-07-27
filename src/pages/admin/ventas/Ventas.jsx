@@ -882,6 +882,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                             onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                             onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
                             style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                          {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
                         </div>
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: 11, color: '#888', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 4 }}><LogoBancolombia size={11} /><LogoNequi size={11} /> Transfer.</label>
@@ -890,6 +891,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                             onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                             onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
                             style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                          {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
                         </div>
                       </div>
                       <div style={{ padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: pagoCompleto ? '#f0fdf4' : '#fff5f5', border: `1px solid ${pagoCompleto ? '#bbf7d0' : '#fecaca'}`, color: pagoCompleto ? '#166534' : '#CA0B0B', display: 'flex', justifyContent: 'space-between' }}>
@@ -1346,6 +1348,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                         onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                         onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
                         style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoEfectivo <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                      {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
                     </div>
                     <div style={{ flex: 1 }}>
                       <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems:'center', gap:4, marginBottom: 3 }}><LogoBancolombia size={12}/><LogoNequi size={12}/>Transferencia *</label>
@@ -1354,6 +1357,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                         onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                         onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
                         style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoTransfer <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                      {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
                     </div>
                   </div>
                   <div style={{ marginTop: 6, padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, background: ok ? '#f0fdf4' : (intentoGuardar ? '#fff5f5' : '#f9f9f9'), border: `1px solid ${ok ? '#bbf7d0' : (intentoGuardar ? '#fecaca' : '#e5e7eb')}`, color: ok ? '#166534' : '#CA0B0B', display: 'flex', justifyContent: 'space-between' }}>
@@ -1538,6 +1542,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                       onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
                       style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeEf}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
                     />
+                    {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems:'center', gap:4, marginBottom: 3 }}>
@@ -1557,6 +1562,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                       onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
                       style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeTr}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
                     />
+                    {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#888', marginTop: 2, textAlign: 'right', fontWeight: 600 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
                   </div>
                 </div>
                 {/* Indicador: verde cuando cuadra, rojo solo si ya intentó guardar */}
