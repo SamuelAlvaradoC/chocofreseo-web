@@ -1762,6 +1762,7 @@ export default function Ventas() {
         ciudad:          f.direccion.ciudad          || null,
         departamento:    f.direccion.departamento    || null,
         referencia:      f.direccion.referencia      || null,
+        id_barrio:       f.direccion.id_barrio       || null,
       };
     } else {
       payload.id_direccion = f.direccion?.id_direccion;
