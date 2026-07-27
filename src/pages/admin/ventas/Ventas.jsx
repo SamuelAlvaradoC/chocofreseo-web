@@ -472,10 +472,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
         const activas = (dirs || []).filter((d) => d.estado !== 0);
         setDireccionesCliente(activas);
         if (activas.length > 0) {
-          setModoDir('guardada'); setDireccion(activas[0]);
-          const precioAuto = activas[0].barrioRel?.precio_domicilio ?? activas[0].costo_domicilio;
-          if (precioAuto) setCostoEnvio(precioAuto);
-          else calcularDomicilioAdmin(activas[0]);
+          setModoDir('guardada'); setDireccion(null); setCostoEnvio(0);
         } else setModoDir('nueva');
       })
       .catch(() => setDireccionesCliente([]));
