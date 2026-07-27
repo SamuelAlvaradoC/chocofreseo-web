@@ -67,7 +67,7 @@ export default function Navbar() {
 
           {/* Mis pedidos — solo clientes */}
           {usuario?.rol === 'cliente' && (
-            <Link to="/mis-pedidos" className={`navbar-link ${location.pathname === '/mis-pedidos' ? 'activo' : ''}`}>
+            <Link to="/perfil" className={`navbar-link ${location.pathname === '/perfil' ? 'activo' : ''}`}>
               Mis pedidos
             </Link>
           )}
@@ -132,7 +132,7 @@ export default function Navbar() {
 
           {/* Mis pedidos mobile — solo clientes */}
           {usuario?.rol === 'cliente' && (
-            <Link to="/mis-pedidos" className="navbar-mobile-link" onClick={() => setMenuAbierto(false)}>Mis pedidos</Link>
+            <Link to="/perfil" className="navbar-mobile-link" onClick={() => setMenuAbierto(false)}>Mis pedidos</Link>
           )}
 
           {/* Panel por rol — mobile */}

@@ -56,17 +56,11 @@ function SearchableBarrio({ barrios, value, onChange, disabled, inputCls, error 
             <li
               key={b.id_barrio}
               onMouseDown={() => seleccionar(b)}
-              style={{
-                padding: '9px 14px', cursor: 'pointer', fontSize: 13,
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}
+              style={{ padding: '9px 14px', cursor: 'pointer', fontSize: 13 }}
               onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
               onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
             >
-              <span>{b.nombre}</span>
-              <span style={{ fontSize: 11, color: '#16a34a', fontWeight: 700 }}>
-                ${Number(b.precio_domicilio).toLocaleString('es-CO')}
-              </span>
+              {b.nombre}
             </li>
           ))}
         </ul>
