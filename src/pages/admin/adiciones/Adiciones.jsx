@@ -79,7 +79,7 @@ function ModalFormulario({ open, onClose, onGuardar, adicionEditar, procesando =
   const [nombre,      setNombre]      = useState(adicionEditar?.nombre      || '');
   const [descripcion, setDescripcion] = useState(adicionEditar?.descripcion || '');
   const [gramaje,     setGramaje]     = useState(adicionEditar?.gramaje     || '');
-  const [precio,      setPrecio]      = useState(adicionEditar?.precio      || '');
+  const [precio,      setPrecio]      = useState(adicionEditar?.precio ? Number(adicionEditar.precio).toLocaleString('es-CO') : '');
   const [img,         setImg]         = useState(adicionEditar?.img         || '');
   const [estado,      setEstado]      = useState(adicionEditar?.estado      ?? 1);
   const [errores,     setErrores]     = useState({});
@@ -89,8 +89,9 @@ function ModalFormulario({ open, onClose, onGuardar, adicionEditar, procesando =
   const validar = () => {
     const e = {};
     if (!nombre.trim())           e.nombre = 'El nombre es requerido';
-    if (!precio)                  e.precio = 'El precio es requerido';
-    else if (Number(precio) <= 0) e.precio = 'El precio debe ser mayor a 0';
+    const precioNum = Number(String(precio).replace(/\./g, '')) || 0;
+    if (!precio)            e.precio = 'El precio es requerido';
+    else if (precioNum <= 0) e.precio = 'El precio debe ser mayor a 0';
     return e;
   };
 
@@ -98,7 +99,7 @@ function ModalFormulario({ open, onClose, onGuardar, adicionEditar, procesando =
     const e = validar();
     if (Object.keys(e).length > 0) { setErrores(e); return; }
     try {
-      await onGuardar({ nombre: nombre.trim(), descripcion: descripcion.trim(), gramaje: gramaje.trim() || null, precio: Number(precio), img, estado: adicionEditar ? estado : 1 });
+      await onGuardar({ nombre: nombre.trim(), descripcion: descripcion.trim(), gramaje: gramaje.trim() || null, precio: Number(String(precio).replace(/\./g, '')), img, estado: adicionEditar ? estado : 1 });
     } catch (err) {
       const msg = err?.response?.data?.message || 'Error al guardar. Inténtalo de nuevo.';
       if (msg.toLowerCase().includes('nombre')) setErrores((p) => ({ ...p, nombre: msg }));
@@ -136,10 +137,8 @@ function ModalFormulario({ open, onClose, onGuardar, adicionEditar, procesando =
         <div className="form-grupo">
           <div className="input-precio-wrap">
             <span className="input-precio-simbolo">$</span>
-            <input className={`form-input input-precio input-monto${errores.precio ? ' input-error' : ''}`} type="number" step="1" min="0" placeholder="0" value={precio}
-              onChange={(e) => { setPrecio(e.target.value); setErrores((p) => ({ ...p, precio: '' })); }}
-              onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-              onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }} />
+            <input className={`form-input input-precio input-monto${errores.precio ? ' input-error' : ''}`} type="text" inputMode="numeric" placeholder="0" value={precio}
+              onChange={(e) => { const d = e.target.value.replace(/\./g,'').replace(/[^0-9]/g,''); const n = Number(d)||0; setPrecio(n>0?n.toLocaleString('es-CO'):''); setErrores((p) => ({ ...p, precio: '' })); }} />
           </div>
           {errores.precio && <span className="form-error">{errores.precio}</span>}
         </div>

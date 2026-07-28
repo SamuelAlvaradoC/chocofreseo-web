@@ -173,11 +173,8 @@ function ModalDetalle({ pedido, onClose }) {
               <span className="pd-modal-label">Desglose</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
                 <span style={{ fontSize: 13, display:'flex', alignItems:'center', gap:4 }}><LogoEfectivo size={12}/>Efectivo: <strong>${Number(pedido.monto_efectivo || 0).toLocaleString('es-CO')}</strong></span>
-                <span style={{ fontSize: 13, display:'flex', flexDirection:'row', alignItems:'center', gap:4 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'nowrap' }}>
-                    <LogoBancolombia size={20} />
-                    <LogoNequi size={32} />
-                  </div>
+                <span style={{ fontSize: 13, display:'flex', alignItems:'center', gap:4 }}>
+                  <LogoBancolombia size={16} /><LogoNequi size={16} />
                   Transferencia: <strong>${Number(pedido.monto_transferencia || 0).toLocaleString('es-CO')}</strong>
                 </span>
               </div>

@@ -64,9 +64,10 @@ function ModalGasto({ open, onClose, onGuardar, procesando }) {
 
   const guardar = async () => {
     if (!descripcion.trim()) { toast.error('Ingresa una descripción'); return; }
-    if (!valor || Number(valor) <= 0) { toast.error('Ingresa un valor mayor a 0'); return; }
+    const valorNum = Number(String(valor).replace(/\./g, '')) || 0;
+    if (!valor || valorNum <= 0) { toast.error('Ingresa un valor mayor a 0'); return; }
     try {
-      await onGuardar({ tipo, descripcion: descripcion.trim(), valor: Number(valor) });
+      await onGuardar({ tipo, descripcion: descripcion.trim(), valor: valorNum });
     } catch {
       toast.error('No se pudo agregar el gasto');
     }
@@ -99,17 +100,11 @@ function ModalGasto({ open, onClose, onGuardar, procesando }) {
         <div className="form-grupo">
           <input
             className="form-input input-monto"
-            type="number"
+            type="text"
             inputMode="numeric"
             placeholder="Valor"
             value={valor}
-            min="0"
-            step="1"
-            onChange={(e) => setValor(e.target.value.replace(/[^0-9]/g, ''))}
-            onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-            onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-            onWheel={(e) => e.target.blur()}
-            style={{ MozAppearance: 'textfield' }}
+            onChange={(e) => { const d = e.target.value.replace(/\./g,'').replace(/[^0-9]/g,''); const n = Number(d)||0; setValor(n>0?n.toLocaleString('es-CO'):''); }}
           />
         </div>
 

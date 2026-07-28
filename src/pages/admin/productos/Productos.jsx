@@ -99,7 +99,7 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
   const [nombre,            setNombre]            = useState(productoEditar?.nombre           || '');
   const [descripcion,       setDescripcion]       = useState(productoEditar?.descripcion      || '');
   const [tamano,            setTamano]            = useState(normalizarTamano(productoEditar?.tamano ?? ''));
-  const [precio,            setPrecio]            = useState(productoEditar?.precio           || '');
+  const [precio,            setPrecio]            = useState(productoEditar?.precio ? Number(productoEditar.precio).toLocaleString('es-CO') : '');
   const [permiteToppings,   setPermiteToppings]   = useState(productoEditar?.permite_toppings ?? 0);
   const [maxToppings,       setMaxToppings]       = useState(productoEditar?.max_toppings === 2 ? 2 : 1);
   const [permiteChocolate,  setPermiteChocolate]  = useState(productoEditar?.permite_chocolate ? 1 : 0);
@@ -114,8 +114,9 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
   const validar = () => {
     const e = {};
     if (!nombre.trim()) e.nombre = 'El nombre es requerido';
-    if (!precio)        e.precio = 'El precio es requerido';
-    else if (Number(precio) <= 0) e.precio = 'El precio debe ser mayor a 0';
+    const precioNum = Number(String(precio).replace(/\./g, '')) || 0;
+    if (!precio)           e.precio = 'El precio es requerido';
+    else if (precioNum <= 0) e.precio = 'El precio debe ser mayor a 0';
     return e;
   };
 
@@ -126,7 +127,7 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
       await onGuardar({
         nombre: nombre.trim(), descripcion: descripcion.trim(),
         id_categoria: Number(idCategoria), tamano,
-        precio: Number(precio), img,
+        precio: Number(String(precio).replace(/\./g, '')), img,
         permite_toppings: permiteToppings,
         max_toppings: Number(maxToppings),
         permite_chocolate: esBowl ? false : permiteChocolate === 1,
@@ -182,10 +183,8 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
           <label className="form-label">Precio</label>
           <div className="input-precio-wrap">
             <span className="input-precio-simbolo">$</span>
-            <input className={`form-input input-precio input-monto${errores.precio ? ' input-error' : ''}`} type="number" step="1" min="0" placeholder="0" value={precio}
-              onChange={(e) => { setPrecio(e.target.value); setErrores((p) => ({ ...p, precio: '' })); }}
-              onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-              onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }} />
+            <input className={`form-input input-precio input-monto${errores.precio ? ' input-error' : ''}`} type="text" inputMode="numeric" placeholder="0" value={precio}
+              onChange={(e) => { const d = e.target.value.replace(/\./g,'').replace(/[^0-9]/g,''); const n = Number(d)||0; setPrecio(n>0?n.toLocaleString('es-CO'):''); setErrores((p) => ({ ...p, precio: '' })); }} />
           </div>
           {errores.precio && <span className="form-error">{errores.precio}</span>}
         </div>
