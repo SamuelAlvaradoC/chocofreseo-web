@@ -67,8 +67,8 @@ const menu = [
     icon: <MapPin size={18} />,
     label: 'Zonas',
     hijos: [
-      { label: 'Ciudades', path: '/admin/ciudades', permiso: 'gestionar_categorias' },
-      { label: 'Barrios',  path: '/admin/barrios',  permiso: 'gestionar_categorias' },
+      { label: 'Ciudades', path: '/admin/ciudades', permiso: 'gestionar_ciudades' },
+      { label: 'Barrios',  path: '/admin/barrios',  permiso: 'gestionar_barrios'  },
     ],
   },
   {
@@ -76,7 +76,7 @@ const menu = [
     label: 'Reseñas',
     path: '/admin/resenas',
     hijos: [],
-    permiso: 'ver_dashboard',
+    permiso: 'ver_reportes',
   },
 ];
 
