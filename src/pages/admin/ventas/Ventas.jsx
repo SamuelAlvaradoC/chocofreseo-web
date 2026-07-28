@@ -1481,9 +1481,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
             ].map((m) => (
               <button key={m.v} type="button" onClick={() => {
                 setMetodoPago(m.v);
-                if (m.v === 'efectivo')      { setMontoEfectivo(total); setMontoTransfer(0); }
-                if (m.v === 'transferencia') { setMontoTransfer(total); setMontoEfectivo(0); }
-                if (m.v === 'mixto')         { setMontoEfectivo(0); setMontoTransfer(0); }
+                setEfDisplay('');
               }} style={{
                 flex: 1, padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
                 border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
