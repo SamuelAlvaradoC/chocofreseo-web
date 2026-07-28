@@ -561,7 +561,7 @@ function ModalLoginRequerido({ open, onClose }) {
           <a href="/login" className="btn-login-req-pri">Iniciar sesión</a>
         </div>
         <p className="modal-login-registro">
-          ¿No tienes cuenta? <a href="/registro" className="modal-login-link">Regístrate gratis</a>
+          ¿No tienes cuenta? <a href="/registro" className="modal-login-link">Regístrate</a>
         </p>
       </div>
     </div>

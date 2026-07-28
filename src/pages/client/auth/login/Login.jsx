@@ -98,7 +98,7 @@ export default function Login() {
             <div className="lf-divisor"><span>o</span></div>
             <p className="lf-registro">
               ¿No tienes cuenta?{' '}
-              <Link to="/registro" className="lf-link-bold">Regístrate gratis</Link>
+              <Link to="/registro" className="lf-link-bold">Regístrate</Link>
             </p>
           </form>
         </div>
