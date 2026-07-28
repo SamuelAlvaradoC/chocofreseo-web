@@ -623,7 +623,7 @@ export default function Dashboard() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
-                    {['Domiciliario','Entregas','Efectivo','Transferencia','Total'].map((h) => (
+                    {['Domiciliario','Entregas','Efectivo','Transferencia','Total','Total envíos'].map((h) => (
                       <th key={h} style={{ padding: '8px 12px', textAlign: 'left', color: '#888', fontWeight: 700, fontSize: 12 }}>{h}</th>
                     ))}
                   </tr>
@@ -636,6 +636,7 @@ export default function Dashboard() {
                       <td style={{ padding: '10px 12px', color: '#16a34a', fontWeight: 700 }}>${Number(d.efectivo).toLocaleString('es-CO')}</td>
                       <td style={{ padding: '10px 12px', color: '#7c3aed', fontWeight: 700 }}>${Number(d.transferencia).toLocaleString('es-CO')}</td>
                       <td style={{ padding: '10px 12px', color: '#CA0B0B', fontWeight: 800 }}>${Number(d.total).toLocaleString('es-CO')}</td>
+                      <td style={{ padding: '10px 12px', color: '#0369a1', fontWeight: 700 }}>${Number(d.total_domicilios || 0).toLocaleString('es-CO')}</td>
                     </tr>
                   ))}
                 </tbody>

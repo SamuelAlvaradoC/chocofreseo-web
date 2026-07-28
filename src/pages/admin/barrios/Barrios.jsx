@@ -18,19 +18,20 @@ function Toggle({ activo, onChange }) {
 function ModalFormulario({ open, onClose, onGuardar, editando, procesando, ciudades }) {
   const [nombre,   setNombre]   = useState(editando?.nombre || '');
   const [idCiudad, setIdCiudad] = useState(editando?.id_ciudad ? String(editando.id_ciudad) : '');
-  const [precio,   setPrecio]   = useState(editando?.precio_domicilio != null ? String(editando.precio_domicilio) : '');
+  const [precio,   setPrecio]   = useState(editando?.precio_domicilio != null ? Number(editando.precio_domicilio).toLocaleString('es-CO') : '');
   const [errores,  setErrores]  = useState({});
 
   if (!open) return null;
 
   const guardar = async () => {
     const e = {};
+    const precioNum = Number(String(precio).replace(/\./g, '')) || 0;
     if (!nombre.trim())    e.nombre   = 'El nombre es requerido';
     if (!idCiudad)         e.ciudad   = 'Selecciona una ciudad';
-    if (!precio || isNaN(Number(precio)) || Number(precio) < 0) e.precio = 'Precio inválido';
+    if (!precio || precioNum < 0) e.precio = 'Precio inválido';
     if (Object.keys(e).length) { setErrores(e); return; }
     try {
-      await onGuardar({ nombre: nombre.trim(), id_ciudad: Number(idCiudad), precio_domicilio: Number(precio) });
+      await onGuardar({ nombre: nombre.trim(), id_ciudad: Number(idCiudad), precio_domicilio: precioNum });
     } catch (err) {
       setErrores({ _general: err?.response?.data?.message || 'Error al guardar' });
     }
@@ -73,19 +74,17 @@ function ModalFormulario({ open, onClose, onGuardar, editando, procesando, ciuda
           <label className="form-label">Precio domicilio *</label>
           <input
             className={`form-input${errores.precio ? ' input-error' : ''}`}
-            placeholder="Ej: 5000"
+            placeholder="Ej: 5.000"
             value={precio}
-            type="number"
-            min="0"
-            step="500"
-            style={{ MozAppearance: 'textfield', WebkitAppearance: 'none' }}
-            onChange={(e) => { setPrecio(e.target.value); setErrores((p) => ({ ...p, precio: '' })); }}
+            type="text"
+            inputMode="numeric"
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\./g, '').replace(/[^0-9]/g, '');
+              const num = Number(digits) || 0;
+              setPrecio(num > 0 ? num.toLocaleString('es-CO') : digits ? '' : '');
+              setErrores((p) => ({ ...p, precio: '' }));
+            }}
           />
-          {precio && !isNaN(Number(precio)) && Number(precio) > 0 && (
-            <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 700, marginTop: 3, display: 'block' }}>
-              {fmt(precio)}
-            </span>
-          )}
           {errores.precio && <span className="form-error">{errores.precio}</span>}
         </div>
 

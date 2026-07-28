@@ -219,8 +219,8 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
               </div>
               {pedido.metodo_pago === 'mixto' && (
                 <div style={{ fontSize: 13, marginTop: 4 }}>
-                  <div style={{display:'flex',alignItems:'center',gap:4}}><LogoEfectivo size={12}/>Efectivo: <strong>${Number(pedido.monto_efectivo || 0).toLocaleString('es-CO')}</strong></div>
-                  <div style={{display:'flex',alignItems:'center',gap:4}}><LogoBancolombia size={12}/><LogoNequi size={12}/>Transferencia: <strong>${Number(pedido.monto_transferencia || 0).toLocaleString('es-CO')}</strong></div>
+                  <div>Efectivo: <strong>${Number(pedido.monto_efectivo || 0).toLocaleString('es-CO')}</strong></div>
+                  <div>Transferencia: <strong>${Number(pedido.monto_transferencia || 0).toLocaleString('es-CO')}</strong></div>
                 </div>
               )}
               {(pedido.metodo_pago === 'transferencia' || pedido.metodo_pago === 'mixto') && (

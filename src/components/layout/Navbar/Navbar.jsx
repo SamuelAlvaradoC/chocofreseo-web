@@ -65,13 +65,6 @@ export default function Navbar() {
           ))}
           <a href="#nosotros" className="navbar-link" onClick={handleNosotros}>Nosotros</a>
 
-          {/* Mis pedidos — solo clientes */}
-          {usuario?.rol === 'cliente' && (
-            <Link to="/perfil" className={`navbar-link ${location.pathname === '/perfil' ? 'activo' : ''}`}>
-              Mis pedidos
-            </Link>
-          )}
-
           {/* Panel por rol */}
           {usuario?.rol === 'admin'                  && <Link to="/admin/dashboard"        className="navbar-link admin-link">Panel Admin</Link>}
           {usuario?.rol === 'domiciliario'           && <Link to="/domiciliario/pedidos"   className="navbar-link domi-link"><Bike size={15} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />Panel Domiciliario</Link>}
@@ -129,11 +122,6 @@ export default function Navbar() {
             </Link>
           ))}
           <a href="#nosotros" className="navbar-mobile-link" onClick={handleNosotros}>Nosotros</a>
-
-          {/* Mis pedidos mobile — solo clientes */}
-          {usuario?.rol === 'cliente' && (
-            <Link to="/perfil" className="navbar-mobile-link" onClick={() => setMenuAbierto(false)}>Mis pedidos</Link>
-          )}
 
           {/* Panel por rol — mobile */}
           {usuario?.rol === 'admin'                 && <Link to="/admin/dashboard"      className="navbar-mobile-link admin-highlight" onClick={() => setMenuAbierto(false)}><LayoutDashboard size={15} style={{display:'inline',verticalAlign:'middle',marginRight:4}} />Panel Administrador</Link>}

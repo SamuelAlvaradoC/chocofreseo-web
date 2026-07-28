@@ -416,8 +416,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const [costoEnvio,         setCostoEnvio]         = useState(5500);
   const [calculandoDom,      setCalculandoDom]      = useState(false);
   const [metodoPago,         setMetodoPago]         = useState('efectivo');
-  const [montoEfectivo,      setMontoEfectivo]      = useState(0);
-  const [montoTransfer,      setMontoTransfer]      = useState(0);
+  const [efDisplay,          setEfDisplay]          = useState('');
   const [observaciones,      setObservaciones]      = useState('');
   const [procesandoVenta,    setProcesandoVenta]    = useState(false);
   const [productoConfigurar, setProductoConfigurar] = useState(null);
@@ -433,8 +432,10 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const descuentoPuntos       = usarPuntos ? puntosAplicarEfectivo * 12.5 : 0;
   const totalConDesc          = Math.max(0, subtotal - descuentoPuntos);
   const total                 = totalConDesc + Number(costoEnvio || 0);
+  const montoEfectivo   = Number(efDisplay.replace(/\./g, '')) || 0;
+  const montoTransfer   = efDisplay !== '' ? Math.max(0, total - montoEfectivo) : 0;
   const pagoCompleto    = metodoPago === 'efectivo' || metodoPago === 'transferencia'
-    || (montoEfectivo > 0 && montoTransfer > 0 && Math.abs(montoEfectivo + montoTransfer - total) < 1);
+    || (montoEfectivo > 0 && montoTransfer > 0);
 
   const clientesFiltrados = busquedaCliente.length >= 2
     ? clientesData.filter((c) =>
@@ -545,25 +546,20 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
 
   const cambiarMetodoPago = (m) => {
     setMetodoPago(m);
-    if (m !== 'mixto') { setMontoEfectivo(0); setMontoTransfer(0); }
+    setEfDisplay('');
   };
 
-  const handleEfMixto = (v) => {
-    const ef = Number(v) || 0;
-    setMontoEfectivo(ef);
-    if (ef <= total) setMontoTransfer(total - ef);
-  };
-  const handleTrMixto = (v) => {
-    const tr = Number(v) || 0;
-    setMontoTransfer(tr);
-    if (tr <= total) setMontoEfectivo(total - tr);
+  const handleEfMixto = (raw) => {
+    const digits = raw.replace(/\./g, '').replace(/[^0-9]/g, '');
+    const num = Math.min(Number(digits) || 0, total);
+    setEfDisplay(num > 0 ? num.toLocaleString('es-CO') : '');
   };
 
   const reset = () => {
     setPasoActual(1); setCliente(null); setBusquedaCliente(''); setDropdownVisible(false);
     setDireccion(null); setModoDir('guardada'); setNuevaDireccion({ direccion_linea: '', barrio: '', ciudad: '', referencia: '' });
     setCarrito([]); setDireccionesCliente([]); setFiltroCategoria(''); setBusquedaProd(''); setCostoEnvio(5500);
-    setMetodoPago('efectivo'); setMontoEfectivo(0); setMontoTransfer(0); setObservaciones('');
+    setMetodoPago('efectivo'); setEfDisplay(''); setObservaciones('');
     setProductoConfigurar(null);
     setPuntosCliente(0); setUsarPuntos(false); setPuntosAplicar(0);
   };
@@ -881,23 +877,14 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                       <div style={{ display: 'flex', gap: 8 }}>
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: 11, color: '#888', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 4 }}><LogoEfectivo size={11} /> Efectivo</label>
-                          <input type="number" className="input-monto" step="1" min="0" value={montoEfectivo || ''} placeholder="0"
+                          <input type="text" inputMode="numeric" className="input-monto" value={efDisplay} placeholder="0"
                             onChange={(e) => handleEfMixto(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                            onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
-                          {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
-                          {montoEfectivo > 0 && (total - montoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoEfectivo).toLocaleString('es-CO')} para transf.</div>}
+                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                         </div>
                         <div style={{ flex: 1 }}>
                           <label style={{ fontSize: 11, color: '#888', display: 'flex', alignItems: 'center', gap: 3, marginBottom: 4 }}><LogoBancolombia size={11} /><LogoNequi size={11} /> Transfer.</label>
-                          <input type="number" className="input-monto" step="1" min="0" value={montoTransfer || ''} placeholder="0"
-                            onChange={(e) => handleTrMixto(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                            onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
-                          {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
-                          {montoTransfer > 0 && (total - montoTransfer) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoTransfer).toLocaleString('es-CO')} para efectivo.</div>}
+                          <input type="text" className="input-monto" value={montoTransfer > 0 ? montoTransfer.toLocaleString('es-CO') : ''} placeholder="0" readOnly
+                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', background: '#f9f9f9', cursor: 'default' }} />
                         </div>
                       </div>
                       <div style={{ padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: pagoCompleto ? '#f0fdf4' : '#fff5f5', border: `1px solid ${pagoCompleto ? '#bbf7d0' : '#fecaca'}`, color: pagoCompleto ? '#166534' : '#CA0B0B', display: 'flex', justifyContent: 'space-between' }}>
@@ -1219,8 +1206,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
   const [costoEnvio, setCostoEnvio] = useState(0);
   const [procesando, setProcesando] = useState(false);
   const [metodoPago, setMetodoPago] = useState('efectivo');
-  const [montoEfectivo, setMontoEfectivo] = useState(0);
-  const [montoTransfer, setMontoTransfer] = useState(0);
+  const [efDisplay,     setEfDisplay]     = useState('');
   const [intentoGuardar, setIntentoGuardar] = useState(false);
   const [productoConfigurar, setProductoConfigurar] = useState(null);
   const [filtroCategoria, setFiltroCategoria] = useState('');
@@ -1232,8 +1218,8 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
     if (!open || !venta) return;
     setCostoEnvio(Number(venta.costo_domicilio || 0));
     setMetodoPago(venta.metodo_pago || 'efectivo');
-    setMontoEfectivo(Number(venta.monto_efectivo || 0));
-    setMontoTransfer(Number(venta.monto_transferencia || 0));
+    const ef0 = Number(venta.monto_efectivo || 0);
+    setEfDisplay(ef0 > 0 ? ef0.toLocaleString('es-CO') : '');
     setNombreCliente(venta.nombre_cliente || (venta.cliente !== '—' ? venta.cliente : '') || '');
     setTelefonoCliente(venta.telefono_cliente !== '—' ? (venta.telefono_cliente || '') : '');
     setIntentoGuardar(false);
@@ -1271,6 +1257,8 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
     return (Number(item.precio) + adicionTotal) * item.cantidad;
   };
   const total = carrito.reduce((s, i) => s + calcItemEdit(i), 0) + Number(costoEnvio || 0);
+  const montoEfectivo = Number(efDisplay.replace(/\./g, '')) || 0;
+  const montoTransfer = efDisplay !== '' ? Math.max(0, total - montoEfectivo) : 0;
 
   const cambiarCantidadEdit = (lineaId, cant) => {
     if (cant < 1) { setCarrito((p) => p.filter((x) => x.lineaId !== lineaId)); return; }
@@ -1303,7 +1291,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
 
   // Si está entregada: solo mostrar sección de método de pago
   if (esEntregada) {
-    const mixtoOk = metodoPago !== 'mixto' || (montoEfectivo > 0 && montoTransfer > 0 && Math.abs(montoEfectivo + montoTransfer - total) < 1);
+    const mixtoOk = metodoPago !== 'mixto' || (montoEfectivo > 0 && montoTransfer > 0);
     return (
       <div className="modal-overlay">
         <div className="modal-caja" style={{ width: 480, maxHeight: '90vh', overflowY: 'auto' }}>
@@ -1324,9 +1312,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
               ].map((m) => (
                 <button key={m.v} type="button" onClick={() => {
                   setMetodoPago(m.v); setIntentoGuardar(false);
-                  if (m.v === 'efectivo')      { setMontoEfectivo(total); setMontoTransfer(0); }
-                  if (m.v === 'transferencia') { setMontoTransfer(total); setMontoEfectivo(0); }
-                  if (m.v === 'mixto')         { setMontoEfectivo(0); setMontoTransfer(0); }
+                  setEfDisplay('');
                 }} style={{
                   flex: 1, padding: '14px 8px', borderRadius: 12, cursor: 'pointer',
                   border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
@@ -1342,35 +1328,25 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
               ))}
             </div>
             {metodoPago === 'mixto' && (() => {
-              const suma = montoEfectivo + montoTransfer;
-              const ok = montoEfectivo > 0 && montoTransfer > 0 && Math.abs(suma - total) < 1;
+              const ok = montoEfectivo > 0 && montoTransfer > 0;
               return (
                 <>
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <div style={{ flex: 1 }}>
                       <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems:'center', gap:4, marginBottom: 3 }}><LogoEfectivo size={12}/>Efectivo *</label>
-                      <input type="number" className="input-monto" step="1" min="0" value={montoEfectivo || ''} placeholder="0"
-                        onChange={(e) => { setMontoEfectivo(Number(e.target.value) || 0); setMontoTransfer(Math.max(0, total - (Number(e.target.value) || 0))); }}
-                        onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                        onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoEfectivo <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
-                      {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
-                      {montoEfectivo > 0 && (total - montoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoEfectivo).toLocaleString('es-CO')} para transf.</div>}
+                      <input type="text" inputMode="numeric" className="input-monto" value={efDisplay} placeholder="0"
+                        onChange={(e) => { const d = e.target.value.replace(/\./g,'').replace(/[^0-9]/g,''); const n = Math.min(Number(d)||0,total); setEfDisplay(n>0?n.toLocaleString('es-CO'):''); setIntentoGuardar(false); }}
+                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoEfectivo <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }} />
                     </div>
                     <div style={{ flex: 1 }}>
                       <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems:'center', gap:4, marginBottom: 3 }}><LogoBancolombia size={12}/><LogoNequi size={12}/>Transferencia *</label>
-                      <input type="number" className="input-monto" step="1" min="0" value={montoTransfer || ''} placeholder="0"
-                        onChange={(e) => { setMontoTransfer(Number(e.target.value) || 0); setMontoEfectivo(Math.max(0, total - (Number(e.target.value) || 0))); }}
-                        onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                        onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoTransfer <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
-                      {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
-                      {montoTransfer > 0 && (total - montoTransfer) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoTransfer).toLocaleString('es-CO')} para efectivo.</div>}
+                      <input type="text" className="input-monto" value={montoTransfer > 0 ? montoTransfer.toLocaleString('es-CO') : ''} placeholder="0" readOnly
+                        style={{ width: '100%', padding: '6px 10px', border: `1px solid ${intentoGuardar && montoTransfer <= 0 ? '#fca5a5' : '#e5e7eb'}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', background: '#f9f9f9', cursor: 'default' }} />
                     </div>
                   </div>
                   <div style={{ marginTop: 6, padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, background: ok ? '#f0fdf4' : (intentoGuardar ? '#fff5f5' : '#f9f9f9'), border: `1px solid ${ok ? '#bbf7d0' : (intentoGuardar ? '#fecaca' : '#e5e7eb')}`, color: ok ? '#166534' : '#CA0B0B', display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{display:'flex',alignItems:'center',gap:4}}>{ok ? <><Check size={12}/>Los montos cuadran</> : intentoGuardar ? <><AlertTriangle size={12}/>Revisa los montos</> : `Total: $${total.toLocaleString('es-CO')}`}</span>
-                    <span>${suma.toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')}</span>
+                    <span>${(montoEfectivo+montoTransfer).toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')}</span>
                   </div>
                 </>
               );
@@ -1522,10 +1498,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
           </div>
 
           {metodoPago === 'mixto' && (() => {
-            const sumaMixto = montoEfectivo + montoTransfer;
-            const sumaCubre = Math.abs(sumaMixto - total) < 1;
-            const ambosPositivos = montoEfectivo > 0 && montoTransfer > 0;
-            const mixtoOk = ambosPositivos && sumaCubre;
+            const mixtoOk = montoEfectivo > 0 && montoTransfer > 0;
             const mostrarError = intentoGuardar && !mixtoOk;
             const bordeEf = (intentoGuardar && montoEfectivo <= 0) ? '#fca5a5' : '#e5e7eb';
             const bordeTr = (intentoGuardar && montoTransfer <= 0) ? '#fca5a5' : '#e5e7eb';
@@ -1537,60 +1510,37 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                       <LogoEfectivo size={12}/>Efectivo <span style={{ color: '#CA0B0B' }}>*</span>
                     </label>
                     <input
-                      type="number" step="1" min="0"
+                      type="text" inputMode="numeric"
                       className="input-monto"
-                      value={montoEfectivo || ''}
+                      value={efDisplay}
                       placeholder="0"
-                      onChange={(e) => {
-                        const ef = Number(e.target.value) || 0;
-                        setMontoEfectivo(ef);
-                        setMontoTransfer(Math.max(0, total - ef));
-                      }}
-                      onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                      onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeEf}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }}
+                      onChange={(e) => { const d = e.target.value.replace(/\./g,'').replace(/[^0-9]/g,''); const n = Math.min(Number(d)||0,total); setEfDisplay(n>0?n.toLocaleString('es-CO'):''); setIntentoGuardar(false); }}
+                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeEf}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
                     />
-                    {montoEfectivo > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoEfectivo.toLocaleString('es-CO')}</div>}
-                    {montoEfectivo > 0 && (total - montoEfectivo) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoEfectivo).toLocaleString('es-CO')} para transf.</div>}
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: 12, color: '#888', display: 'flex', alignItems:'center', gap:4, marginBottom: 3 }}>
                       <LogoBancolombia size={12}/><LogoNequi size={12}/>Transferencia <span style={{ color: '#CA0B0B' }}>*</span>
                     </label>
                     <input
-                      type="number" step="1" min="0"
+                      type="text"
                       className="input-monto"
-                      value={montoTransfer || ''}
+                      value={montoTransfer > 0 ? montoTransfer.toLocaleString('es-CO') : ''}
                       placeholder="0"
-                      onChange={(e) => {
-                        const tr = Number(e.target.value) || 0;
-                        setMontoTransfer(tr);
-                        setMontoEfectivo(Math.max(0, total - tr));
-                      }}
-                      onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-                      onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeTr}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', MozAppearance: 'textfield', WebkitAppearance: 'none' }}
+                      readOnly
+                      style={{ width: '100%', padding: '6px 10px', border: `1px solid ${bordeTr}`, borderRadius: 6, fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box', background: '#f9f9f9', cursor: 'default' }}
                     />
-                    {montoTransfer > 0 && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 2, textAlign: 'right', fontWeight: 700 }}>${montoTransfer.toLocaleString('es-CO')}</div>}
-                    {montoTransfer > 0 && (total - montoTransfer) > 0 && <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 1, textAlign: 'right' }}>Faltan: ${(total - montoTransfer).toLocaleString('es-CO')} para efectivo.</div>}
                   </div>
                 </div>
-                {/* Indicador: verde cuando cuadra, rojo solo si ya intentó guardar */}
                 {mixtoOk ? (
                   <div style={{ marginTop: 6, padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{display:'flex',alignItems:'center',gap:4}}><Check size={12}/>Los montos cuadran</span>
-                    <span>${sumaMixto.toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')}</span>
+                    <span>${(montoEfectivo+montoTransfer).toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')}</span>
                   </div>
                 ) : mostrarError ? (
                   <div style={{ marginTop: 6, padding: '6px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, background: '#fff5f5', border: '1px solid #fecaca', color: '#CA0B0B', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>
-                      <AlertTriangle size={12} style={{marginRight:4}}/>
-                      {!ambosPositivos
-                        ? 'Ambos montos deben ser mayores a $0'
-                        : `Faltan / sobran $${Math.abs(sumaMixto - total).toLocaleString('es-CO')}`
-                      }
-                    </span>
-                    <span>${sumaMixto.toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')}</span>
+                    <span><AlertTriangle size={12} style={{marginRight:4}}/>Ambos montos deben ser mayores a $0</span>
+                    <span>${(montoEfectivo+montoTransfer).toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')}</span>
                   </div>
                 ) : null}
               </>
@@ -1609,8 +1559,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
             onClick={async () => {
               if (procesando) return;
               if (metodoPago === 'mixto') {
-                const suma = montoEfectivo + montoTransfer;
-                if (montoEfectivo <= 0 || montoTransfer <= 0 || Math.abs(suma - total) >= 1) {
+                if (montoEfectivo <= 0 || montoTransfer <= 0) {
                   setIntentoGuardar(true);
                   return;
                 }
