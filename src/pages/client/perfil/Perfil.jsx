@@ -70,7 +70,7 @@ function SeccionDatos({ usuario }) {
     }
     setProcesando(true);
     try {
-      const u = await api.editarPerfil({ nombre: nombre.trim(), telefono: telefono.trim() || undefined });
+      const u = await api.editarPerfil({ nombre: nombre.trim(), telefono: telefono.trim() });
       actualizarUsuario({ nombre: u.nombre, telefono: u.telefono });
       setEditando(false);
       setGuardado(true);
@@ -160,7 +160,7 @@ function SeccionContrasena() {
     if (procesando) return;
     if (!actual.trim() || !nueva.trim() || !confirmar.trim()) { setError('Completa todos los campos'); return; }
     if (nueva !== confirmar) { setError('Las contraseñas no coinciden'); return; }
-    if (nueva.length < 6)    { setError('Mínimo 6 caracteres'); return; }
+    if (nueva.length < 8)    { setError('Mínimo 8 caracteres'); return; }
     setError('');
     setProcesando(true);
     try {
@@ -178,7 +178,7 @@ function SeccionContrasena() {
       <div className="perfil-sec-header">
         <div>
           <h3 className="perfil-sec-titulo">Cambiar contraseña</h3>
-          <p className="perfil-sec-sub">Elige una contraseña segura de mínimo 6 caracteres</p>
+          <p className="perfil-sec-sub">Elige una contraseña segura de mínimo 8 caracteres</p>
         </div>
       </div>
       {ok    && <div className="perfil-alerta-ok" style={{display:'flex',alignItems:'center',gap:6}}><Check size={14}/>Contraseña actualizada correctamente</div>}

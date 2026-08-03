@@ -21,7 +21,7 @@ export default function Registro() {
     if (!email.trim())     { setError('El correo electrónico es obligatorio'); return; }
     if (!/\S+@\S+\.\S+/.test(email)) { setError('Ingresa un correo electrónico válido'); return; }
     if (!contrasena.trim()) { setError('La contraseña es obligatoria'); return; }
-    if (contrasena.length < 6) { setError('La contraseña debe tener al menos 6 caracteres'); return; }
+    if (contrasena.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
     if (!confirmar.trim()) { setError('Confirma tu contraseña'); return; }
     if (contrasena !== confirmar) { setError('Las contraseñas no coinciden'); return; }
 
@@ -72,7 +72,7 @@ export default function Registro() {
             </div>
             <div className="lf-grupo">
               <label className="lf-label">Contraseña</label>
-              <input className="lf-input" type="password" placeholder="Mínimo 6 caracteres" value={contrasena} onChange={(e) => { setContrasena(e.target.value); setError(''); }} />
+              <input className="lf-input" type="password" placeholder="Mínimo 8 caracteres" value={contrasena} onChange={(e) => { setContrasena(e.target.value); setError(''); }} />
             </div>
             <div className="lf-grupo">
               <label className="lf-label">Confirmar contraseña</label>

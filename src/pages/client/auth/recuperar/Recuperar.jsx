@@ -38,7 +38,7 @@ export default function Recuperar() {
     e.preventDefault();
     if (!codigo.trim() || codigo.length !== 6) { setError('Ingresa el código de 6 dígitos');             return; }
     if (!nueva.trim())                          { setError('Ingresa la nueva contraseña');                return; }
-    if (nueva.length < 6)                       { setError('La contraseña debe tener mínimo 6 caracteres'); return; }
+    if (nueva.length < 8)                       { setError('La contraseña debe tener mínimo 8 caracteres'); return; }
     if (nueva !== confirmar)                    { setError('Las contraseñas no coinciden');               return; }
     setCargando(true);
     setError('');

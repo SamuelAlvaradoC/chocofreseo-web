@@ -37,7 +37,7 @@ function ModalFormulario({ open, onClose, onGuardar, clienteEditar, procesando =
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Email no válido';
     if (!clienteEditar) {
       if (!contrasena)                  e.contrasena    = 'La contraseña es requerida';
-      else if (contrasena.length < 6)   e.contrasena    = 'Mínimo 6 caracteres';
+      else if (contrasena.length < 8)   e.contrasena    = 'Mínimo 8 caracteres';
       if (contrasena !== confirmarPass) e.confirmarPass = 'Las contraseñas no coinciden';
     }
     return e;
@@ -284,7 +284,7 @@ export default function Clientes() {
       const nuevo = await api.crearCliente({ nombre: f.nombre, email: f.email, contrasena: f.contrasena, ...(f.telefono ? { telefono: f.telefono } : {}) });
       setLista((p) => [...p, { ...nuevo, nombre: nuevo.usuario?.nombre || nuevo.nombre || f.nombre }]);
       setModalAbierto(false);
-    } catch (err) { console.error('Error creando cliente:', err); }
+    } catch (err) { toast.error(err?.response?.data?.message || 'Error al crear cliente'); }
     finally { setProcesando(false); }
   };
 
@@ -294,7 +294,7 @@ export default function Clientes() {
       const actualizado = await api.actualizarCliente(editando.id_cliente, { nombre: f.nombre || undefined, email: f.email || undefined, telefono: f.telefono || undefined });
       setLista((p) => p.map((c) => c.id_cliente === editando.id_cliente ? { ...c, ...actualizado, nombre: actualizado.usuario?.nombre || actualizado.nombre || c.nombre } : c));
       setEditando(null);
-    } catch (err) { console.error('Error editando cliente:', err); }
+    } catch (err) { toast.error(err?.response?.data?.message || 'Error al editar cliente'); }
     finally { setProcesando(false); }
   };
 

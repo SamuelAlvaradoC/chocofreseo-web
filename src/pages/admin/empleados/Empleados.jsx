@@ -55,7 +55,7 @@ function ModalFormulario({ open, onClose, onGuardar, empleadoEditar, procesando 
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Email no válido';
     if (!empleadoEditar) {
       if (!contrasena)                  e.contrasena    = 'La contraseña es requerida';
-      else if (contrasena.length < 6)   e.contrasena    = 'Mínimo 6 caracteres';
+      else if (contrasena.length < 8)   e.contrasena    = 'Mínimo 8 caracteres';
       if (contrasena !== confirmarPass) e.confirmarPass = 'Las contraseñas no coinciden';
     }
     if (!fechaIngreso) e.fechaIngreso = 'La fecha de ingreso es requerida';
