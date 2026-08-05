@@ -99,7 +99,7 @@ function ModalFormulario({ open, onClose, onGuardar, empleadoEditar, procesando 
         {!empleadoEditar && (
           <div className="form-fila">
             <div className="form-grupo">
-              <input className={`form-input${errores.contrasena ? ' input-error' : ''}`} type="password" placeholder="Contraseña (mín. 6 caracteres)" value={contrasena}
+              <input className={`form-input${errores.contrasena ? ' input-error' : ''}`} type="password" placeholder="Contraseña (mín. 8 caracteres)" value={contrasena}
                 onChange={(e) => { setContrasena(e.target.value); setErrores((p) => ({ ...p, contrasena: '' })); }} />
               {errores.contrasena && <span className="form-error">{errores.contrasena}</span>}
             </div>

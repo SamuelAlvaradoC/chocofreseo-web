@@ -336,7 +336,8 @@ export default function Roles() {
     try {
       await api.asignarRolPermisos(idRol, nuevosPermisos);
     } catch (err) {
-      console.error('Error guardando permisos:', err);
+      toast.error(err?.response?.data?.message || 'No se pudieron guardar los permisos');
+      return;
     }
     setModalPermisos(null);
     setLista((prev) =>

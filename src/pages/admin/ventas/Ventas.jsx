@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { Eye, Edit, Check, X, FileText, RotateCcw, AlertTriangle, Search } from 'lucide-react';
-import { LogoBancolombia, LogoNequi, LogoEfectivo } from '../../../components/common/LogosApps';
+import { LogoBancolombia, LogoNequi, LogoEfectivo, LogoWhatsApp } from '../../../components/common/LogosApps';
 import { toast } from '../../../utils/toast';
 import { imgCl } from '../../../utils/cloudinary';
 import AdminLayout from '../../../components/layout/AdminLayout';
@@ -436,6 +436,10 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const montoTransfer   = efDisplay !== '' ? Math.max(0, total - montoEfectivo) : 0;
   const pagoCompleto    = metodoPago === 'efectivo' || metodoPago === 'transferencia'
     || (montoEfectivo > 0 && montoTransfer > 0);
+  // Si la dirección tiene barrio del catálogo, el backend fuerza costo_domicilio
+  // = Barrio.precio_domicilio sin importar lo que se mande — el campo debe
+  // quedar de solo lectura para no mostrarle al admin un número que luego no se guarda.
+  const tieneBarrio = (modoDir === 'guardada' && !!direccion?.barrioRel) || (modoDir === 'nueva' && !!nuevaDireccion?.id_barrio);
 
   const clientesFiltrados = busquedaCliente.length >= 2
     ? clientesData.filter((c) =>
@@ -708,13 +712,16 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                       <span style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>Costo domicilio $</span>
                       {calculandoDom
                         ? <span style={{ fontSize: 12, color: '#888' }}>Calculando...</span>
+                        : tieneBarrio
+                        ? <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>${Number(costoEnvio).toLocaleString('es-CO')}</span>
                         : <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
                             onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
                             onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
                             style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
                       }
                     </div>
-                    {costoEnvio > 0 && !calculandoDom && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 3, textAlign: 'right', fontWeight: 700 }}>Domicilio: ${Number(costoEnvio).toLocaleString('es-CO')}</div>}
+                    {tieneBarrio && <div style={{ fontSize: 11, color: '#888', marginTop: 3, textAlign: 'right' }}>Precio fijado por el barrio del catálogo</div>}
+                    {costoEnvio > 0 && !calculandoDom && !tieneBarrio && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 3, textAlign: 'right', fontWeight: 700 }}>Domicilio: ${Number(costoEnvio).toLocaleString('es-CO')}</div>}
                   </div>
                 </div>
               )}
@@ -1004,14 +1011,6 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   );
 }
 
-function IcoWhatsApp() {
-  return (
-    <svg viewBox="0 0 32 32" width="16" height="16" fill="currentColor">
-      <path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.737 5.469 2.027 7.773L0 32l8.427-2.007A15.93 15.93 0 0 0 16 32c8.836 0 16-7.164 16-16S24.836 0 16 0zm0 29.333a13.27 13.27 0 0 1-6.773-1.853l-.485-.289-5.003 1.193 1.24-4.858-.317-.499A13.233 13.233 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.27-9.878c-.398-.2-2.355-1.162-2.72-1.294-.365-.133-.631-.2-.897.2-.265.398-1.03 1.294-1.263 1.56-.232.265-.465.299-.863.1-.398-.2-1.682-.62-3.204-1.977-1.184-1.057-1.984-2.362-2.216-2.76-.232-.398-.025-.613.174-.812.179-.178.398-.465.597-.697.2-.232.265-.398.398-.664.133-.265.066-.498-.033-.697-.1-.2-.897-2.163-1.229-2.96-.324-.778-.653-.672-.897-.684l-.764-.013c-.265 0-.697.1-1.063.498-.365.398-1.394 1.362-1.394 3.325 0 1.962 1.427 3.858 1.626 4.123.2.265 2.808 4.287 6.804 6.013.951.41 1.693.655 2.272.839.954.304 1.823.261 2.51.158.766-.114 2.355-.963 2.687-1.893.332-.93.332-1.727.232-1.893-.099-.166-.365-.265-.763-.465z"/>
-    </svg>
-  );
-}
-
 function ModalDetalle({ open, onClose, venta }) {
   const [lightbox, setLightbox] = useState(false);
   if (!open || !venta) return null;
@@ -1190,7 +1189,7 @@ function ModalDetalle({ open, onClose, venta }) {
             {wpp && (
               <a href={wpp} target="_blank" rel="noopener noreferrer"
                 style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px', background: '#25D366', color: '#fff', borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: 'none', fontFamily: 'inherit' }}>
-                <IcoWhatsApp /> WhatsApp
+                <LogoWhatsApp size={16} color="white"/> WhatsApp
               </a>
             )}
             <button className="btn-primario" onClick={onClose} style={{ flex: 1 }}>Cerrar</button>
@@ -1223,20 +1222,29 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
     setNombreCliente(venta.nombre_cliente || (venta.cliente !== '—' ? venta.cliente : '') || '');
     setTelefonoCliente(venta.telefono_cliente !== '—' ? (venta.telefono_cliente || '') : '');
     setIntentoGuardar(false);
-    setCarrito((venta.detalleVentas || []).map((d) => ({
-      lineaId: d.id_detalle_venta,
-      id_producto: d.id_producto,
-      nombre: d.producto?.nombre || '—',
-      // precio_unitario ya incluye topping extra — NO usar calcularPrecioItem para el total
-      precio: Number(d.precio_unitario || 0),
-      max_toppings: d.producto?.max_toppings || 0,
-      es_bowl: d.producto?.es_bowl || false,
-      cantidad: d.cantidad,
-      toppings: (d.detalleToppings || []).map((t) => ({ id_topping: t.id_topping, nombre: t.topping?.nombre || '', cantidad: t.cantidad || 1 })),
-      adiciones: (d.detalleAdiciones || []).map((a) => ({ id_adicion: a.id_adicion, nombre: a.adicion?.nombre || '', precio: Number(a.precio_unitario || 0), cantidad: a.cantidad || 1 })),
-      salsas: parsearSalsas(d.salsas),
-      chocolate: d.chocolate || null,
-    })));
+    setCarrito((venta.detalleVentas || []).map((d) => {
+      // El producto pudo cambiar de configuración después de esta venta —
+      // si ya no permite chocolate/salsas, se limpia al cargar para no
+      // reenviarlo tal cual y que el backend lo rechace (400) con solo
+      // cambiar la cantidad, sin que el admin haya tocado ese campo.
+      const prodActual = productosData.find((p) => p.id_producto === d.id_producto);
+      const permiteChoc = prodActual ? !!prodActual.permite_chocolate : true;
+      const permiteSal  = prodActual ? !!prodActual.permite_salsas   : true;
+      return {
+        lineaId: d.id_detalle_venta,
+        id_producto: d.id_producto,
+        nombre: d.producto?.nombre || '—',
+        // precio_unitario ya incluye topping extra — NO usar calcularPrecioItem para el total
+        precio: Number(d.precio_unitario || 0),
+        max_toppings: d.producto?.max_toppings || 0,
+        es_bowl: d.producto?.es_bowl || false,
+        cantidad: d.cantidad,
+        toppings: (d.detalleToppings || []).map((t) => ({ id_topping: t.id_topping, nombre: t.topping?.nombre || '', cantidad: t.cantidad || 1 })),
+        adiciones: (d.detalleAdiciones || []).map((a) => ({ id_adicion: a.id_adicion, nombre: a.adicion?.nombre || '', precio: Number(a.precio_unitario || 0), cantidad: a.cantidad || 1 })),
+        salsas: permiteSal ? parsearSalsas(d.salsas) : [],
+        chocolate: permiteChoc ? (d.chocolate || null) : null,
+      };
+    }));
   }, [open, venta]);
 
   if (!open || !venta) return null;
@@ -1265,11 +1273,28 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
     setCarrito((p) => p.map((x) => x.lineaId === lineaId ? { ...x, cantidad: cant } : x));
   };
 
+  // Igual que itemsIguales en ModalCrearVenta: mismo producto + misma config
+  // exacta (chocolate/toppings/adiciones/salsas) se fusiona sumando cantidad
+  // en vez de crear una línea nueva separada.
+  const itemsIgualesEdit = (a, b) => {
+    if (a.id_producto !== b.id_producto) return false;
+    if ((a.chocolate || '') !== (b.chocolate || '')) return false;
+    const topsA = [...(a.toppings || [])].map((t) => t.id_topping).sort().join(',');
+    const topsB = [...(b.toppings || [])].map((t) => t.id_topping).sort().join(',');
+    if (topsA !== topsB) return false;
+    const adsA  = [...(a.adiciones || [])].map((ad) => ad.id_adicion).sort().join(',');
+    const adsB  = [...(b.adiciones || [])].map((ad) => ad.id_adicion).sort().join(',');
+    if (adsA !== adsB) return false;
+    const salsasA = [...(a.salsas || [])].map((s) => s.id || s.nombre || s).sort().join(',');
+    const salsasB = [...(b.salsas || [])].map((s) => s.id || s.nombre || s).sort().join(',');
+    return salsasA === salsasB;
+  };
+
   const agregarAlCarritoEdit = (prod, tops, adics, choc, sals) => {
     const totalTop = tops.reduce((s, t) => s + (t.cantidad || 1), 0);
     const toppingExtra = Math.max(0, totalTop - (prod.max_toppings || 0)) * 2000;
     const salsasExtra = Math.max(0, (sals || []).length - MAX_SALSAS_GRATIS) * PRECIO_SALSA_EXTRA;
-    setCarrito((prev) => [...prev, {
+    const nuevoItem = {
       lineaId: Date.now() + Math.random(),
       id_producto: prod.id_producto, nombre: prod.nombre,
       precio: Number(prod.precio) + toppingExtra + salsasExtra,
@@ -1278,7 +1303,16 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
       toppings: tops, adiciones: adics,
       salsas: sals || [],
       chocolate: choc || null,
-    }]);
+    };
+    setCarrito((prev) => {
+      const idx = prev.findIndex((item) => itemsIgualesEdit(item, nuevoItem));
+      if (idx >= 0) {
+        const arr = [...prev];
+        arr[idx] = { ...arr[idx], cantidad: arr[idx].cantidad + 1 };
+        return arr;
+      }
+      return [...prev, nuevoItem];
+    });
     setProductoConfigurar(null); setBusquedaProd('');
   };
 
@@ -1461,14 +1495,20 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
           )}
         </div>
 
-        {/* Costo domicilio */}
+        {/* Costo domicilio — de solo lectura si la dirección tiene barrio del
+            catálogo, porque el backend fuerza Barrio.precio_domicilio y
+            cualquier valor manual distinto se descartaría sin avisar. */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '12px 0', padding: '10px 12px', background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb' }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>Costo domicilio $</label>
-          <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
-            onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
-            onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
-            style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit' }} />
+          {venta.direccion?.id_barrio
+            ? <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>${Number(costoEnvio).toLocaleString('es-CO')}</span>
+            : <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
+                onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
+                onInput={(e) => { e.target.value = e.target.value.replace(/[.,]/g, ''); }}
+                style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit' }} />
+          }
         </div>
+        {venta.direccion?.id_barrio && <div style={{ fontSize: 11, color: '#888', marginTop: -8, marginBottom: 12, textAlign: 'right' }}>Precio fijado por el barrio del catálogo</div>}
 
         {/* Método de pago */}
         <div style={{ marginBottom: 12 }}>

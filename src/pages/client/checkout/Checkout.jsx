@@ -167,7 +167,7 @@ function PasoDireccion({ usuario, onNext, onBack }) {
             <div className="checkout-form">
               <FormDireccion
                 value={nuevaDireccion}
-                onChange={(f, v) => { setNuevaDireccion((p) => ({ ...p, [f]: v })); setErrDir((p) => ({ ...p, [f]: '', ...(f === 'lat' || f === 'lng' ? { mapa: '' } : {}) })); setError(''); }}
+                onChange={(f, v) => { setNuevaDireccion((p) => ({ ...p, [f]: v })); setErrDir((p) => ({ ...p, [f]: '' })); setError(''); }}
                 errors={errDir}
                 layout="client"
               />
@@ -245,7 +245,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
     setError('');
   };
 
-  const pagoCompleto = metodoPago === 'efectivo' || metodoPago === 'transferencia' || (efNum > 0 && efNum < total);
+  const pagoCompleto = metodoPago === 'efectivo' || metodoPago === 'transferencia' || (efNum > 0 && efNum <= total);
 
   const handleConfirmar = () => {
     if (!pagoCompleto) { setError(`Falta $${(total - totalPagado).toLocaleString('es-CO')} por cubrir`); return; }
@@ -596,7 +596,6 @@ function PedidoConfirmado({ onVolver, onVerPedidos }) {
 export default function Checkout() {
   const [paso,       setPaso]       = useState(1);
   const [direccion,  setDireccion]  = useState(null);
-  const [distKm,     setDistKm]     = useState(0);
   const [procesando, setProcesando] = useState(false);
   const [confirmado, setConfirmado] = useState(false);
 
@@ -737,7 +736,7 @@ export default function Checkout() {
         </div>
         <div className="checkout-contenido">
           {paso === 1 && <PasoDatos     usuario={usuario} onNext={handleDatosNext} onActualizarUsuario={actualizarUsuario} />}
-          {paso === 2 && <PasoDireccion usuario={usuario} onNext={(d) => { setDireccion(d); setDistKm(d.distancia_km || 0); setPaso(3); }} onBack={() => setPaso(1)} />}
+          {paso === 2 && <PasoDireccion usuario={usuario} onNext={(d) => { setDireccion(d); setPaso(3); }} onBack={() => setPaso(1)} />}
           {paso === 3 && <PasoPago      carrito={carrito} direccion={direccion} onBack={() => setPaso(2)} onConfirmar={(pagoInfo) => handleConfirmar(pagoInfo)} puntosAUsar={puntosAUsarNav} procesando={procesando} />}
         </div>
       </div>

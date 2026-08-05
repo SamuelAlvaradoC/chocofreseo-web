@@ -82,7 +82,7 @@ function ModalFormulario({ open, onClose, onGuardar, usuarioEditar, rolesLista =
         {!usuarioEditar && (
           <>
             <div className="form-grupo">
-              <input className={`form-input${errores.contrasena ? ' input-error' : ''}`} type="password" placeholder="Contraseña (mín. 6 caracteres)" value={contrasena}
+              <input className={`form-input${errores.contrasena ? ' input-error' : ''}`} type="password" placeholder="Contraseña (mín. 8 caracteres)" value={contrasena}
                 onChange={(e) => { setContrasena(e.target.value); setErrores((p) => ({ ...p, contrasena: '' })); }} />
               {errores.contrasena && <span className="form-error">{errores.contrasena}</span>}
             </div>
@@ -230,8 +230,6 @@ export default function Usuarios() {
   const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
   const paginados    = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
 
-  const getRol = (id) => rolesLista.find((r) => r.id_rol === id)?.nombre || '—';
-
   const crear = async (f) => {
     if (procesando) return; setProcesando(true);
     try {
@@ -245,7 +243,7 @@ export default function Usuarios() {
   const editar = async (f) => {
     if (procesando) return; setProcesando(true);
     try {
-      await api.actualizarUsuario(editando.id_usuario, { nombre: f.nombre, email: f.email, id_rol: f.id_rol });
+      await api.actualizarUsuario(editando.id_usuario, { nombre: f.nombre, email: f.email, id_rol: f.id_rol, estado: f.estado });
       cargar();
       setEditando(null);
     } catch (err) { throw err; }
@@ -319,7 +317,7 @@ export default function Usuarios() {
                   <td style={{ textTransform: 'capitalize' }}>{u.nombre}</td>
                   <td className="td-suave">{u.email}</td>
                   <td>
-                    <span>{u.rol?.nombre || getRol(u.id_rol)}</span>
+                    <span>{u.rol?.nombre || '—'}</span>
                     {u.empleado?.cargo && <span className="td-suave" style={{ display: 'block', fontSize: 11 }}>{u.empleado.cargo}</span>}
                   </td>
                   <td>

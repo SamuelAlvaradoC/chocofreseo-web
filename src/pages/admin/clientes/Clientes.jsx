@@ -78,7 +78,7 @@ function ModalFormulario({ open, onClose, onGuardar, clienteEditar, procesando =
 
         {!clienteEditar && (
           <div className="form-fila">
-            {campo('Contraseña (mín. 6 caracteres)', contrasena,    setContrasena,    'contrasena',    'password')}
+            {campo('Contraseña (mín. 8 caracteres)', contrasena,    setContrasena,    'contrasena',    'password')}
             {campo('Confirmar contraseña',           confirmarPass, setConfirmarPass, 'confirmarPass', 'password')}
           </div>
         )}
@@ -312,15 +312,9 @@ export default function Clientes() {
 
   const verDetalle = async (cliente) => {
     setClienteDetalle({ cargando: true });
-    const apiBase = (process.env.REACT_APP_API_URL || 'https://mi-api-qpjo.onrender.com') + '/api';
-    const token = localStorage.getItem('token');
     try {
-      const res  = await fetch(`${apiBase}/clientes/${cliente.id_cliente}/detalle?t=${Date.now()}`, {
-        headers: { Authorization: 'Bearer ' + token },
-        cache: 'no-store',
-      });
-      const json = await res.json();
-      setClienteDetalle(json.data || json);
+      const detalle = await api.obtenerClienteDetalle(cliente.id_cliente);
+      setClienteDetalle(detalle);
     } catch {
       setClienteDetalle(null);
     }
