@@ -266,7 +266,10 @@ export default function Dashboard() {
 
       socket.emit('imprimir_cierre', {
         // Usa la fecha filtrada (no "hoy") para que el comprobante impreso
-        // corresponda al día que el admin está viendo
+        // corresponda al día que el admin está viendo. El servidor recalcula
+        // los números reales a partir de fechaISO — estos otros campos ya no
+        // se usan para el cálculo, solo quedan por compatibilidad.
+        fechaISO: filtroFecha || hoyISO(),
         fecha: new Date((filtroFecha || hoyISO()) + 'T12:00:00').toLocaleDateString('es-CO', {
           day: '2-digit', month: '2-digit', year: 'numeric',
           timeZone: 'America/Bogota',
