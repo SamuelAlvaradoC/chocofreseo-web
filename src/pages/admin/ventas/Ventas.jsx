@@ -414,6 +414,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const [filtroCategoria,    setFiltroCategoria]    = useState('');
   const [busquedaProd,       setBusquedaProd]       = useState('');
   const [costoEnvio,         setCostoEnvio]         = useState(5500);
+  const [overrideDomicilio,  setOverrideDomicilio]  = useState(false);
   const [calculandoDom,      setCalculandoDom]      = useState(false);
   const [metodoPago,         setMetodoPago]         = useState('efectivo');
   const [efDisplay,          setEfDisplay]          = useState('');
@@ -440,6 +441,9 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   // = Barrio.precio_domicilio sin importar lo que se mande — el campo debe
   // quedar de solo lectura para no mostrarle al admin un número que luego no se guarda.
   const tieneBarrio = (modoDir === 'guardada' && !!direccion?.barrioRel) || (modoDir === 'nueva' && !!nuevaDireccion?.id_barrio);
+  // Si cambia la dirección/barrio, el desbloqueo manual no debe seguir aplicando
+  // a la nueva selección — se vuelve a pedir explícitamente cada vez.
+  useEffect(() => { setOverrideDomicilio(false); }, [modoDir, direccion?.id_direccion, nuevaDireccion?.id_barrio]);
 
   const clientesFiltrados = busquedaCliente.length >= 2
     ? clientesData.filter((c) =>
@@ -580,6 +584,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
         cliente, direccion: dirFinal, carrito: carritoConSubtotales,
         metodoPago, pagoEfectivo: String(ef), pagoTransfer: String(tr),
         observaciones, total, subtotal, costodomicilio: Number(costoEnvio || 0),
+        overrideDomicilio,
         puntosAplicar: usarPuntos ? puntosAplicarEfectivo : 0,
       });
       reset(); onClose();
@@ -712,7 +717,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                       <span style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>Costo domicilio $</span>
                       {calculandoDom
                         ? <span style={{ fontSize: 12, color: '#888' }}>Calculando...</span>
-                        : tieneBarrio
+                        : tieneBarrio && !overrideDomicilio
                         ? <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>${Number(costoEnvio).toLocaleString('es-CO')}</span>
                         : <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
                             onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
@@ -720,7 +725,19 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                             style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 8, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit', MozAppearance: 'textfield', WebkitAppearance: 'none' }} />
                       }
                     </div>
-                    {tieneBarrio && <div style={{ fontSize: 11, color: '#888', marginTop: 3, textAlign: 'right' }}>Precio fijado por el barrio del catálogo</div>}
+                    {tieneBarrio && !overrideDomicilio && (
+                      <div style={{ fontSize: 11, color: '#888', marginTop: 3, textAlign: 'right' }}>
+                        Precio fijado por el barrio del catálogo ·{' '}
+                        <button type="button" onClick={() => setOverrideDomicilio(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#CA0B0B', fontWeight: 700, fontSize: 11, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
+                          Cambiar precio manualmente
+                        </button>
+                      </div>
+                    )}
+                    {tieneBarrio && overrideDomicilio && (
+                      <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: 3, textAlign: 'right', fontWeight: 600 }}>
+                        Precio manual — distinto al del barrio del catálogo
+                      </div>
+                    )}
                     {costoEnvio > 0 && !calculandoDom && !tieneBarrio && <div style={{ fontSize: 11, color: '#16a34a', marginTop: 3, textAlign: 'right', fontWeight: 700 }}>Domicilio: ${Number(costoEnvio).toLocaleString('es-CO')}</div>}
                   </div>
                 </div>
@@ -1203,6 +1220,7 @@ function ModalDetalle({ open, onClose, venta }) {
 function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [], toppingsData = [], adicionesData = [], categoriasData = [] }) {
   const [carrito, setCarrito] = useState([]);
   const [costoEnvio, setCostoEnvio] = useState(0);
+  const [overrideDomicilio, setOverrideDomicilio] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [metodoPago, setMetodoPago] = useState('efectivo');
   const [efDisplay,     setEfDisplay]     = useState('');
@@ -1393,7 +1411,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
               if (metodoPago === 'mixto' && !mixtoOk) { setIntentoGuardar(true); return; }
               setProcesando(true);
               try {
-                await onGuardar({ items: carrito, costo_domicilio: costoEnvio, metodo_pago: metodoPago, monto_efectivo: metodoPago === 'efectivo' ? total : (metodoPago === 'mixto' ? montoEfectivo : 0), monto_transferencia: metodoPago === 'transferencia' ? total : (metodoPago === 'mixto' ? montoTransfer : 0) });
+                await onGuardar({ items: carrito, costo_domicilio: costoEnvio, override_costo_domicilio: overrideDomicilio, metodo_pago: metodoPago, monto_efectivo: metodoPago === 'efectivo' ? total : (metodoPago === 'mixto' ? montoEfectivo : 0), monto_transferencia: metodoPago === 'transferencia' ? total : (metodoPago === 'mixto' ? montoTransfer : 0) });
               } finally {
                 setProcesando(false);
               }
@@ -1496,11 +1514,11 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
         </div>
 
         {/* Costo domicilio — de solo lectura si la dirección tiene barrio del
-            catálogo, porque el backend fuerza Barrio.precio_domicilio y
-            cualquier valor manual distinto se descartaría sin avisar. */}
+            catálogo, porque el backend fuerza Barrio.precio_domicilio salvo
+            que el admin pida explícitamente cambiarlo (override_costo_domicilio). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '12px 0', padding: '10px 12px', background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb' }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>Costo domicilio $</label>
-          {venta.direccion?.id_barrio
+          {venta.direccion?.id_barrio && !overrideDomicilio
             ? <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>${Number(costoEnvio).toLocaleString('es-CO')}</span>
             : <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
                 onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
@@ -1508,7 +1526,19 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                 style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit' }} />
           }
         </div>
-        {venta.direccion?.id_barrio && <div style={{ fontSize: 11, color: '#888', marginTop: -8, marginBottom: 12, textAlign: 'right' }}>Precio fijado por el barrio del catálogo</div>}
+        {venta.direccion?.id_barrio && !overrideDomicilio && (
+          <div style={{ fontSize: 11, color: '#888', marginTop: -8, marginBottom: 12, textAlign: 'right' }}>
+            Precio fijado por el barrio del catálogo ·{' '}
+            <button type="button" onClick={() => setOverrideDomicilio(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#CA0B0B', fontWeight: 700, fontSize: 11, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
+              Cambiar precio manualmente
+            </button>
+          </div>
+        )}
+        {venta.direccion?.id_barrio && overrideDomicilio && (
+          <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: -8, marginBottom: 12, textAlign: 'right', fontWeight: 600 }}>
+            Precio manual — distinto al del barrio del catálogo
+          </div>
+        )}
 
         {/* Método de pago */}
         <div style={{ marginBottom: 12 }}>
@@ -1731,6 +1761,7 @@ export default function Ventas() {
     const payload = {
       id_cliente:          f.cliente?.id_cliente,
       costo_domicilio:     f.costodomicilio || 3000,
+      override_costo_domicilio: !!f.overrideDomicilio,
       observaciones:       f.observaciones || '',
       items,
       ...(metodo ? { metodo_pago: metodo } : {}),
@@ -1770,6 +1801,7 @@ export default function Ventas() {
       await api.editarVenta(editandoVenta.id_venta, {
         items,
         costo_domicilio:     f.costo_domicilio,
+        override_costo_domicilio: !!f.override_costo_domicilio,
         metodo_pago:         f.metodo_pago,
         monto_efectivo:      f.monto_efectivo,
         monto_transferencia: f.monto_transferencia,
