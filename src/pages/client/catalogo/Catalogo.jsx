@@ -696,8 +696,9 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
                       <div style={{ fontSize:12, fontWeight:700, color:'#1a1a1a' }}>🎯 {puntosDisponibles.puntos} puntos</div>
                       <div style={{ fontSize:11, color:'#888' }}>= ${(puntosDisponibles.saldo_pesos||0).toLocaleString('es-CO')} disponibles</div>
                     </div>
-                    <button onClick={() => { const n=!usarPuntos; setUsarPuntos(n); setPuntosAUsar(n?maxPuntosUsables:0); }}
-                      style={{ padding:'4px 10px', borderRadius:6, border:'none', cursor:'pointer', fontSize:11, fontWeight:700, background:usarPuntos?'#CA0B0B':'#e5e7eb', color:usarPuntos?'white':'#555', transition:'all 0.15s', flexShrink:0 }}>
+                    <button onClick={() => { if (maxPuntosUsables === 0) return; const n=!usarPuntos; setUsarPuntos(n); setPuntosAUsar(n?maxPuntosUsables:0); }}
+                      disabled={maxPuntosUsables === 0}
+                      style={{ padding:'4px 10px', borderRadius:6, border:'none', cursor: maxPuntosUsables === 0 ? 'not-allowed' : 'pointer', fontSize:11, fontWeight:700, background:usarPuntos?'#CA0B0B':'#e5e7eb', color:usarPuntos?'white':'#555', opacity: maxPuntosUsables === 0 ? 0.5 : 1, transition:'all 0.15s', flexShrink:0 }}>
                       {usarPuntos ? '✓ Activo' : 'Usar puntos'}
                     </button>
                   </div>
@@ -765,7 +766,7 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
           </div>
           <div className="carrito-barra-der">
             <span className="carrito-barra-subtotal">${subtotal.toLocaleString('es-CO')}</span>
-            <button className="carrito-barra-btn-checkout" onClick={(e) => { e.stopPropagation(); onIrCheckout(); }}>
+            <button className="carrito-barra-btn-checkout" onClick={(e) => { e.stopPropagation(); onIrCheckout(puntosAUsar, descuentoPuntos); }}>
               Hacer pedido
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <polyline points="9 18 15 12 9 6"/>
