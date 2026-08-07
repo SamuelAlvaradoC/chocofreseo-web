@@ -232,8 +232,9 @@ export default function Empleados() {
   const [eliminando,   setEliminando]   = useState(null);
   const [detalle,      setDetalle]      = useState(null);
   const [procesando,   setProcesando]   = useState(false);
+  const [cargando,     setCargando]     = useState(true);
 
-  const cargar = () => api.listarEmpleados().then((d) => setLista(d.map(mapEmpleado))).catch(() => {});
+  const cargar = () => api.listarEmpleados().then((d) => { setLista(d.map(mapEmpleado)); setCargando(false); }).catch(() => setCargando(false));
   useEffect(() => { cargar(); }, []);
   useEffect(() => { setPagina(1); }, [busqueda, filtroCargo]);
 
@@ -283,8 +284,8 @@ export default function Empleados() {
         <input placeholder="Buscar por nombre o email..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-        {usarFiltroEstado
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', minHeight: 30 }}>
+        {cargando ? null : usarFiltroEstado
           ? [{ key: 'todos', label: 'Todos' }, { key: 'activos', label: 'Activos' }, { key: 'inactivos', label: 'Inactivos' }].map((c) => (
               <button key={c.key} onClick={() => setFiltroCargo(c.key)} style={{
                 padding: '5px 14px', borderRadius: 20, border: filtroCargo === c.key ? 'none' : '1px solid #e0e0e0',

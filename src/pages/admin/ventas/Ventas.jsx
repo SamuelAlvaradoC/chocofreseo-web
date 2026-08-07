@@ -112,13 +112,13 @@ const calcularPrecioItem = (item) => {
   return base + toppingExtra + salsasExtra + adicionesTotal;
 };
 
-const calcularPasosConfig = (prod) => {
+const calcularPasosConfig = (prod, toppingsActivos = []) => {
   if (!prod) return [];
   const pasos = [];
   if (prod.es_bowl           === true) pasos.push('bowl');
   if (prod.permite_chocolate === true) pasos.push('chocolate');
   if (prod.permite_salsas    === true) pasos.push('salsas');
-  if (prod.permite_toppings  === 1)   pasos.push('toppings');
+  if (prod.permite_toppings  === 1 && toppingsActivos.length > 0) pasos.push('toppings');
   pasos.push('adiciones');
   return pasos;
 };
@@ -134,7 +134,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
   if (!producto) return null;
 
   const prod       = producto;
-  const pasos      = calcularPasosConfig(prod);
+  const pasos      = calcularPasosConfig(prod, toppingsActivos);
   const pasoActual = pasos[pasoIdx] || 'adiciones';
   const esPrimero  = pasoIdx === 0;
   const esUltimo   = pasoIdx === pasos.length - 1;

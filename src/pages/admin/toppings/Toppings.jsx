@@ -229,13 +229,13 @@ export default function Toppings() {
 
   const crear = async (f) => {
     if (procesando) return; setProcesando(true);
-    try { const nuevo = await api.crearTopping({ nombre: f.nombre, descripcion: f.descripcion, img: f.img, estado: 1 }); setLista((p) => [...p, nuevo]); setModalAbierto(false); }
+    try { const nuevo = await api.crearTopping({ nombre: f.nombre, descripcion: f.descripcion, img: f.img, gramaje: f.gramaje, estado: 1 }); setLista((p) => [...p, nuevo]); setModalAbierto(false); }
     catch (err) { throw err; }
     finally { setProcesando(false); }
   };
   const editar = async (f) => {
     if (procesando) return; setProcesando(true);
-    try { const actualizado = await api.actualizarTopping(editando.id_topping, { nombre: f.nombre, descripcion: f.descripcion, img: f.img, estado: f.estado }); setLista((p) => p.map((t) => t.id_topping === editando.id_topping ? { ...t, ...actualizado } : t)); setEditando(null); }
+    try { const actualizado = await api.actualizarTopping(editando.id_topping, { nombre: f.nombre, descripcion: f.descripcion, img: f.img, gramaje: f.gramaje, estado: f.estado }); setLista((p) => p.map((t) => t.id_topping === editando.id_topping ? { ...t, ...actualizado } : t)); setEditando(null); }
     catch (err) { throw err; }
     finally { setProcesando(false); }
   };

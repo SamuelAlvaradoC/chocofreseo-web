@@ -249,6 +249,10 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
 
   const handleConfirmar = () => {
     if (!pagoCompleto) { setError(`Falta $${(total - totalPagado).toLocaleString('es-CO')} por cubrir`); return; }
+    if ((metodoPago === 'transferencia' || metodoPago === 'mixto') && !comprobante) {
+      setComprobanteErr('Debes subir el comprobante de pago para continuar');
+      return;
+    }
     const ef = metodoPago === 'efectivo' ? total : metodoPago === 'mixto' ? efNum : 0;
     const tr = metodoPago === 'transferencia' ? total : metodoPago === 'mixto' ? Math.max(0, total - efNum) : 0;
     onConfirmar({ metodoPago, pagoEfectivo: String(ef), pagoTransfer: String(tr), comprobante, observaciones, puntosAUsar });

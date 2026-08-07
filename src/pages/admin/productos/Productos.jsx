@@ -16,15 +16,6 @@ const TAMANOS = [
   { value: 'Grande (16oz)',  label: 'Grande (16oz)' },
 ];
 
-// Normaliza valores viejos ('Pequeño') al nuevo formato ('Pequeño (9oz)')
-const normalizarTamano = (t) => {
-  if (!t) return '';
-  if (t === 'Pequeño') return 'Pequeño (9oz)';
-  if (t === 'Mediano') return 'Mediano (12oz)';
-  if (t === 'Grande')  return 'Grande (16oz)';
-  return t;
-};
-
 const formatPrecio = (v) =>
   v !== '' && v !== null && v !== undefined
     ? `$${Number(v).toLocaleString('es-CO')}`
@@ -98,10 +89,10 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
   const [idCategoria,       setIdCategoria]       = useState(productoEditar?.id_categoria     || (categoriasLista[0]?.id_categoria ?? 1));
   const [nombre,            setNombre]            = useState(productoEditar?.nombre           || '');
   const [descripcion,       setDescripcion]       = useState(productoEditar?.descripcion      || '');
-  const [tamano,            setTamano]            = useState(normalizarTamano(productoEditar?.tamano ?? ''));
+  const [tamano,            setTamano]            = useState(productoEditar?.tamano ?? '');
   const [precio,            setPrecio]            = useState(productoEditar?.precio ? Number(productoEditar.precio).toLocaleString('es-CO') : '');
   const [permiteToppings,   setPermiteToppings]   = useState(productoEditar?.permite_toppings ?? 0);
-  const [maxToppings,       setMaxToppings]       = useState(productoEditar?.max_toppings === 2 ? 2 : 1);
+  const [maxToppings,       setMaxToppings]       = useState([1, 2, 3].includes(productoEditar?.max_toppings) ? productoEditar.max_toppings : 1);
   const [permiteChocolate,  setPermiteChocolate]  = useState(productoEditar?.permite_chocolate ? 1 : 0);
   const [permiteSalsas,     setPermiteSalsas]     = useState(Boolean(productoEditar?.permite_salsas));
   const [esBowl,            setEsBowl]            = useState(Boolean(productoEditar?.es_bowl));
@@ -291,7 +282,7 @@ function ModalEliminar({ open, onClose, onConfirmar, nombre, procesando = false 
 function ModalDetalle({ open, onClose, producto, categoriasLista = [], onEditar }) {
   if (!open || !producto) return null;
   const catNombre   = categoriasLista.find((c) => c.id_categoria === producto.id_categoria)?.nombre || '—';
-  const tamanoLabel = TAMANOS.find((t) => t.value === normalizarTamano(producto.tamano || ''))?.label || producto.tamano || '—';
+  const tamanoLabel = TAMANOS.find((t) => t.value === (producto.tamano || ''))?.label || producto.tamano || '—';
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 480, maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -400,7 +391,7 @@ export default function Productos() {
   const paginados    = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
 
   const getCategoria = (id) => categoriasLista.find((c) => c.id_categoria === id)?.nombre || '—';
-  const getTamanoLabel = (t) => TAMANOS.find((x) => x.value === normalizarTamano(t || ''))?.label || t || '—';
+  const getTamanoLabel = (t) => TAMANOS.find((x) => x.value === (t || ''))?.label || t || '—';
   const crear    = async (f) => { if (procesando) return; setProcesando(true); try { await api.crearProducto(f); cargar(); setModalAbierto(false); } catch (err) { throw err; } finally { setProcesando(false); } };
   const editar   = async (f) => { if (procesando) return; setProcesando(true); try { await api.actualizarProducto(editando.id_producto, f); cargar(); setEditando(null); } catch (err) { throw err; } finally { setProcesando(false); } };
   const eliminar = async () => {

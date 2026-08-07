@@ -22,8 +22,6 @@ const del     = (url)         => http.delete(url).then(unwrap).catch(handleErr);
 export const login               = (d)    => post('/auth/login', d);
 export const register            = (d)    => post('/auth/register', d);
 export const logout              = ()     => post('/auth/logout');
-export const recuperarContrasena = (d)    => post('/auth/recuperar', d);
-export const cambiarContrasena   = (d)    => patch('/auth/cambiar-contrasena', d);
 export const solicitarReset      = (d)    => post('/auth/solicitar-reset', d);
 export const verificarReset      = (d)    => post('/auth/verificar-reset', d);
 export const getPerfil           = ()     => get('/auth/perfil');

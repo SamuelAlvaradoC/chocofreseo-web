@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import { toast } from '../../../utils/toast';
 import * as api from '../../../services/api';
+import { useAuth } from '../../../context/AuthContext';
 import '../categorias/Categorias.css';
 
 function Toggle({ activo, onChange }) {
@@ -81,6 +82,8 @@ function ModalEliminar({ open, onClose, onConfirmar, nombre, procesando }) {
 const POR_PAGINA = 8;
 
 export default function Ciudades() {
+  const { tienePermiso } = useAuth();
+  const puedeGestionar   = tienePermiso('gestionar_ciudades');
   const [lista,      setLista]      = useState([]);
   const [busqueda,   setBusqueda]   = useState('');
   const [pagina,     setPagina]     = useState(1);
@@ -134,7 +137,7 @@ export default function Ciudades() {
           <h1 className="page-titulo">Ciudades / Municipios</h1>
           <p className="page-subtitulo">{lista.length} ciudades registradas</p>
         </div>
-        <button className="btn-primario" onClick={() => setModal(true)}>+ Añadir ciudad</button>
+        {puedeGestionar && <button className="btn-primario" onClick={() => setModal(true)}>+ Añadir ciudad</button>}
       </div>
 
       <div className="buscador">
@@ -159,15 +162,19 @@ export default function Ciudades() {
               <tr key={c.id_ciudad} style={{ opacity: c.estado === 0 ? 0.6 : 1 }}>
                 <td style={{ fontWeight: 600 }}>{c.nombre}</td>
                 <td className="td-suave">{c._count?.barrios ?? 0} barrios</td>
-                <td><Toggle activo={c.estado === 1} onChange={() => toggle(c.id_ciudad, c.estado)} /></td>
+                <td><Toggle activo={c.estado === 1} onChange={puedeGestionar ? () => toggle(c.id_ciudad, c.estado) : undefined} /></td>
                 <td>
                   <div className="acciones">
-                    <button className="btn-accion editar" onClick={() => setEditando({ ...c })} title="Editar">
-                      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button className="btn-accion eliminar" onClick={() => setEliminando({ ...c })} title="Eliminar">
-                      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                    </button>
+                    {puedeGestionar ? (
+                      <>
+                        <button className="btn-accion editar" onClick={() => setEditando({ ...c })} title="Editar">
+                          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                        <button className="btn-accion eliminar" onClick={() => setEliminando({ ...c })} title="Eliminar">
+                          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      </>
+                    ) : '—'}
                   </div>
                 </td>
               </tr>

@@ -31,7 +31,7 @@ function ModalFormulario({ open, onClose, onGuardar, usuarioEditar, rolesLista =
   const [email,         setEmail]         = useState(usuarioEditar?.email  || '');
   const [contrasena,    setContrasena]    = useState('');
   const [confirmarPass, setConfirmarPass] = useState('');
-  const [idRol,         setIdRol]         = useState(usuarioEditar?.id_rol ?? 1);
+  const [idRol,         setIdRol]         = useState(usuarioEditar?.id_rol ?? rolesLista.find(r => r.estado !== 0)?.id_rol ?? 1);
   const [estado,        setEstado]        = useState(usuarioEditar?.estado ?? 1);
   const [errores,       setErrores]       = useState({});
 
