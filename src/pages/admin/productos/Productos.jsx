@@ -37,10 +37,10 @@ function UploadImagen({ value, onChange }) {
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const FORMATOS = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    const FORMATOS = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!FORMATOS.includes(file.type)) {
-      setErrorImg('Formato no permitido. Solo JPG, PNG o PDF');
-      toast.error('Formato no permitido. Solo JPG, PNG o PDF');
+      setErrorImg('Formato no permitido. Solo JPG o PNG');
+      toast.error('Formato no permitido. Solo JPG o PNG');
       e.target.value = '';
       return;
     }
@@ -78,7 +78,7 @@ function UploadImagen({ value, onChange }) {
             <span>Subir imagen</span>
           </div>
         )}
-        <input ref={inputRef} type="file" accept=".jpg,.jpeg,.png,.pdf" style={{ display: 'none' }} onChange={handleFile} />
+        <input ref={inputRef} type="file" accept=".jpg,.jpeg,.png" style={{ display: 'none' }} onChange={handleFile} />
       </div>
       {errorImg && <span className="form-error" style={{ display: 'block', marginTop: 4 }}>{errorImg}</span>}
     </div>

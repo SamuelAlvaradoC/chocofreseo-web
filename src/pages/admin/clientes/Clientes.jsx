@@ -43,10 +43,16 @@ function ModalFormulario({ open, onClose, onGuardar, clienteEditar, procesando =
     return e;
   };
 
-  const guardar = () => {
+  const guardar = async () => {
     const e = validar();
     if (Object.keys(e).length > 0) { setErrores(e); return; }
-    onGuardar({ nombre: nombre.trim(), email: email.trim(), contrasena, telefono: telefono.trim() || undefined });
+    try {
+      await onGuardar({ nombre: nombre.trim(), email: email.trim(), contrasena, telefono: telefono.trim() });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Error al guardar. Inténtalo de nuevo.';
+      if (msg.toLowerCase().includes('email')) setErrores((p) => ({ ...p, email: msg }));
+      else setErrores((p) => ({ ...p, _general: msg }));
+    }
   };
 
   const campo = (placeholder, value, onChange, errorKey, type = 'text') => (
@@ -85,6 +91,7 @@ function ModalFormulario({ open, onClose, onGuardar, clienteEditar, procesando =
 
         {campo('Teléfono (opcional)', telefono, setTelefono, 'telefono', 'tel')}
 
+        {errores._general && <p className="error-general">{errores._general}</p>}
         <div className="modal-pie">
           <button className="btn-secundario" onClick={onClose}>Cancelar</button>
           {clienteEditar
@@ -284,17 +291,17 @@ export default function Clientes() {
       const nuevo = await api.crearCliente({ nombre: f.nombre, email: f.email, contrasena: f.contrasena, ...(f.telefono ? { telefono: f.telefono } : {}) });
       setLista((p) => [...p, { ...nuevo, nombre: nuevo.usuario?.nombre || nuevo.nombre || f.nombre }]);
       setModalAbierto(false);
-    } catch (err) { toast.error(err?.response?.data?.message || 'Error al crear cliente'); }
+    } catch (err) { throw err; }
     finally { setProcesando(false); }
   };
 
   const editar = async (f) => {
     if (procesando) return; setProcesando(true);
     try {
-      const actualizado = await api.actualizarCliente(editando.id_cliente, { nombre: f.nombre || undefined, email: f.email || undefined, telefono: f.telefono || undefined });
+      const actualizado = await api.actualizarCliente(editando.id_cliente, { nombre: f.nombre, email: f.email, telefono: f.telefono });
       setLista((p) => p.map((c) => c.id_cliente === editando.id_cliente ? { ...c, ...actualizado, nombre: actualizado.usuario?.nombre || actualizado.nombre || c.nombre } : c));
       setEditando(null);
-    } catch (err) { toast.error(err?.response?.data?.message || 'Error al editar cliente'); }
+    } catch (err) { throw err; }
     finally { setProcesando(false); }
   };
 

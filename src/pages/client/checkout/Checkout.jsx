@@ -206,14 +206,14 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
   const efNum             = Number(String(pagoEfectivo).replace(/\./g, '')) || 0;
   const totalPagado       = efNum + (Number(String(pagoTransfer).replace(/\./g, '')) || 0);
 
-  const FORMATOS_PERMITIDOS = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+  const FORMATOS_PERMITIDOS = ['image/jpeg', 'image/jpg', 'image/png'];
   const MAX_SIZE_MB = 5;
 
   const handleComprobante = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     if (!FORMATOS_PERMITIDOS.includes(file.type)) {
-      setComprobanteErr('Formato no permitido. Solo JPG, PNG o PDF.');
+      setComprobanteErr('Formato no permitido. Solo JPG o PNG.');
       e.target.value = '';
       return;
     }
@@ -459,21 +459,15 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
             <label className="checkout-label">Comprobante de transferencia</label>
             <label className="checkout-upload">
               {comprobante
-                ? (comprobante.type === 'application/pdf'
-                    ? <div className="checkout-upload-pdf">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CA0B0B" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span>{comprobante.name}</span>
-                      </div>
-                    : <img src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
-                  )
+                ? <img src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
                 : <div className="checkout-upload-placeholder">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     <span>Subir comprobante</span>
                   </div>
               }
-              <input type="file" accept=".jpg,.jpeg,.png,.pdf" style={{ display: 'none' }} onChange={handleComprobante} />
+              <input type="file" accept=".jpg,.jpeg,.png" style={{ display: 'none' }} onChange={handleComprobante} />
             </label>
-            <p className="checkout-upload-hint">Formatos permitidos: <strong>JPG, PNG, PDF</strong> · Tamaño máximo: <strong>5 MB</strong></p>
+            <p className="checkout-upload-hint">Formatos permitidos: <strong>JPG, PNG</strong> · Tamaño máximo: <strong>5 MB</strong></p>
             {comprobanteErr && <div className="checkout-error" style={{ marginTop: 6, marginBottom: 0 }}>{comprobanteErr}</div>}
           </div>
         </>
@@ -502,21 +496,15 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
             <label className="checkout-label">Comprobante de transferencia</label>
             <label className="checkout-upload">
               {comprobante
-                ? (comprobante.type === 'application/pdf'
-                    ? <div className="checkout-upload-pdf">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CA0B0B" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span>{comprobante.name}</span>
-                      </div>
-                    : <img src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
-                  )
+                ? <img src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
                 : <div className="checkout-upload-placeholder">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     <span>Subir comprobante</span>
                   </div>
               }
-              <input type="file" accept=".jpg,.jpeg,.png,.pdf" style={{ display: 'none' }} onChange={handleComprobante} />
+              <input type="file" accept=".jpg,.jpeg,.png" style={{ display: 'none' }} onChange={handleComprobante} />
             </label>
-            <p className="checkout-upload-hint">Formatos permitidos: <strong>JPG, PNG, PDF</strong> · Tamaño máximo: <strong>5 MB</strong></p>
+            <p className="checkout-upload-hint">Formatos permitidos: <strong>JPG, PNG</strong> · Tamaño máximo: <strong>5 MB</strong></p>
             {comprobanteErr && <div className="checkout-error" style={{ marginTop: 6, marginBottom: 0 }}>{comprobanteErr}</div>}
           </div>
           <div className="checkout-cambio">
