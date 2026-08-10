@@ -1637,6 +1637,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                 await onGuardar({
                   items: carrito,
                   costo_domicilio: costoEnvio,
+                  override_costo_domicilio: overrideDomicilio,
                   metodo_pago: metodoPago,
                   monto_efectivo:      metodoPago === 'efectivo'      ? total : (metodoPago === 'mixto' ? montoEfectivo : 0),
                   monto_transferencia: metodoPago === 'transferencia' ? total : (metodoPago === 'mixto' ? montoTransfer : 0),
