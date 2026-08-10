@@ -338,7 +338,7 @@ export default function Clientes() {
       <div className="page-header">
         <div>
           <h1 className="page-titulo">Clientes</h1>
-          <p className="page-subtitulo">{lista.length} clientes registrados</p>
+          <p className="page-subtitulo">{lista.length} {lista.length === 1 ? 'cliente registrado' : 'clientes registrados'}</p>
         </div>
         <button className="btn-primario" onClick={() => setModalAbierto(true)}>+ Añadir cliente</button>
       </div>
