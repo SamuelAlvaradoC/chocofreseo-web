@@ -218,9 +218,8 @@ export default function Toppings() {
   const [detalle,      setDetalle]      = useState(null);
   const [procesando,   setProcesando]   = useState(false);
 
-  useEffect(() => {
-    api.listarToppings().then(setLista).catch((err) => console.error('Error cargando toppings:', err));
-  }, []);
+  const cargar = () => api.listarToppings().then(setLista).catch((err) => console.error('Error cargando toppings:', err));
+  useEffect(() => { cargar(); }, []);
   useEffect(() => { setPagina(1); }, [busqueda]);
 
   const filtrados = lista.filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()));
@@ -229,13 +228,13 @@ export default function Toppings() {
 
   const crear = async (f) => {
     if (procesando) return; setProcesando(true);
-    try { const nuevo = await api.crearTopping({ nombre: f.nombre, descripcion: f.descripcion, img: f.img, gramaje: f.gramaje, estado: 1 }); setLista((p) => [...p, nuevo]); setModalAbierto(false); }
+    try { await api.crearTopping({ nombre: f.nombre, descripcion: f.descripcion, img: f.img, gramaje: f.gramaje, estado: 1 }); cargar(); setModalAbierto(false); }
     catch (err) { throw err; }
     finally { setProcesando(false); }
   };
   const editar = async (f) => {
     if (procesando) return; setProcesando(true);
-    try { const actualizado = await api.actualizarTopping(editando.id_topping, { nombre: f.nombre, descripcion: f.descripcion, img: f.img, gramaje: f.gramaje, estado: f.estado }); setLista((p) => p.map((t) => t.id_topping === editando.id_topping ? { ...t, ...actualizado } : t)); setEditando(null); }
+    try { await api.actualizarTopping(editando.id_topping, { nombre: f.nombre, descripcion: f.descripcion, img: f.img, gramaje: f.gramaje, estado: f.estado }); cargar(); setEditando(null); }
     catch (err) { throw err; }
     finally { setProcesando(false); }
   };
@@ -249,7 +248,7 @@ export default function Toppings() {
     const topping = lista.find((t) => t.id_topping === id);
     const nuevoEstado = topping.estado ? 0 : 1;
     try { await api.estadoTopping(id, { estado: nuevoEstado }); setLista((p) => p.map((t) => t.id_topping === id ? { ...t, estado: nuevoEstado } : t)); }
-    catch (err) { console.error('Error cambiando estado topping:', err); }
+    catch (err) { toast.error(err?.response?.data?.message || 'No se pudo cambiar el estado'); }
   };
 
   return (

@@ -246,9 +246,8 @@ export default function Adiciones() {
   const [detalle,      setDetalle]      = useState(null);
   const [procesando,   setProcesando]   = useState(false);
 
-  useEffect(() => {
-    api.listarAdiciones().then(setLista).catch((err) => console.error('Error cargando adiciones:', err));
-  }, []);
+  const cargar = () => api.listarAdiciones().then(setLista).catch((err) => console.error('Error cargando adiciones:', err));
+  useEffect(() => { cargar(); }, []);
   useEffect(() => { setPagina(1); }, [busqueda]);
 
   const filtrados = lista.filter((a) => a.nombre.toLowerCase().includes(busqueda.toLowerCase()));
@@ -257,13 +256,13 @@ export default function Adiciones() {
 
   const crear = async (f) => {
     if (procesando) return; setProcesando(true);
-    try { const nueva = await api.crearAdicion({ nombre: f.nombre, descripcion: f.descripcion, precio: f.precio, img: f.img, estado: 1 }); setLista((p) => [...p, nueva]); setModalAbierto(false); }
+    try { await api.crearAdicion({ nombre: f.nombre, descripcion: f.descripcion, precio: f.precio, img: f.img, gramaje: f.gramaje, estado: 1 }); cargar(); setModalAbierto(false); }
     catch (err) { throw err; }
     finally { setProcesando(false); }
   };
   const editar = async (f) => {
     if (procesando) return; setProcesando(true);
-    try { const actualizada = await api.actualizarAdicion(editando.id_adicion, { nombre: f.nombre, descripcion: f.descripcion, precio: f.precio, img: f.img, estado: f.estado }); setLista((p) => p.map((a) => a.id_adicion === editando.id_adicion ? { ...a, ...actualizada } : a)); setEditando(null); }
+    try { await api.actualizarAdicion(editando.id_adicion, { nombre: f.nombre, descripcion: f.descripcion, precio: f.precio, img: f.img, gramaje: f.gramaje, estado: f.estado }); cargar(); setEditando(null); }
     catch (err) { throw err; }
     finally { setProcesando(false); }
   };
@@ -277,7 +276,7 @@ export default function Adiciones() {
     const adicion = lista.find((a) => a.id_adicion === id);
     const nuevoEstado = adicion.estado ? 0 : 1;
     try { await api.estadoAdicion(id, { estado: nuevoEstado }); setLista((p) => p.map((a) => a.id_adicion === id ? { ...a, estado: nuevoEstado } : a)); }
-    catch (err) { console.error('Error cambiando estado adicion:', err); }
+    catch (err) { toast.error(err?.response?.data?.message || 'No se pudo cambiar el estado'); }
   };
 
   return (

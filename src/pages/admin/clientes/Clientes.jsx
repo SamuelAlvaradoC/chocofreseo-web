@@ -257,11 +257,11 @@ export default function Clientes() {
   useEffect(() => { setPagina(1); }, [busqueda, filtroEstado]);
 
   const filtrados = lista.filter((c) => {
-    const q = busqueda.toLowerCase();
+    const q = busqueda.trim().toLowerCase();
     const coincideBusqueda =
       (c.usuario?.nombre || c.nombre || '').toLowerCase().includes(q) ||
       (c.usuario?.email  || '').toLowerCase().includes(q) ||
-      (c.telefono || '').includes(busqueda);
+      (c.telefono || '').includes(busqueda.trim());
     const estado = c.usuario?.estado;
     const coincideEstado =
       filtroEstado === 'todos' ||

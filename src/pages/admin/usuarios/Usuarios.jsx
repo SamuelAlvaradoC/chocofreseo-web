@@ -221,7 +221,7 @@ export default function Usuarios() {
   useEffect(() => { setPagina(1); }, [busqueda, filtroRol]);
 
   const filtrados = lista.filter((u) => {
-    const q = busqueda.toLowerCase();
+    const q = busqueda.trim().toLowerCase();
     const coincideBusqueda = u.nombre.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.rol?.nombre || '').toLowerCase().includes(q);
     const coincideRol = filtroRol === 'todos' || u.rol?.nombre === filtroRol;
     return coincideBusqueda && coincideRol;

@@ -256,7 +256,8 @@ function ModalConfirmarEntrega({ pedido, onClose, onConfirmar }) {
 // ── Card compacta ─────────────────────────────────────────────────
 function PedidoCard({ pedido, tipo, onCoger, onDevolver, onEntregar, onVerDetalle, procesando = false }) {
   const tel  = (pedido.telefono || '').replace(/\D/g, '');
-  const wpp  = tel ? `https://wa.me/57${tel}?text=${encodeURIComponent('Hola')}` : null;
+  const telConPrefijo = tel ? (tel.startsWith('57') ? tel : `57${tel}`) : '';
+  const wpp  = tel ? `https://wa.me/${telConPrefijo}?text=${encodeURIComponent('Hola')}` : null;
   const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([pedido.direccion, pedido.barrio, pedido.ciudad].filter(Boolean).join(', '))}`;
 
   return (

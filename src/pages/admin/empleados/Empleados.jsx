@@ -243,7 +243,7 @@ export default function Empleados() {
   const usarFiltroEstado = cargosUnicos.length === 0;
 
   const filtrados = lista.filter((e) => {
-    const q = busqueda.toLowerCase();
+    const q = busqueda.trim().toLowerCase();
     const coincideBusqueda = (e.nombre || '').toLowerCase().includes(q) || (e.email || '').toLowerCase().includes(q);
     let coincideFiltro;
     if (usarFiltroEstado) {

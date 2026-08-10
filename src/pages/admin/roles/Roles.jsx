@@ -285,7 +285,7 @@ export default function Roles() {
   useEffect(() => { setPagina(1); }, [busqueda]);
 
   const filtrados = lista.filter((r) =>
-    r.nombre.toLowerCase().includes(busqueda.toLowerCase())
+    r.nombre.toLowerCase().includes(busqueda.trim().toLowerCase())
   );
   const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
   const paginados    = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);

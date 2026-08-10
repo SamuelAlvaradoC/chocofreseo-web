@@ -22,7 +22,7 @@ const mapPedido = (v) => ({
   subtotal:           Number(v.subtotal || 0),
   descuento_puntos:   Number(v.descuento_puntos || 0),
   puntos_usados:      Number(v.puntos_usados || 0),
-  costo_domicilio:    Number(v.costo_domicilio || 3000),
+  costo_domicilio:    Number(v.costo_domicilio ?? 3000),
   barrio:             v.direccion?.barrio || null,
   ciudad:             v.direccion?.ciudad || null,
   direccion_completa: v.direccion?.direccion_linea || null,

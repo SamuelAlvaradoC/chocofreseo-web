@@ -186,7 +186,10 @@ export default function Categorias() {
       toast.error(err?.response?.data?.message || 'No se pudo eliminar la categoría');
     } finally { setProcesando(false); setEliminando(null); }
   };
-  const toggle   = async (id, estadoActual) => { await api.estadoCategoria(id, { estado: estadoActual ? 0 : 1 }).catch(() => {}); cargar(); };
+  const toggle   = async (id, estadoActual) => {
+    try { await api.estadoCategoria(id, { estado: estadoActual ? 0 : 1 }); cargar(); }
+    catch (err) { toast.error(err?.response?.data?.message || 'No se pudo cambiar el estado'); }
+  };
 
   return (
     <AdminLayout>

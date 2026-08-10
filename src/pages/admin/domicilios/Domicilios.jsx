@@ -20,7 +20,7 @@ const mapVentaDomi = (v) => ({
   ciudad:       v.direccion?.ciudad  || '—',
   total:           Number(v.total || 0),
   subtotal:        Number(v.subtotal || 0),
-  costo_domicilio: Number(v.costo_domicilio || 3000),
+  costo_domicilio: Number(v.costo_domicilio ?? 3000),
   descuento_puntos: Number(v.descuento_puntos || 0),
   puntos_usados:   Number(v.puntos_usados || 0),
   metodo_pago:  v.metodo_pago || (v.pagos?.[0]?.detallePagos?.length > 1 ? 'mixto' : v.pagos?.[0]?.detallePagos?.[0]?.metodoPago?.nombre) || 'efectivo',
@@ -95,7 +95,7 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
 
   if (!open || !pedido) return null;
 
-  const costodomicilio  = Number(pedido.costo_domicilio || 3000);
+  const costodomicilio  = Number(pedido.costo_domicilio ?? 3000);
   const subtotalBruto   = Number(pedido.subtotal || 0);
   const descuentoPuntos = Number(pedido.descuento_puntos || 0);
 
@@ -303,8 +303,11 @@ export default function Domicilios() {
     setProcesando(false); cargar(); setRevisando(null); setRechazandoRapido(null);
   };
 
-  const urlWpp = (telefono, idVenta) =>
-    `https://wa.me/57${telefono}?text=Hola,%20confirmamos%20tu%20pedido%20%23${idVenta}%20de%20ChocoFreseo`;
+  const urlWpp = (telefono, idVenta) => {
+    const digits = String(telefono || '').replace(/\D/g, '');
+    const numero = digits.startsWith('57') ? digits : `57${digits}`;
+    return `https://wa.me/${numero}?text=Hola,%20confirmamos%20tu%20pedido%20%23${idVenta}%20de%20ChocoFreseo`;
+  };
 
   return (
     <AdminLayout>

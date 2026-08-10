@@ -1034,8 +1034,9 @@ function ModalDetalle({ open, onClose, venta }) {
   const est      = colorEstado(venta.estado);
   const metBadge = venta.metodo_pago ? (METODO_BADGE[venta.metodo_pago] || { bg: '#f5f5f5', color: '#888', label: venta.metodo_pago }) : null;
   const tel      = (venta.telefono_cliente || '').replace(/\D/g, '');
+  const telConPrefijo = tel ? (tel.startsWith('57') ? tel : `57${tel}`) : '';
   const wppMsg   = encodeURIComponent(`Hola ${venta.cliente}, tu pedido #${venta.id_venta} de ChocoFreseo ya está confirmado y en preparación 🍫🍦`);
-  const wpp      = tel ? `https://wa.me/57${tel}?text=${wppMsg}` : null;
+  const wpp      = tel ? `https://wa.me/${telConPrefijo}?text=${wppMsg}` : null;
   const subtotalProductos = (venta.detalleVentas || []).reduce((a, d) => {
     return a + calcularDesglose(d).totalItem;
   }, 0);
