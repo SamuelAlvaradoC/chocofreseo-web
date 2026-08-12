@@ -41,7 +41,10 @@ function ModalFormulario({ open, onClose, onGuardar, empleadoEditar, procesando 
   const [email,         setEmail]         = useState(empleadoEditar?.email         || '');
   const [contrasena,    setContrasena]    = useState('');
   const [confirmarPass, setConfirmarPass] = useState('');
-  const [cargo,         setCargo]         = useState(empleadoEditar?.cargo         || CARGOS_FORM[0]);
+  // Sin default silencioso: si no se elige un cargo explícitamente, "guardar"
+  // debe bloquear el envío en vez de crear el empleado con el primer cargo
+  // de la lista (Domiciliario) sin que el admin se dé cuenta.
+  const [cargo,         setCargo]         = useState(empleadoEditar?.cargo         || '');
   const [fechaIngreso,  setFechaIngreso]  = useState(empleadoEditar?.fecha_ingreso || '');
   const [estado,        setEstado]        = useState(empleadoEditar?.estado        ?? 1);
   const [errores,       setErrores]       = useState({});
@@ -59,6 +62,7 @@ function ModalFormulario({ open, onClose, onGuardar, empleadoEditar, procesando 
       if (contrasena !== confirmarPass) e.confirmarPass = 'Las contraseñas no coinciden';
     }
     if (!fechaIngreso) e.fechaIngreso = 'La fecha de ingreso es requerida';
+    if (!cargo) e.cargo = 'Selecciona el cargo';
     return e;
   };
 
@@ -114,9 +118,15 @@ function ModalFormulario({ open, onClose, onGuardar, empleadoEditar, procesando 
         <span className="form-seccion-titulo">Información laboral</span>
         <div className="form-fila">
           <div className="form-grupo">
-            <select className="form-input" value={cargo} onChange={(e) => setCargo(e.target.value)}>
+            <select
+              className={`form-input${errores.cargo ? ' input-error' : ''}`}
+              value={cargo}
+              onChange={(e) => { setCargo(e.target.value); setErrores((p) => ({ ...p, cargo: '' })); }}
+            >
+              <option value="" disabled>Selecciona un cargo…</option>
               {CARGOS_FORM.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+            {errores.cargo && <span className="form-error">{errores.cargo}</span>}
           </div>
           <div className="form-grupo">
             <input className={`form-input${errores.fechaIngreso ? ' input-error' : ''}`} type="date" value={fechaIngreso}
