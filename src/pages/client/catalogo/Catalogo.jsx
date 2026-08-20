@@ -828,7 +828,28 @@ function BadgeProducto({ p }) {
 }
 
 /* ─── Card de producto ─── */
-function CardProducto({ p, onAgregar }) {
+function BadgeMasPedido() {
+  return (
+    <div
+      style={{
+        position: 'absolute', top: 8, left: 8, zIndex: 2,
+        background: '#CA0B0B', color: '#fff',
+        borderRadius: 8, padding: '5px 9px', display: 'flex', alignItems: 'center', gap: 4,
+        boxShadow: '0 2px 10px rgba(202,11,11,0.5)',
+        fontFamily: 'Nunito, sans-serif', fontWeight: 800,
+        fontSize: 10, lineHeight: 1, letterSpacing: '0.3px',
+        pointerEvents: 'none', whiteSpace: 'nowrap',
+      }}
+    >
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+        <path d="M12 2l2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8l-6.2 3.5L7 14.2 2 9.3l7.1-.7L12 2z" />
+      </svg>
+      MÁS PEDIDO
+    </div>
+  );
+}
+
+function CardProducto({ p, onAgregar, destacado }) {
   return (
     <div className="producto-card">
       <div style={{ position: 'relative' }}>
@@ -839,6 +860,7 @@ function CardProducto({ p, onAgregar }) {
             <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 48 }}>🍫</div>
           )}
         </div>
+        {destacado && <BadgeMasPedido />}
         <BadgeProducto p={p} />
       </div>
       <div className="producto-card-body">
@@ -889,6 +911,7 @@ export default function Catalogo() {
   const [categorias,      setCategorias]      = useState([{ id_categoria: 0, nombre: 'Todos' }]);
   const [toppings,        setToppings]        = useState([]);
   const [adiciones,       setAdiciones]       = useState([]);
+  const [masPedidos,      setMasPedidos]      = useState([]);
   const [cargando,        setCargando]        = useState(true);
   const [categoriaActiva, setCategoriaActiva] = useState(0);
   const [busqueda,        setBusqueda]        = useState('');
@@ -909,6 +932,9 @@ export default function Catalogo() {
       setToppings(tops || []);
       setAdiciones(adics || []);
     }).catch(console.error).finally(() => setCargando(false));
+
+    // Sección "Más Pedidos" es independiente: si falla, el catálogo normal sigue funcionando.
+    api.catalogoMasPedidos().then((prods) => setMasPedidos(prods || [])).catch(console.error);
   }, []);
 
   const filtrados = useMemo(() => {
@@ -962,6 +988,19 @@ export default function Catalogo() {
             <span><strong>Tiempo estimado de entrega:</strong> {tiempoEspera}–{tiempoEspera + 20} min</span>
           </div>
         )}
+        {masPedidos.length > 0 && (
+          <div className="mas-pedidos-seccion">
+            <h2 className="mas-pedidos-titulo">🔥 Más Pedidos</h2>
+            <div className="mas-pedidos-scroll">
+              {masPedidos.map((p) => (
+                <div className="mas-pedidos-item" key={p.id_producto}>
+                  <CardProducto p={p} onAgregar={handleAgregar} destacado />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="catalogo-top">
           <div className="catalogo-categorias">
             {categorias.map((cat) => (

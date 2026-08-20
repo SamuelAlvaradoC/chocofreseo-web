@@ -38,6 +38,7 @@ export const catalogoToppings    = ()     => get('/catalogo/toppings');
 export const catalogoAdiciones   = ()     => get('/catalogo/adiciones');
 export const catalogoBuscar      = (q)    => get('/catalogo/buscar', { q });
 export const catalogoPromociones = ()     => get('/catalogo/promociones');
+export const catalogoMasPedidos  = ()     => get('/catalogo/mas-pedidos');
 
 // ── Ventas ────────────────────────────────────────────────────
 export const listarVentas        = (est, fecha) => get('/ventas', { ...(est ? { estado: est } : {}), ...(fecha ? { fecha } : {}) });
