@@ -828,59 +828,74 @@ function BadgeProducto({ p }) {
 }
 
 /* ─── Card de producto ─── */
+// Estrella de 5 puntas de verdad (path generado, sin imagen externa) --
+// calcomanía en la esquina superior izquierda de la imagen, sobresaliendo
+// del borde de la tarjeta (offset negativo) y ligeramente rotada. El brazo
+// interno del polígono usa un radio más "gordo" de lo normal (0.5 en vez
+// del ~0.38 clásico) para que "MAS PEDIDO" en dos líneas quepa legible
+// dentro sin dejar de leerse como estrella.
+const ESTRELLA_PATH =
+  'M50,2 L64.11,30.58 L95.65,35.17 L72.83,57.42 L78.21,88.83 ' +
+  'L50,74 L21.79,88.83 L27.17,57.42 L4.35,35.17 L35.89,30.58 Z';
+
 function BadgeMasPedido() {
   return (
     <div
       style={{
-        position: 'absolute', top: 8, left: 8, zIndex: 2,
-        background: '#CA0B0B', color: '#fff',
-        borderRadius: 8, padding: '5px 9px', display: 'flex', alignItems: 'center', gap: 4,
-        boxShadow: '0 2px 10px rgba(202,11,11,0.5)',
-        fontFamily: 'Nunito, sans-serif', fontWeight: 800,
-        fontSize: 10, lineHeight: 1, letterSpacing: '0.3px',
-        pointerEvents: 'none', whiteSpace: 'nowrap',
+        position: 'absolute', top: -16, left: -16, zIndex: 3,
+        width: 76, height: 76,
+        transform: 'rotate(-11deg)',
+        filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.35))',
+        pointerEvents: 'none',
       }}
     >
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-        <path d="M12 2l2.9 6.6L22 9.3l-5 4.9 1.2 7.1L12 17.8l-6.2 3.5L7 14.2 2 9.3l7.1-.7L12 2z" />
+      <svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">
+        <path d={ESTRELLA_PATH} fill="#FBF2E0" stroke="#EADFC2" strokeWidth="1.5" strokeLinejoin="round" />
+        <text x="50" y="46" textAnchor="middle" fontFamily="Nunito, sans-serif" fontWeight="900" fontSize="15" fill="#CA0B0B">MAS</text>
+        <text x="50" y="61" textAnchor="middle" fontFamily="Nunito, sans-serif" fontWeight="900" fontSize="13.5" fill="#CA0B0B">PEDIDO</text>
       </svg>
-      MÁS PEDIDO
     </div>
   );
 }
 
 function CardProducto({ p, onAgregar, destacado }) {
   return (
-    <div className="producto-card">
-      <div style={{ position: 'relative' }}>
-        <div style={{ width:'100%', height:200, borderRadius:'12px 12px 0 0', overflow:'hidden', background:'#f5f5f5' }}>
-          {p.img ? (
-            <img src={imgCl(p.img, 400, 400)} alt={p.nombre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-          ) : (
-            <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 48 }}>🍫</div>
-          )}
+    // Wrapper externo SIN overflow:hidden (a diferencia de .producto-card,
+    // que sí lo tiene para recortar la imagen) -- así la estrella puede
+    // sobresalir de verdad más allá del borde de la tarjeta en vez de
+    // quedar recortada por el mismo contenedor que redondea la imagen.
+    <div className="producto-card-envoltorio" style={{ position: 'relative', height: '100%' }}>
+      {destacado && <BadgeMasPedido />}
+      <div className="producto-card">
+        <div style={{ position: 'relative' }}>
+          <div style={{ width:'100%', height:200, borderRadius:'12px 12px 0 0', overflow:'hidden', background:'#f5f5f5' }}>
+            {p.img ? (
+              <img src={imgCl(p.img, 400, 400)} alt={p.nombre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            ) : (
+              <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 48 }}>🍫</div>
+            )}
+          </div>
+          <BadgeProducto p={p} />
         </div>
-        {destacado && <BadgeMasPedido />}
-        <BadgeProducto p={p} />
-      </div>
-      <div className="producto-card-body">
-        <h3 className="producto-card-nombre">{p.nombre}</h3>
-        {p.descripcion && (
-          <p
-            className="producto-card-desc"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {p.descripcion}
-          </p>
-        )}
-        <div className="producto-card-footer">
-          <span className="producto-card-precio">${Number(p.precio).toLocaleString('es-CO')}</span>
-          <button className="producto-card-btn" onClick={() => onAgregar(p)}>+ Agregar</button>
+        <div className="producto-card-body">
+          <h3 className="producto-card-nombre">{p.nombre}</h3>
+          {p.descripcion && (
+            <p
+              className="producto-card-desc"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {p.descripcion}
+            </p>
+          )}
+          <div className="producto-card-footer">
+            <span className="producto-card-precio">${Number(p.precio).toLocaleString('es-CO')}</span>
+            <button className="producto-card-btn" onClick={() => onAgregar(p)}>+ Agregar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -937,6 +952,14 @@ export default function Catalogo() {
     api.catalogoMasPedidos().then((prods) => setMasPedidos(prods || [])).catch(console.error);
   }, []);
 
+  // Ranking de "más pedidos": Map id_producto -> posición (0 = el más
+  // pedido). Se usa tanto para decidir la insignia como para reordenar.
+  const rankMasPedidos = useMemo(() => {
+    const m = new Map();
+    masPedidos.forEach((p, i) => m.set(p.id_producto, i));
+    return m;
+  }, [masPedidos]);
+
   const filtrados = useMemo(() => {
     let lista = productos.filter(p => p.estado !== 0);
     if (busqueda.trim()) {
@@ -947,8 +970,18 @@ export default function Catalogo() {
     } else {
       lista = [...lista].sort((a, b) => a.id_categoria - b.id_categoria);
     }
+    // Los más pedidos van primero (en su orden de ranking) dentro de
+    // cualquier subconjunto visible -- "Todos", una categoría puntual, o
+    // resultado de búsqueda -- el resto conserva el orden que ya traía.
+    if (rankMasPedidos.size > 0) {
+      const destacados = lista
+        .filter(p => rankMasPedidos.has(p.id_producto))
+        .sort((a, b) => rankMasPedidos.get(a.id_producto) - rankMasPedidos.get(b.id_producto));
+      const resto = lista.filter(p => !rankMasPedidos.has(p.id_producto));
+      lista = [...destacados, ...resto];
+    }
     return lista;
-  }, [productos, busqueda, categoriaActiva]);
+  }, [productos, busqueda, categoriaActiva, rankMasPedidos]);
 
   const handleAgregar = (producto) => {
     if (!estadoTienda.abierto) { setMostrarAlertaCerrado(true); return; }
@@ -988,19 +1021,6 @@ export default function Catalogo() {
             <span><strong>Tiempo estimado de entrega:</strong> {tiempoEspera}–{tiempoEspera + 20} min</span>
           </div>
         )}
-        {masPedidos.length > 0 && (
-          <div className="mas-pedidos-seccion">
-            <h2 className="mas-pedidos-titulo">🔥 Más Pedidos</h2>
-            <div className="mas-pedidos-scroll">
-              {masPedidos.map((p) => (
-                <div className="mas-pedidos-item" key={p.id_producto}>
-                  <CardProducto p={p} onAgregar={handleAgregar} destacado />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="catalogo-top">
           <div className="catalogo-categorias">
             {categorias.map((cat) => (
@@ -1030,7 +1050,9 @@ export default function Catalogo() {
           </div>
         ) : (
           <div className="productos-grid">
-            {filtrados.map((p) => <CardProducto key={p.id_producto} p={p} onAgregar={handleAgregar} />)}
+            {filtrados.map((p) => (
+              <CardProducto key={p.id_producto} p={p} onAgregar={handleAgregar} destacado={rankMasPedidos.has(p.id_producto)} />
+            ))}
           </div>
         )}
       </div>
