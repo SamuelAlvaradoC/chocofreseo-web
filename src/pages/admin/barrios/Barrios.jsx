@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import AdminLayout from '../../../components/layout/AdminLayout';
+import Paginacion from '../../../components/Paginacion';
 import { toast } from '../../../utils/toast';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
@@ -121,8 +122,6 @@ function ModalEliminar({ open, onClose, onConfirmar, nombre, procesando }) {
   );
 }
 
-const POR_PAGINA = 10;
-
 export default function Barrios() {
   const { tienePermiso } = useAuth();
   const puedeGestionar   = tienePermiso('gestionar_barrios');
@@ -131,6 +130,7 @@ export default function Barrios() {
   const [busqueda,     setBusqueda]     = useState('');
   const [filtroCiudad, setFiltroCiudad] = useState('');
   const [pagina,       setPagina]       = useState(1);
+  const [porPagina,    setPorPagina]    = useState(10);
   const [modal,        setModal]        = useState(false);
   const [editando,     setEditando]     = useState(null);
   const [eliminando,   setEliminando]   = useState(null);
@@ -148,8 +148,18 @@ export default function Barrios() {
     const matchCiudad = !filtroCiudad || String(b.id_ciudad) === filtroCiudad;
     return matchNombre && matchCiudad;
   });
-  const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
-  const paginados   = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+
+  const mostrandoTodos = porPagina === 'todos';
+  const totalPaginas   = mostrandoTodos ? 1 : Math.ceil(filtrados.length / porPagina);
+  const paginados      = mostrandoTodos ? filtrados : filtrados.slice((pagina - 1) * porPagina, pagina * porPagina);
+
+  // Al cambiar el selector "Mostrar" (o al filtrar) el total de páginas puede
+  // encogerse -- si el usuario se había quedado en una página que ya no
+  // existe, se recorta a la última válida en vez de dejarlo viendo una tabla
+  // vacía. Mismo patrón que en Ventas.
+  useEffect(() => {
+    setPagina((p) => Math.min(Math.max(1, p), totalPaginas || 1));
+  }, [totalPaginas]);
 
   const crear = async (f) => {
     if (procesando) return; setProcesando(true);
@@ -207,6 +217,17 @@ export default function Barrios() {
         </select>
       </div>
 
+      {/* Paginación arriba también -- con 255+ barrios no tiene sentido
+          obligar a bajar hasta el final de la tabla para cambiar de página. */}
+      {filtrados.length > 0 && (
+        <div className="tabla-wrap" style={{ marginBottom: 16 }}>
+          <Paginacion
+            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
+            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
+          />
+        </div>
+      )}
+
       <div className="tabla-wrap">
         <table>
           <thead>
@@ -245,14 +266,11 @@ export default function Barrios() {
             ))}
           </tbody>
         </table>
-        {totalPaginas > 1 && (
-          <div className="paginacion">
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1}>‹</button>
-            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-              <button key={n} className={`btn-pagina${pagina === n ? ' activo' : ''}`} onClick={() => setPagina(n)}>{n}</button>
-            ))}
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>›</button>
-          </div>
+        {filtrados.length > 0 && (
+          <Paginacion
+            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
+            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
+          />
         )}
       </div>
 

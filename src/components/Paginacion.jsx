@@ -1,0 +1,114 @@
+// Componente de paginación reutilizable para las tablas del panel Admin.
+// Muestra siempre Anterior/Siguiente + primera/última página, un rango
+// alrededor de la página actual, y "..." para los huecos -- en vez de listar
+// todos los números seguidos (inutilizable con muchas páginas, ej. Barrios).
+
+export const OPCIONES_POR_PAGINA_DEFAULT = [10, 50, 100, 'todos'];
+
+// Pura y exportada aparte para poder testear el cálculo del rango sin montar
+// el componente. `delta` = cuántas páginas mostrar a cada lado de la actual.
+export function calcularRangoPaginas(pagina, totalPaginas, delta = 2) {
+  const total = Math.max(1, totalPaginas || 1);
+  if (total <= 1) return [1];
+
+  let izquierda = Math.max(2, pagina - delta);
+  let derecha   = Math.min(total - 1, pagina + delta);
+
+  // Si el hueco entre el extremo y el inicio/fin del rango es de una sola
+  // página, se muestra esa página en vez de "..." -- un "..." que esconde
+  // un único número se ve peor que simplemente mostrarlo.
+  if (izquierda === 3) izquierda = 2;
+  if (derecha === total - 2) derecha = total - 1;
+
+  const rango = [1];
+  if (izquierda > 2) rango.push('...');
+  for (let i = izquierda; i <= derecha; i++) rango.push(i);
+  if (derecha < total - 1) rango.push('...');
+  rango.push(total);
+
+  return rango;
+}
+
+const estiloBoton = { width: 32, height: 32, padding: 0 };
+const estiloBotonTexto = { width: 'auto', padding: '0 12px' };
+const estiloElipsis = {
+  width: 32, height: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  color: '#aaa', fontWeight: 700, fontSize: 13, userSelect: 'none',
+};
+const estiloSelect = {
+  height: 32, padding: '0 10px', borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 13,
+  color: '#333', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer',
+};
+
+export default function Paginacion({
+  pagina,
+  totalPaginas,
+  onCambiarPagina,
+  porPagina,
+  onCambiarPorPagina,
+  opcionesPorPagina = OPCIONES_POR_PAGINA_DEFAULT,
+  delta = 2,
+}) {
+  const mostrarSelector = porPagina !== undefined && typeof onCambiarPorPagina === 'function';
+  const mostrarNumeros  = totalPaginas > 1;
+
+  if (!mostrarSelector && !mostrarNumeros) return null;
+
+  const rango = mostrarNumeros ? calcularRangoPaginas(pagina, totalPaginas, delta) : [];
+
+  return (
+    <div className="paginacion" style={{ justifyContent: mostrarSelector ? 'space-between' : 'flex-end', flexWrap: 'wrap' }}>
+      {mostrarSelector && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: '#888' }}>Mostrar:</span>
+          <select
+            value={porPagina}
+            onChange={(e) => onCambiarPorPagina(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
+            style={estiloSelect}
+          >
+            {opcionesPorPagina.map((op) => (
+              <option key={op} value={op}>{op === 'todos' ? 'Todos' : op}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {mostrarNumeros && (
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            className="btn-pagina"
+            style={estiloBotonTexto}
+            onClick={() => onCambiarPagina(Math.max(1, pagina - 1))}
+            disabled={pagina === 1}
+          >
+            ‹ Anterior
+          </button>
+
+          {rango.map((p, i) =>
+            p === '...' ? (
+              <span key={`ellipsis-${i}`} style={estiloElipsis}>···</span>
+            ) : (
+              <button
+                key={p}
+                className={`btn-pagina${pagina === p ? ' activo' : ''}`}
+                style={estiloBoton}
+                onClick={() => onCambiarPagina(p)}
+              >
+                {p}
+              </button>
+            )
+          )}
+
+          <button
+            className="btn-pagina"
+            style={estiloBotonTexto}
+            onClick={() => onCambiarPagina(Math.min(totalPaginas, pagina + 1))}
+            disabled={pagina === totalPaginas}
+          >
+            Siguiente ›
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
