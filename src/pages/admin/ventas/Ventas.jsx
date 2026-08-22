@@ -425,6 +425,10 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const [usarPuntos,         setUsarPuntos]         = useState(false);
   const [puntosAplicar,      setPuntosAplicar]      = useState(0);
 
+  // Si cambia la dirección/barrio, el desbloqueo manual no debe seguir aplicando
+  // a la nueva selección — se vuelve a pedir explícitamente cada vez.
+  useEffect(() => { setOverrideDomicilio(false); }, [modoDir, direccion?.id_direccion, nuevaDireccion?.id_barrio]);
+
   if (!open) return null;
 
   const subtotal              = carrito.reduce((a, i) => a + calcularPrecioItem(i) * i.cantidad, 0);
@@ -441,9 +445,6 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   // = Barrio.precio_domicilio sin importar lo que se mande — el campo debe
   // quedar de solo lectura para no mostrarle al admin un número que luego no se guarda.
   const tieneBarrio = (modoDir === 'guardada' && !!direccion?.barrioRel) || (modoDir === 'nueva' && !!nuevaDireccion?.id_barrio);
-  // Si cambia la dirección/barrio, el desbloqueo manual no debe seguir aplicando
-  // a la nueva selección — se vuelve a pedir explícitamente cada vez.
-  useEffect(() => { setOverrideDomicilio(false); }, [modoDir, direccion?.id_direccion, nuevaDireccion?.id_barrio]);
 
   const clientesFiltrados = busquedaCliente.length >= 2
     ? clientesData.filter((c) =>
