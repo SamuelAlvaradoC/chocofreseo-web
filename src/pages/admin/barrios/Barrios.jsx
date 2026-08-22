@@ -230,13 +230,13 @@ export default function Barrios() {
         <SelectorPorPagina porPagina={porPagina} onCambiarPorPagina={setPorPagina} />
       </div>
 
-      {/* Navegación de páginas también arriba -- con 255+ barrios no tiene
-          sentido obligar a bajar hasta el final de la tabla para cambiar de
-          página. El selector "Mostrar" ya vive en la fila de filtros, así
-          que aquí solo van los números. */}
+      {/* Navegación de páginas, compacta y sin tarjeta propia -- el selector
+          "Mostrar" ya vive en la fila de filtros, así que aquí solo van los
+          números. Con eso arriba, cerca de los filtros, no hace falta
+          repetir la paginación al final de la tabla. */}
       {totalPaginas > 1 && (
-        <div className="tabla-wrap" style={{ marginBottom: 16 }}>
-          <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina} />
+        <div style={{ marginBottom: 12 }}>
+          <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina} compacto />
         </div>
       )}
 
@@ -278,12 +278,6 @@ export default function Barrios() {
             ))}
           </tbody>
         </table>
-        {filtrados.length > 0 && (
-          <Paginacion
-            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
-            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
-          />
-        )}
       </div>
 
       {modal && <ModalFormulario open={true} onClose={() => setModal(false)} onGuardar={crear} editando={null} procesando={procesando} ciudades={ciudades} />}

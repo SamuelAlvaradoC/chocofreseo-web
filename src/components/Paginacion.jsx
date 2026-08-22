@@ -68,6 +68,10 @@ export default function Paginacion({
   onCambiarPorPagina,
   opcionesPorPagina = OPCIONES_POR_PAGINA_DEFAULT,
   delta = 2,
+  // Sin la tarjeta blanca acolchada (padding + borde) -- para cuando el
+  // propio contenedor padre ya le da el layout, ej. una fila suelta entre
+  // los filtros y la tabla en vez de una caja separada.
+  compacto = false,
 }) {
   const mostrarSelector = porPagina !== undefined && typeof onCambiarPorPagina === 'function';
   const mostrarNumeros  = totalPaginas > 1;
@@ -77,7 +81,14 @@ export default function Paginacion({
   const rango = mostrarNumeros ? calcularRangoPaginas(pagina, totalPaginas, delta) : [];
 
   return (
-    <div className="paginacion" style={{ justifyContent: mostrarSelector ? 'space-between' : 'flex-end', flexWrap: 'wrap' }}>
+    <div
+      className="paginacion"
+      style={{
+        justifyContent: mostrarSelector ? 'space-between' : 'flex-end',
+        flexWrap: 'wrap',
+        ...(compacto ? { padding: 0, borderTop: 'none' } : {}),
+      }}
+    >
       {mostrarSelector && (
         <SelectorPorPagina porPagina={porPagina} onCambiarPorPagina={onCambiarPorPagina} opciones={opcionesPorPagina} />
       )}

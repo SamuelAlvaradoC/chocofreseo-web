@@ -134,3 +134,21 @@ describe('<SelectorPorPagina /> — standalone (para usar fuera de <Paginacion/>
     expect(screen.queryByText('10')).not.toBeInTheDocument();
   });
 });
+
+describe('<Paginacion compacto /> — sin la tarjeta blanca acolchada', () => {
+  // Nota: jsdom no acepta "border-top: none" como valor de estilo inline
+  // (lo descarta silenciosamente aunque sea CSS válido en cualquier
+  // navegador real -- confirmado visualmente con Chromium vía Playwright).
+  // Por eso este test solo verifica el padding, que sí es fiable en jsdom.
+  test('quita el padding propio de ".paginacion" cuando compacto=true', () => {
+    render(<Paginacion pagina={1} totalPaginas={5} onCambiarPagina={() => {}} compacto />);
+    const contenedor = screen.getByText('1').closest('.paginacion');
+    expect(contenedor.style.padding).toBe('0px');
+  });
+
+  test('sin compacto (por defecto), conserva el padding de la tarjeta', () => {
+    render(<Paginacion pagina={1} totalPaginas={5} onCambiarPagina={() => {}} />);
+    const contenedor = screen.getByText('1').closest('.paginacion');
+    expect(contenedor.style.padding).toBe('');
+  });
+});

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Barrios from './Barrios';
 import * as api from '../../../services/api';
@@ -37,16 +37,15 @@ function mockApiDefaults() {
   api.listarCiudades.mockResolvedValue([{ id_ciudad: 1, nombre: 'Medellín' }]);
 }
 
-describe('Barrios admin — fila de filtros con "Mostrar" reubicado', () => {
+describe('Barrios admin — fila de filtros con "Mostrar", paginación compacta sin duplicado', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test('el selector "Mostrar" vive en la fila de filtros (junto al de ciudad) Y en la paginación de abajo', async () => {
+  test('el selector "Mostrar" aparece UNA sola vez, en la fila de filtros (ya no está duplicado abajo)', async () => {
     mockApiDefaults();
     render(<Barrios />);
 
     await screen.findByText('Barrio 1');
-    // Dos apariciones: fila de filtros + paginación de abajo.
-    expect(screen.getAllByText('Mostrar:')).toHaveLength(2);
+    expect(screen.getAllByText('Mostrar:')).toHaveLength(1);
   });
 
   test('el select de ciudad tiene un ancho fijo angosto, no 100% de la fila', async () => {
@@ -58,34 +57,34 @@ describe('Barrios admin — fila de filtros con "Mostrar" reubicado', () => {
     expect(selectCiudad.style.width).toBe('260px');
   });
 
-  test('cambiar "Mostrar" desde la fila de filtros (arriba) sincroniza con el de abajo', async () => {
+  test('cambiar "Mostrar" desde los filtros recalcula la tabla igual que antes', async () => {
     mockApiDefaults();
     render(<Barrios />);
 
     await screen.findByText('Barrio 1');
-    const [mostrarArriba, mostrarAbajo] = screen.getAllByDisplayValue('10');
-    fireEvent.change(mostrarArriba, { target: { value: '50' } });
+    fireEvent.change(screen.getByDisplayValue('10'), { target: { value: 'todos' } });
 
-    expect(mostrarAbajo.value).toBe('50');
+    // Con "Todos" ya no hay paginación (una sola "página" con los 25).
+    await screen.findByText('Barrio 25');
+    expect(screen.queryByText('Siguiente ›')).not.toBeInTheDocument();
   });
 
-  test('cambiar "Mostrar" desde abajo sincroniza con el de la fila de filtros (arriba)', async () => {
+  test('la navegación de páginas (números) aparece UNA sola vez, compacta entre los filtros y la tabla', async () => {
     mockApiDefaults();
     render(<Barrios />);
 
     await screen.findByText('Barrio 1');
-    const [mostrarArriba, mostrarAbajo] = screen.getAllByDisplayValue('10');
-    fireEvent.change(mostrarAbajo, { target: { value: 'todos' } });
-
-    expect(within(mostrarArriba.closest('div')).getByDisplayValue('Todos')).toBeInTheDocument();
+    // Con 25 barrios y 10/página hay 3 páginas.
+    expect(screen.getAllByText('Siguiente ›')).toHaveLength(1);
+    expect(screen.getAllByText('‹ Anterior')).toHaveLength(1);
   });
 
-  test('la navegación de páginas (números) sigue apareciendo arriba de la tabla, separada del filtro', async () => {
+  test('la fila de paginación ya no vive dentro de la tarjeta blanca de la tabla (sin "tabla-wrap" propio)', async () => {
     mockApiDefaults();
     render(<Barrios />);
 
     await screen.findByText('Barrio 1');
-    // Con 25 barrios y 10/página hay 3 páginas -- debe verse "Siguiente ›" arriba.
-    expect(screen.getAllByText('Siguiente ›').length).toBeGreaterThanOrEqual(1);
+    const filaPaginacion = screen.getByText('‹ Anterior').closest('.paginacion');
+    expect(filaPaginacion.closest('.tabla-wrap')).toBeNull();
   });
 });
