@@ -3,11 +3,10 @@ import { toast } from '../../../utils/toast';
 import { imgCl } from '../../../utils/cloudinary';
 import { useState, useEffect, useRef } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
+import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
 import './Productos.css';
-
-const POR_PAGINA = 10;
 
 const TAMANOS = [
   { value: '',               label: '(Sin tamaño)' },
@@ -369,6 +368,7 @@ export default function Productos() {
   const [busqueda,        setBusqueda]        = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('todas');
   const [pagina,          setPagina]          = useState(1);
+  const [porPagina,       setPorPagina]       = useState(10);
   const [modalAbierto,    setModalAbierto]    = useState(false);
   const [editando,        setEditando]        = useState(null);
   const [eliminando,      setEliminando]      = useState(null);
@@ -387,8 +387,17 @@ export default function Productos() {
     const coincideCategoria  = filtroCategoria === 'todas' || String(p.id_categoria) === String(filtroCategoria);
     return coincideBusqueda && coincideCategoria;
   });
-  const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
-  const paginados    = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+  const mostrandoTodos = porPagina === 'todos';
+  const totalPaginas   = mostrandoTodos ? 1 : Math.ceil(filtrados.length / porPagina);
+  const paginados      = mostrandoTodos ? filtrados : filtrados.slice((pagina - 1) * porPagina, pagina * porPagina);
+
+  // Al cambiar el selector "Mostrar" (o al filtrar) el total de páginas puede
+  // encogerse -- si el usuario se había quedado en una página que ya no
+  // existe, se recorta a la última válida en vez de dejarlo viendo una tabla
+  // vacía. Mismo patrón que en Barrios/Ventas.
+  useEffect(() => {
+    setPagina((p) => Math.min(Math.max(1, p), totalPaginas || 1));
+  }, [totalPaginas]);
 
   const getCategoria = (id) => categoriasLista.find((c) => c.id_categoria === id)?.nombre || '—';
   const getTamanoLabel = (t) => TAMANOS.find((x) => x.value === (t || ''))?.label || t || '—';
@@ -436,6 +445,17 @@ export default function Productos() {
         {filtroCategoria !== 'todas' && ` en ${categoriasLista.find(c => String(c.id_categoria) === String(filtroCategoria))?.nombre || ''}`}
         {busqueda.trim() && ` con "${busqueda}"`}
       </div>
+
+      {/* Paginación arriba también -- ya se acerca a varias páginas y solo
+          va a crecer, no tiene sentido bajar hasta el final para cambiar. */}
+      {filtrados.length > 0 && (
+        <div className="tabla-wrap" style={{ marginBottom: 16 }}>
+          <Paginacion
+            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
+            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
+          />
+        </div>
+      )}
 
       <div className="tabla-wrap">
         <table>
@@ -487,14 +507,11 @@ export default function Productos() {
             )}
           </tbody>
         </table>
-        {totalPaginas > 1 && (
-          <div className="paginacion">
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1}>‹</button>
-            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-              <button key={n} className={`btn-pagina${pagina === n ? ' activo' : ''}`} onClick={() => setPagina(n)}>{n}</button>
-            ))}
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>›</button>
-          </div>
+        {filtrados.length > 0 && (
+          <Paginacion
+            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
+            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
+          />
         )}
       </div>
 
