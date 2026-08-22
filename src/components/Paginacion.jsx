@@ -40,6 +40,26 @@ const estiloSelect = {
   color: '#333', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer',
 };
 
+// Selector "Mostrar: 10/50/100/Todos" solo -- separado de <Paginacion/> para
+// poder colocarlo en cualquier layout (ej. junto a un filtro) sin arrastrar
+// los botones de número de página. <Paginacion/> lo reutiliza internamente.
+export function SelectorPorPagina({ porPagina, onCambiarPorPagina, opciones = OPCIONES_POR_PAGINA_DEFAULT }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontSize: 12.5, fontWeight: 600, color: '#888' }}>Mostrar:</span>
+      <select
+        value={porPagina}
+        onChange={(e) => onCambiarPorPagina(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
+        style={estiloSelect}
+      >
+        {opciones.map((op) => (
+          <option key={op} value={op}>{op === 'todos' ? 'Todos' : op}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function Paginacion({
   pagina,
   totalPaginas,
@@ -59,18 +79,7 @@ export default function Paginacion({
   return (
     <div className="paginacion" style={{ justifyContent: mostrarSelector ? 'space-between' : 'flex-end', flexWrap: 'wrap' }}>
       {mostrarSelector && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12.5, fontWeight: 600, color: '#888' }}>Mostrar:</span>
-          <select
-            value={porPagina}
-            onChange={(e) => onCambiarPorPagina(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
-            style={estiloSelect}
-          >
-            {opcionesPorPagina.map((op) => (
-              <option key={op} value={op}>{op === 'todos' ? 'Todos' : op}</option>
-            ))}
-          </select>
-        </div>
+        <SelectorPorPagina porPagina={porPagina} onCambiarPorPagina={onCambiarPorPagina} opciones={opcionesPorPagina} />
       )}
 
       {mostrarNumeros && (

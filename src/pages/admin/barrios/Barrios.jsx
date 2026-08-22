@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import AdminLayout from '../../../components/layout/AdminLayout';
-import Paginacion from '../../../components/Paginacion';
+import Paginacion, { SelectorPorPagina } from '../../../components/Paginacion';
 import { toast } from '../../../utils/toast';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
@@ -201,30 +201,42 @@ export default function Barrios() {
         {puedeGestionar && <button className="btn-primario" onClick={() => setModal(true)}>+ Añadir barrio</button>}
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <div className="buscador" style={{ flex: 1, minWidth: 200, margin: 0 }}>
-          <Search size={14} color="#aaa" />
-          <input placeholder="Buscar barrio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', flex: 1, minWidth: 280 }}>
+          <div className="buscador" style={{ flex: 1, minWidth: 200, margin: 0 }}>
+            <Search size={14} color="#aaa" />
+            <input placeholder="Buscar barrio..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+          </div>
+          {/* Ancho fijo -- antes usaba .form-input (width:100%) y con
+              flex-basis:auto terminaba estirándose a lo ancho de toda la
+              fila, dejando el "Mostrar" sin espacio donde ir. */}
+          <select
+            style={{
+              height: 36, width: 260, flexShrink: 0, padding: '0 10px', borderRadius: 8,
+              border: '1px solid #e5e7eb', fontSize: 13, color: '#333', background: '#fff',
+              fontFamily: 'inherit', outline: 'none', cursor: 'pointer',
+            }}
+            value={filtroCiudad}
+            onChange={(e) => setFiltroCiudad(e.target.value)}
+          >
+            <option value="">Todas las ciudades</option>
+            {ciudades.map((c) => <option key={c.id_ciudad} value={c.id_ciudad}>{c.nombre}</option>)}
+          </select>
         </div>
-        <select
-          className="form-input"
-          style={{ height: 36, padding: '0 10px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, minWidth: 160 }}
-          value={filtroCiudad}
-          onChange={(e) => setFiltroCiudad(e.target.value)}
-        >
-          <option value="">Todas las ciudades</option>
-          {ciudades.map((c) => <option key={c.id_ciudad} value={c.id_ciudad}>{c.nombre}</option>)}
-        </select>
+
+        {/* Mismo estado que el "Mostrar" de la paginación de abajo -- cambiar
+            uno actualiza el otro. Aprovecha el espacio que dejaba libre el
+            select de ciudad angosto. */}
+        <SelectorPorPagina porPagina={porPagina} onCambiarPorPagina={setPorPagina} />
       </div>
 
-      {/* Paginación arriba también -- con 255+ barrios no tiene sentido
-          obligar a bajar hasta el final de la tabla para cambiar de página. */}
-      {filtrados.length > 0 && (
+      {/* Navegación de páginas también arriba -- con 255+ barrios no tiene
+          sentido obligar a bajar hasta el final de la tabla para cambiar de
+          página. El selector "Mostrar" ya vive en la fila de filtros, así
+          que aquí solo van los números. */}
+      {totalPaginas > 1 && (
         <div className="tabla-wrap" style={{ marginBottom: 16 }}>
-          <Paginacion
-            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
-            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
-          />
+          <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina} />
         </div>
       )}
 

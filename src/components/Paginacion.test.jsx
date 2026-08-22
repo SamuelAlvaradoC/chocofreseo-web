@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Paginacion, { calcularRangoPaginas } from './Paginacion';
+import Paginacion, { calcularRangoPaginas, SelectorPorPagina } from './Paginacion';
 
 describe('calcularRangoPaginas', () => {
   test('página en el medio con muchas páginas: muestra rango alrededor + extremos con "..."', () => {
@@ -102,5 +102,35 @@ describe('<Paginacion /> — render e interacción', () => {
     render(<Paginacion pagina={1} totalPaginas={5} onCambiarPagina={() => {}} porPagina={10} onCambiarPorPagina={onCambiarPorPagina} />);
     fireEvent.change(screen.getByDisplayValue('10'), { target: { value: '50' } });
     expect(onCambiarPorPagina).toHaveBeenCalledWith(50);
+  });
+
+  test('sin porPagina/onCambiarPorPagina, no renderiza el selector "Mostrar" (para usarlo junto a un filtro aparte)', () => {
+    render(<Paginacion pagina={6} totalPaginas={26} onCambiarPagina={() => {}} />);
+    expect(screen.queryByText('Mostrar:')).not.toBeInTheDocument();
+    // pero los números sí siguen ahí
+    expect(screen.getByText('6')).toHaveClass('activo');
+  });
+});
+
+describe('<SelectorPorPagina /> — standalone (para usar fuera de <Paginacion/>, ej. junto a un filtro)', () => {
+  test('muestra "Mostrar:" con el valor actual seleccionado', () => {
+    render(<SelectorPorPagina porPagina={10} onCambiarPorPagina={() => {}} />);
+    expect(screen.getByText('Mostrar:')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('10')).toBeInTheDocument();
+  });
+
+  test('cambiar el valor llama a onCambiarPorPagina con el tipo correcto (Number o "todos")', () => {
+    const onCambiarPorPagina = jest.fn();
+    render(<SelectorPorPagina porPagina={10} onCambiarPorPagina={onCambiarPorPagina} />);
+    fireEvent.change(screen.getByDisplayValue('10'), { target: { value: '100' } });
+    expect(onCambiarPorPagina).toHaveBeenCalledWith(100);
+    fireEvent.change(screen.getByDisplayValue('10'), { target: { value: 'todos' } });
+    expect(onCambiarPorPagina).toHaveBeenCalledWith('todos');
+  });
+
+  test('acepta una lista de opciones personalizada', () => {
+    render(<SelectorPorPagina porPagina={25} onCambiarPorPagina={() => {}} opciones={[25, 75]} />);
+    expect(screen.getByDisplayValue('25')).toBeInTheDocument();
+    expect(screen.queryByText('10')).not.toBeInTheDocument();
   });
 });
