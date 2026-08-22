@@ -10,7 +10,7 @@ import { useAuth } from '../../../context/AuthContext';
 import FormDireccion from '../../../components/common/FormDireccion';
 import './Ventas.css';
 
-const POR_PAGINA = 5;
+const OPCIONES_POR_PAGINA = [10, 50, 100, 'todos'];
 
 const ESTADO_LABELS = {
   pendiente:  'Pendiente',
@@ -1709,6 +1709,7 @@ export default function Ventas() {
   const [filtroMetodo,   setFiltroMetodo]  = useState('todos');
   const [filtroFecha,    setFiltroFecha]   = useState(() => new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10));
   const [pagina,         setPagina]        = useState(1);
+  const [porPagina,      setPorPagina]     = useState(10);
   const [modalCrear,     setModalCrear]    = useState(false);
   const [detalle,        setDetalle]       = useState(null);
   const [editandoVenta,  setEditandoVenta] = useState(null);
@@ -1744,8 +1745,16 @@ export default function Ventas() {
     return matchBusqueda && matchEstado && matchMetodo;
   });
 
-  const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
-  const paginados    = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+  const mostrandoTodos = porPagina === 'todos';
+  const totalPaginas   = mostrandoTodos ? 1 : Math.ceil(filtrados.length / porPagina);
+  const paginados      = mostrandoTodos ? filtrados : filtrados.slice((pagina - 1) * porPagina, pagina * porPagina);
+
+  // Al cambiar el selector "Mostrar" (o al filtrar) el total de páginas puede
+  // encogerse — si el usuario se había quedado en una página que ya no existe,
+  // se recorta a la última válida en vez de dejarlo viendo un listado vacío.
+  useEffect(() => {
+    setPagina((p) => Math.min(Math.max(1, p), totalPaginas || 1));
+  }, [totalPaginas]);
 
   const crearVenta = async (f) => {
     const items = (f.carrito || []).map((item) => ({
@@ -2064,13 +2073,29 @@ export default function Ventas() {
             )}
           </tbody>
         </table>
-        {totalPaginas > 1 && (
-          <div className="paginacion">
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1}>‹</button>
-            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-              <button key={n} className={`btn-pagina${pagina === n ? ' activo' : ''}`} onClick={() => setPagina(n)}>{n}</button>
-            ))}
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>›</button>
+        {filtrados.length > 0 && (
+          <div className="paginacion" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: '#888' }}>Mostrar:</span>
+              <select
+                value={porPagina}
+                onChange={(e) => setPorPagina(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
+                style={{ height: 32, padding: '0 10px', borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 13, color: '#333', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer' }}
+              >
+                {OPCIONES_POR_PAGINA.map((op) => (
+                  <option key={op} value={op}>{op === 'todos' ? 'Todos' : op}</option>
+                ))}
+              </select>
+            </div>
+            {totalPaginas > 1 && (
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button className="btn-pagina" onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1}>‹</button>
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
+                  <button key={n} className={`btn-pagina${pagina === n ? ' activo' : ''}`} onClick={() => setPagina(n)}>{n}</button>
+                ))}
+                <button className="btn-pagina" onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>›</button>
+              </div>
+            )}
           </div>
         )}
       </div>

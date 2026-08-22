@@ -5,7 +5,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import './Empleados.css';
 
-const POR_PAGINA = 5;
+const POR_PAGINA = 10;
 const CARGOS_FORM = ['Domiciliario', 'Cocinero', 'Confirmador'];
 
 const fmtFecha = (f) => {

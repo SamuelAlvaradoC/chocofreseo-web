@@ -152,7 +152,7 @@ function ModalDetalle({ open, onClose, categoria }) {
   );
 }
 
-const POR_PAGINA = 5;
+const POR_PAGINA = 10;
 
 export default function Categorias() {
   const [lista,        setLista]        = useState([]);

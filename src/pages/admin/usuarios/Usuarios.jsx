@@ -5,7 +5,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import './Usuarios.css';
 import * as api from '../../../services/api';
 
-const POR_PAGINA = 5;
+const POR_PAGINA = 10;
 
 const fmtFecha = (f) => {
   if (!f) return '—';

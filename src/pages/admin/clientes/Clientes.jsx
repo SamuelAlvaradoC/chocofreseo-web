@@ -5,7 +5,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import './Clientes.css';
 import * as api from '../../../services/api';
 
-const POR_PAGINA = 5;
+const POR_PAGINA = 10;
 
 function Toggle({ activo, onChange }) {
   return (

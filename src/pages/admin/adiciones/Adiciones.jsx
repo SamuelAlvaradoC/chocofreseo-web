@@ -6,7 +6,7 @@ import './Adiciones.css';
 import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
 
-const POR_PAGINA = 5;
+const POR_PAGINA = 10;
 
 const formatPrecio = (v) =>
   v !== '' && v !== null && v !== undefined ? `$${Number(v).toLocaleString('es-CO')}` : '—';

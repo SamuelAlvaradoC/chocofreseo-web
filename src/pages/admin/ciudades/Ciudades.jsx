@@ -79,7 +79,7 @@ function ModalEliminar({ open, onClose, onConfirmar, nombre, procesando }) {
   );
 }
 
-const POR_PAGINA = 8;
+const POR_PAGINA = 10;
 
 export default function Ciudades() {
   const { tienePermiso } = useAuth();

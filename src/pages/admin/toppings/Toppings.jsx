@@ -6,7 +6,7 @@ import './Toppings.css';
 import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
 
-const POR_PAGINA = 5;
+const POR_PAGINA = 10;
 
 function Toggle({ activo, onChange }) {
   return (

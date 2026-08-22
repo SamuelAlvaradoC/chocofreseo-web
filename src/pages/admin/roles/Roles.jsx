@@ -257,7 +257,7 @@ function ModalPermisos({ open, onClose, onGuardar, rol, permisosDisponibles = []
   );
 }
 
-const POR_PAGINA = 5;
+const POR_PAGINA = 10;
 
 export default function Roles() {
   const [lista,              setLista]              = useState([]);
