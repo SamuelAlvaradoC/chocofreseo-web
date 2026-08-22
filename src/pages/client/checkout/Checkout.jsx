@@ -523,7 +523,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
         <label className="checkout-label">Observaciones (opcional)</label>
         <textarea
           rows={1}
-          placeholder="¿Alguna nota? (opcional)"
+          placeholder="Ej: devuelta de $50.000 (opcional)"
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
           onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'; }}
