@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Barrios from './Barrios';
 import * as api from '../../../services/api';
@@ -37,15 +37,15 @@ function mockApiDefaults() {
   api.listarCiudades.mockResolvedValue([{ id_ciudad: 1, nombre: 'Medellín' }]);
 }
 
-describe('Barrios admin — fila de filtros con "Mostrar", paginación compacta sin duplicado', () => {
+describe('Barrios admin — "Mostrar" arriba (filtros) Y abajo (paginación), sincronizados', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test('el selector "Mostrar" aparece UNA sola vez, en la fila de filtros (ya no está duplicado abajo)', async () => {
+  test('el selector "Mostrar" aparece dos veces: en la fila de filtros Y junto a la paginación de abajo', async () => {
     mockApiDefaults();
     render(<Barrios />);
 
     await screen.findByText('Barrio 1');
-    expect(screen.getAllByText('Mostrar:')).toHaveLength(1);
+    expect(screen.getAllByText('Mostrar:')).toHaveLength(2);
   });
 
   test('el select de ciudad tiene un ancho fijo angosto, no 100% de la fila', async () => {
@@ -57,34 +57,47 @@ describe('Barrios admin — fila de filtros con "Mostrar", paginación compacta 
     expect(selectCiudad.style.width).toBe('260px');
   });
 
-  test('cambiar "Mostrar" desde los filtros recalcula la tabla igual que antes', async () => {
+  test('NO hay paginación (números) flotando arriba, entre los filtros y la tabla', async () => {
     mockApiDefaults();
     render(<Barrios />);
 
     await screen.findByText('Barrio 1');
-    fireEvent.change(screen.getByDisplayValue('10'), { target: { value: 'todos' } });
-
-    // Con "Todos" ya no hay paginación (una sola "página" con los 25).
-    await screen.findByText('Barrio 25');
-    expect(screen.queryByText('Siguiente ›')).not.toBeInTheDocument();
+    // Solo debe existir un bloque .paginacion (el de abajo).
+    expect(document.querySelectorAll('.paginacion')).toHaveLength(1);
   });
 
-  test('la navegación de páginas (números) aparece UNA sola vez, compacta entre los filtros y la tabla', async () => {
-    mockApiDefaults();
-    render(<Barrios />);
-
-    await screen.findByText('Barrio 1');
-    // Con 25 barrios y 10/página hay 3 páginas.
-    expect(screen.getAllByText('Siguiente ›')).toHaveLength(1);
-    expect(screen.getAllByText('‹ Anterior')).toHaveLength(1);
-  });
-
-  test('la fila de paginación ya no vive dentro de la tarjeta blanca de la tabla (sin "tabla-wrap" propio)', async () => {
+  test('la paginación de abajo vive DENTRO de la tarjeta de la tabla, sin envoltorio propio', async () => {
     mockApiDefaults();
     render(<Barrios />);
 
     await screen.findByText('Barrio 1');
     const filaPaginacion = screen.getByText('‹ Anterior').closest('.paginacion');
-    expect(filaPaginacion.closest('.tabla-wrap')).toBeNull();
+    // Su .tabla-wrap más cercano debe ser el mismo que envuelve la tabla
+    // (no uno extra, propio y separado).
+    const tarjetas = document.querySelectorAll('.tabla-wrap');
+    expect(tarjetas).toHaveLength(1);
+    expect(filaPaginacion.closest('.tabla-wrap')).toBe(tarjetas[0]);
+  });
+
+  test('cambiar "Mostrar" desde arriba (filtros) sincroniza con el de abajo (paginación)', async () => {
+    mockApiDefaults();
+    render(<Barrios />);
+
+    await screen.findByText('Barrio 1');
+    const [mostrarArriba, mostrarAbajo] = screen.getAllByDisplayValue('10');
+    fireEvent.change(mostrarArriba, { target: { value: '50' } });
+
+    expect(mostrarAbajo.value).toBe('50');
+  });
+
+  test('cambiar "Mostrar" desde abajo (paginación) sincroniza con el de arriba (filtros)', async () => {
+    mockApiDefaults();
+    render(<Barrios />);
+
+    await screen.findByText('Barrio 1');
+    const [mostrarArriba, mostrarAbajo] = screen.getAllByDisplayValue('10');
+    fireEvent.change(mostrarAbajo, { target: { value: 'todos' } });
+
+    expect(within(mostrarArriba.closest('div')).getByDisplayValue('Todos')).toBeInTheDocument();
   });
 });
