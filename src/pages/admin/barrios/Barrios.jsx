@@ -269,14 +269,13 @@ export default function Barrios() {
           </tbody>
         </table>
         {/* Mismo estado que el "Mostrar" de la fila de filtros -- cambiar
-            uno actualiza el otro. compacto=true quita el padding/borde
-            propios de ".paginacion" para que quede pegada a la última fila,
-            sin tarjeta/caja aparte (igual que el patrón de Ventas). */}
+            uno actualiza el otro. Sin compacto: conserva el padding/borde
+            propios de ".paginacion" para que no quede pegada/recortada
+            contra la última fila de la tabla (mismo patrón que Productos). */}
         {filtrados.length > 0 && (
           <Paginacion
             pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
             porPagina={porPagina} onCambiarPorPagina={setPorPagina}
-            compacto
           />
         )}
       </div>

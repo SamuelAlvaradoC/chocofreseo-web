@@ -74,11 +74,15 @@ export default function Paginacion({
   compacto = false,
 }) {
   const mostrarSelector = porPagina !== undefined && typeof onCambiarPorPagina === 'function';
-  const mostrarNumeros  = totalPaginas > 1;
+  // Siempre se renderizan Anterior/1/Siguiente, incluso con una sola página
+  // (deshabilitados en ese caso) -- layout consistente en todas las tablas
+  // del panel en vez de que la fila de paginación aparezca y desaparezca
+  // según cuántos registros haya.
+  const mostrarNumeros  = true;
 
   if (!mostrarSelector && !mostrarNumeros) return null;
 
-  const rango = mostrarNumeros ? calcularRangoPaginas(pagina, totalPaginas, delta) : [];
+  const rango = calcularRangoPaginas(pagina, totalPaginas, delta);
 
   return (
     <div

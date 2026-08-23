@@ -79,9 +79,11 @@ describe('<Paginacion /> — render e interacción', () => {
     expect(screen.getByText('Siguiente ›')).not.toBeDisabled();
   });
 
-  test('con una sola página y sin selector, no renderiza nada', () => {
-    const { container } = render(<Paginacion pagina={1} totalPaginas={1} onCambiarPagina={() => {}} />);
-    expect(container).toBeEmptyDOMElement();
+  test('con una sola página y sin selector, igual renderiza Anterior/1/Siguiente deshabilitados', () => {
+    render(<Paginacion pagina={1} totalPaginas={1} onCambiarPagina={() => {}} />);
+    expect(screen.getByText('‹ Anterior')).toBeDisabled();
+    expect(screen.getByText('Siguiente ›')).toBeDisabled();
+    expect(screen.getByText('1')).toHaveClass('activo');
   });
 
   test('selector "Mostrar" solo aparece si se pasan porPagina + onCambiarPorPagina', () => {

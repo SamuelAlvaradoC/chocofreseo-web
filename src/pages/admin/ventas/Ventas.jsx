@@ -5,12 +5,11 @@ import { LogoBancolombia, LogoNequi, LogoEfectivo, LogoWhatsApp } from '../../..
 import { toast } from '../../../utils/toast';
 import { imgCl } from '../../../utils/cloudinary';
 import AdminLayout from '../../../components/layout/AdminLayout';
+import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import FormDireccion from '../../../components/common/FormDireccion';
 import './Ventas.css';
-
-const OPCIONES_POR_PAGINA = [10, 50, 100, 'todos'];
 
 const ESTADO_LABELS = {
   pendiente:  'Pendiente',
@@ -2074,29 +2073,10 @@ export default function Ventas() {
           </tbody>
         </table>
         {filtrados.length > 0 && (
-          <div className="paginacion" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12.5, fontWeight: 600, color: '#888' }}>Mostrar:</span>
-              <select
-                value={porPagina}
-                onChange={(e) => setPorPagina(e.target.value === 'todos' ? 'todos' : Number(e.target.value))}
-                style={{ height: 32, padding: '0 10px', borderRadius: 8, border: '1px solid #e0e0e0', fontSize: 13, color: '#333', background: '#fff', fontFamily: 'inherit', outline: 'none', cursor: 'pointer' }}
-              >
-                {OPCIONES_POR_PAGINA.map((op) => (
-                  <option key={op} value={op}>{op === 'todos' ? 'Todos' : op}</option>
-                ))}
-              </select>
-            </div>
-            {totalPaginas > 1 && (
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button className="btn-pagina" onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1}>‹</button>
-                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-                  <button key={n} className={`btn-pagina${pagina === n ? ' activo' : ''}`} onClick={() => setPagina(n)}>{n}</button>
-                ))}
-                <button className="btn-pagina" onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>›</button>
-              </div>
-            )}
-          </div>
+          <Paginacion
+            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
+            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
+          />
         )}
       </div>
       </div>
