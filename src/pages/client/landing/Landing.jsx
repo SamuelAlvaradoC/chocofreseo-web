@@ -19,7 +19,7 @@ const PRODUCTOS_ESTRELLA = [
 ];
 
 const PASOS = [
-  { icono: <ShoppingBag size={28} />, numero: '01', titulo: 'Elige tu antojo',    desc: 'Explora el catálogo, personaliza con toppings, salsas y adiciones' },
+  { icono: <ShoppingBag size={28} />, numero: '01', titulo: 'Elige tu antojo',    desc: 'Explora el catálogo, personaliza con toppings, untables y adiciones' },
   { icono: <MapPin      size={28} />, numero: '02', titulo: 'Marca tu ubicación', desc: 'Pon el pin en el mapa y calculamos el domicilio automáticamente' },
   { icono: <CreditCard  size={28} />, numero: '03', titulo: 'Elige cómo pagar',  desc: 'Efectivo, transferencia o mixto. Sin complicaciones' },
   { icono: <Truck       size={28} />, numero: '04', titulo: 'Recíbelo con freseo', desc: 'Tu pedido llega directo a tu puerta, fresquito y delicioso' },
@@ -59,35 +59,26 @@ export default function Landing() {
       <section style={{ padding: '60px 20px', background: 'white' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 26, fontWeight: 900, color: '#1a1a1a', marginBottom: 8 }}>
-            Míranos en acción
+            Aprende a pedir en 1 minuto
           </h2>
           <p style={{ color: '#888', fontSize: 14, marginBottom: 32 }}>
-            Síguenos en TikTok, Instagram y Facebook para ver nuestras creaciones
+            Mira este video rápido y descubre lo fácil que es hacer tu pedido en ChocoFreseo. Mientras tanto, síguenos en nuestras redes:
           </p>
 
           <div style={{
-            background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+            background: '#1a1a1a',
             borderRadius: 20, overflow: 'hidden',
             aspectRatio: '16/9', position: 'relative',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
             maxWidth: 640, margin: '0 auto 24px',
           }}>
-            <div style={{ textAlign: 'center', color: 'white' }}>
-              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" style={{ marginBottom: 12 }}>
-                <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="rgba(255,255,255,0.7)" stroke="none"/>
-              </svg>
-              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>Video próximamente</div>
-              <div style={{ fontSize: 13, opacity: 0.6 }}>@chocofreseo en TikTok</div>
-            </div>
-            <div style={{
-              position: 'absolute', top: 16, right: 16,
-              background: '#CA0B0B', borderRadius: 6,
-              padding: '4px 10px', fontSize: 11,
-              color: 'white', fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 5,
-            }}>
-              <LogoTikTok size={11} color="white"/> TikTok
-            </div>
+            <video
+              controls
+              preload="metadata"
+              style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
+            >
+              <source src="https://res.cloudinary.com/diqeuyoqo/video/upload/v1787968751/ChocoFreseo_video_landing_v2_fark9e.mp4" type="video/mp4" />
+              Tu navegador no soporta la reproducción de video.
+            </video>
           </div>
 
           {/* Orden: TikTok @chocofreseo · Instagram @chocofreseo · TikTok @sorprendetupaladar */}

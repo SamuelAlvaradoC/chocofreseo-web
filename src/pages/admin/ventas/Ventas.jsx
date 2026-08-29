@@ -221,7 +221,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
             ))}
           </div>
           <div style={{ fontSize: 11, color: '#888', marginTop: 6, fontWeight: 600 }}>
-            Paso {pasoIdx + 1} de {pasos.length} · {pasoActual === 'bowl' ? 'Cobertura' : pasoActual === 'chocolate' ? 'Tipo de chocolate' : pasoActual === 'salsas' ? 'Salsas' : pasoActual === 'toppings' ? 'Toppings' : 'Adiciones'}
+            Paso {pasoIdx + 1} de {pasos.length} · {pasoActual === 'bowl' ? 'Cobertura' : pasoActual === 'chocolate' ? 'Tipo de chocolate' : pasoActual === 'salsas' ? 'Untables' : pasoActual === 'toppings' ? 'Toppings' : 'Adiciones'}
           </div>
         </div>
         <div style={{ padding: '16px 18px', flex: 1, overflowY: 'auto' }}>
@@ -278,7 +278,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
           {pasoActual === 'salsas' && (
             <div>
               <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>
-                Primeras 2 gratis · <span style={{ color: COLOR_SALSAS, fontWeight: 700 }}>extras +${PRECIO_SALSA_EXTRA.toLocaleString('es-CO')} c/u</span>
+                Primeros 2 gratis · <span style={{ color: COLOR_SALSAS, fontWeight: 700 }}>extras +${PRECIO_SALSA_EXTRA.toLocaleString('es-CO')} c/u</span>
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {SALSAS_DISPONIBLES.map((salsa) => {
@@ -377,7 +377,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
               <span>Base</span><span>${precioBase.toLocaleString('es-CO')}</span>
             </div>
             {topExtra > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#CA0B0B' }}><span>Toppings extra</span><span>+${topExtra.toLocaleString('es-CO')}</span></div>}
-            {salsaExtra > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: COLOR_SALSAS }}><span>Salsas extra</span><span>+${salsaExtra.toLocaleString('es-CO')}</span></div>}
+            {salsaExtra > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: COLOR_SALSAS }}><span>Untables extra</span><span>+${salsaExtra.toLocaleString('es-CO')}</span></div>}
             {adicsTotal > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#d97706' }}><span>Adiciones</span><span>+${adicsTotal.toLocaleString('es-CO')}</span></div>}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 14, color: '#CA0B0B', borderTop: '1px solid #e5e7eb', paddingTop: 6, marginTop: 4 }}>
               <span>Total unitario</span><span>${precioTotal.toLocaleString('es-CO')}</span>
@@ -1113,7 +1113,7 @@ function ModalDetalle({ open, onClose, venta }) {
                     <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>
                       ${precioBase.toLocaleString('es-CO')} base
                       {toppingExtra > 0 && <span style={{ color: '#CA0B0B' }}> · +${toppingExtra.toLocaleString('es-CO')} toppings</span>}
-                      {salsaExtra   > 0 && <span style={{ color: COLOR_SALSAS }}> · +${salsaExtra.toLocaleString('es-CO')} salsas</span>}
+                      {salsaExtra   > 0 && <span style={{ color: COLOR_SALSAS }}> · +${salsaExtra.toLocaleString('es-CO')} untables</span>}
                       {adicsTotal   > 0 && <span style={{ color: '#d97706' }}> · +${adicsTotal.toLocaleString('es-CO')} adiciones</span>}
                       {cantidad     > 1 && <span> · ×{cantidad}</span>}
                     </div>

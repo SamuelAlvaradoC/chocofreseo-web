@@ -205,7 +205,7 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
               <span style={{ position: 'absolute', top: 2, left: permiteSalsas ? '22px' : '2px', width: 20, height: 20, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
             </button>
             <span style={{ fontSize: 13, fontWeight: 600, color: permiteSalsas ? '#CA0B0B' : '#888' }}>
-              {permiteSalsas ? '🍫 Con salsas' : 'Sin salsas'}
+              {permiteSalsas ? '🍫 Con untables' : 'Sin untables'}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -338,7 +338,7 @@ function ModalDetalle({ open, onClose, producto, categoriasLista = [], onEditar 
                 </span>
               </div>
               <div className="detalle-item">
-                <span className="detalle-label">Salsas</span>
+                <span className="detalle-label">Untables</span>
                 <span className="detalle-badge" style={{ background: producto.permite_salsas ? '#f5f5f5' : '#fafafa', color: producto.permite_salsas ? '#1a1a1a' : '#999' }}>
                   {producto.permite_salsas ? '✓ Sí' : '✗ No'}
                 </span>

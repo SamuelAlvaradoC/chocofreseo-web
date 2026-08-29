@@ -440,7 +440,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
           )}
           {salsasExtra > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', color: COLOR_SALSAS }}>
-              <span>Salsas extra</span><span>+${salsasExtra.toLocaleString('es-CO')}</span>
+              <span>Untables extra</span><span>+${salsasExtra.toLocaleString('es-CO')}</span>
             </div>
           )}
           {adicionTotal > 0 && (
@@ -480,9 +480,9 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
             </div>
             <button onClick={cerrar} style={{ background: '#f5f5f5', border: 'none', borderRadius: '50%', width: 34, height: 34, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
           </div>
-          <p style={{ ...secLbl, marginTop: 10, marginBottom: 0 }}>Elige tus salsas 🍫</p>
+          <p style={{ ...secLbl, marginTop: 10, marginBottom: 0 }}>Elige tus untables 🍫</p>
           <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-            Las primeras {MAX_SALSAS_GRATIS} son gratis · Adicionales: ${PRECIO_SALSA_EXTRA.toLocaleString('es-CO')} c/u
+            Los primeros {MAX_SALSAS_GRATIS} son gratis · Adicionales: ${PRECIO_SALSA_EXTRA.toLocaleString('es-CO')} c/u
           </div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
@@ -521,8 +521,8 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
             })}
           </div>
           <div style={{ padding: '10px 14px', background: salsasElegidas.length >= MAX_SALSAS_GRATIS ? '#fef3c7' : '#f0fdf4', borderRadius: 8, fontSize: 13, textAlign: 'center', border: '1px solid', borderColor: salsasElegidas.length >= MAX_SALSAS_GRATIS ? '#fde68a' : '#bbf7d0' }}>
-            {salsasElegidas.length === 0 && `Elige hasta ${MAX_SALSAS_GRATIS} salsas gratis`}
-            {salsasElegidas.length > 0 && salsasCobradas === 0 && `${salsasGratis} salsa${salsasGratis > 1 ? 's' : ''} incluida${salsasGratis > 1 ? 's' : ''} ✓`}
+            {salsasElegidas.length === 0 && `Elige hasta ${MAX_SALSAS_GRATIS} untables gratis`}
+            {salsasElegidas.length > 0 && salsasCobradas === 0 && `${salsasGratis} untable${salsasGratis > 1 ? 's' : ''} incluido${salsasGratis > 1 ? 's' : ''} ✓`}
             {salsasCobradas > 0 && `${salsasGratis} gratis + ${salsasCobradas} extra = +$${costoSalsas.toLocaleString('es-CO')}`}
           </div>
         </div>
@@ -812,7 +812,7 @@ function BadgeProducto({ p }) {
     tieneCobertura && 'Elige cobertura',
     tieneChocolate && 'Elige chocolate',
     tieneToppings  && labelTop,
-    tieneSalsas    && `${MAX_SALSAS_GRATIS} salsas gratis`,
+    tieneSalsas    && `${MAX_SALSAS_GRATIS} untables gratis`,
   ].filter(Boolean);
 
   return (
