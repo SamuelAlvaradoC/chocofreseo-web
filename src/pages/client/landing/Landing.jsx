@@ -3,7 +3,7 @@ import ClientLayout from '../../../components/layout/ClientLayout';
 import Hero         from './components/Hero';
 import Conocenos    from './components/Conocenos';
 import CtaFinal     from './components/CtaFinal';
-import { ShoppingBag, MapPin, CreditCard, Truck, Maximize2, X } from 'lucide-react';
+import { ShoppingBag, MapPin, CreditCard, Truck } from 'lucide-react';
 import { LogoInstagram, LogoTikTok, LogoFacebook } from '../../../components/common/LogosApps';
 import './Landing.css';
 
@@ -27,42 +27,10 @@ const PASOS = [
 
 export default function Landing() {
   const [productosDB, setProductosDB] = useState([]);
-  const [pantallaGrande, setPantallaGrande] = useState(false);
 
   useEffect(() => {
     document.title = 'ChocoFreseo | Chocolates, Fresas y Postres en Medellín';
   }, []);
-
-  // Pantalla grande simulada (position:fixed, no Fullscreen API real) para
-  // permitir vertical y evitar el aviso del SO de Android en fullscreen
-  // nativo -- ver commits anteriores. Al no ser fullscreen real no hay
-  // gesto/botón Atrás nativo para salir, así que hace falta manejarlo a
-  // mano: Escape, botón X, y el botón Atrás del navegador/celular via
-  // history (se empuja una entrada al abrir, popstate cierra en vez de
-  // navegar fuera de la página).
-  const abrirPantallaGrande = () => {
-    setPantallaGrande(true);
-    window.history.pushState({ videoPantallaGrande: true }, '');
-  };
-  const cerrarPantallaGrande = () => {
-    setPantallaGrande(false);
-    if (window.history.state?.videoPantallaGrande) window.history.back();
-  };
-
-  useEffect(() => {
-    if (!pantallaGrande) return;
-    const onPopState = () => setPantallaGrande(false);
-    const onKeyDown = (e) => { if (e.key === 'Escape') cerrarPantallaGrande(); };
-    window.addEventListener('popstate', onPopState);
-    window.addEventListener('keydown', onKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('popstate', onPopState);
-      window.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [pantallaGrande]);
 
   useEffect(() => {
     const apiUrl = (process.env.REACT_APP_API_URL || 'https://mi-api-qpjo.onrender.com') + '/api';
@@ -97,42 +65,23 @@ export default function Landing() {
             Mira este video rápido y descubre lo fácil que es hacer tu pedido en ChocoFreseo. Mientras tanto, síguenos en nuestras redes:
           </p>
 
-          <div style={pantallaGrande ? {
-            position: 'fixed', inset: 0, zIndex: 1000,
-            background: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          } : {
+          <div style={{
             background: '#1a1a1a',
             borderRadius: 20, overflow: 'hidden',
             aspectRatio: '16/9', position: 'relative',
             maxWidth: 640, margin: '0 auto 24px',
           }}>
-            {/* controlsList="nofullscreen" quita el botón de fullscreen nativo
-                de los controles del navegador -- en su lugar, el botón propio
-                de abajo activa "pantalla grande" simulada (position:fixed, no
-                Fullscreen API real), para permitir vertical libremente y no
-                disparar el aviso del SO de Android. */}
+            {/* Fullscreen 100% nativo del navegador: pantalla completa real
+                (oculta la barra del navegador), a cambio de forzar landscape
+                y mostrar el aviso de Android en gestos -- aprobado. */}
             <video
-              className="chocofreseo-video"
               controls
-              controlsList="nofullscreen"
               preload="auto"
               style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
             >
               <source src="https://res.cloudinary.com/diqeuyoqo/video/upload/v1787968751/ChocoFreseo_video_landing_v2_fark9e.mp4" type="video/mp4" />
               Tu navegador no soporta la reproducción de video.
             </video>
-            <button
-              onClick={pantallaGrande ? cerrarPantallaGrande : abrirPantallaGrande}
-              aria-label={pantallaGrande ? 'Cerrar pantalla grande' : 'Ver en pantalla grande'}
-              style={{
-                position: 'absolute', top: 12, right: 12,
-                width: 36, height: 36, borderRadius: 8,
-                background: 'rgba(0,0,0,0.55)', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              {pantallaGrande ? <X size={18} color="white" /> : <Maximize2 size={16} color="white" />}
-            </button>
           </div>
 
           {/* Orden: TikTok @chocofreseo · Instagram @chocofreseo · TikTok @sorprendetupaladar */}
