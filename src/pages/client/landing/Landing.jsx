@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ClientLayout from '../../../components/layout/ClientLayout';
 import Hero         from './components/Hero';
 import Conocenos    from './components/Conocenos';
 import CtaFinal     from './components/CtaFinal';
-import { ShoppingBag, MapPin, CreditCard, Truck } from 'lucide-react';
+import { ShoppingBag, MapPin, CreditCard, Truck, Maximize2 } from 'lucide-react';
 import { LogoInstagram, LogoTikTok, LogoFacebook } from '../../../components/common/LogosApps';
 import './Landing.css';
 
@@ -27,10 +27,24 @@ const PASOS = [
 
 export default function Landing() {
   const [productosDB, setProductosDB] = useState([]);
+  const videoWrapRef = useRef(null);
 
   useEffect(() => {
     document.title = 'ChocoFreseo | Chocolates, Fresas y Postres en Medellín';
   }, []);
+
+  // Experimento: pedir fullscreen al DIV contenedor en vez de al <video>
+  // mismo. El forzado a landscape que hace Chrome parece ser un
+  // comportamiento especial solo para cuando el <video> ES el elemento en
+  // fullscreen -- si el contenedor es un div normal, en teoría no debería
+  // aplicar, dejando fullscreen real (barra del navegador oculta) sin
+  // forzar orientación. No verificado en dispositivo real todavía.
+  const abrirPantallaGrande = () => {
+    const el = videoWrapRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  };
 
   useEffect(() => {
     const apiUrl = (process.env.REACT_APP_API_URL || 'https://mi-api-qpjo.onrender.com') + '/api';
@@ -65,23 +79,44 @@ export default function Landing() {
             Mira este video rápido y descubre lo fácil que es hacer tu pedido en ChocoFreseo. Mientras tanto, síguenos en nuestras redes:
           </p>
 
-          <div style={{
-            background: '#1a1a1a',
-            borderRadius: 20, overflow: 'hidden',
-            aspectRatio: '16/9', position: 'relative',
-            maxWidth: 640, margin: '0 auto 24px',
-          }}>
-            {/* Fullscreen 100% nativo del navegador: pantalla completa real
-                (oculta la barra del navegador), a cambio de forzar landscape
-                y mostrar el aviso de Android en gestos -- aprobado. */}
+          <div
+            ref={videoWrapRef}
+            className="video-fullscreen-wrap"
+            style={{
+              background: '#1a1a1a',
+              borderRadius: 20, overflow: 'hidden',
+              aspectRatio: '16/9', position: 'relative',
+              maxWidth: 640, margin: '0 auto 24px',
+            }}
+          >
+            {/* Fullscreen nativo pedido al DIV (no al <video>) -- ver
+                comentario en abrirPantallaGrande. El botón nativo de
+                fullscreen del <video> se oculta (controlsList + CSS en
+                Landing.css) para que la única forma de entrar sea nuestro
+                botón, apuntando siempre al contenedor. */}
             <video
+              className="chocofreseo-video"
               controls
+              controlsList="nofullscreen"
               preload="auto"
               style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
             >
               <source src="https://res.cloudinary.com/diqeuyoqo/video/upload/v1787968751/ChocoFreseo_video_landing_v2_fark9e.mp4" type="video/mp4" />
               Tu navegador no soporta la reproducción de video.
             </video>
+            <button
+              onClick={abrirPantallaGrande}
+              aria-label="Ver en pantalla grande"
+              className="video-fullscreen-btn"
+              style={{
+                position: 'absolute', top: 12, right: 12,
+                width: 36, height: 36, borderRadius: 8,
+                background: 'rgba(0,0,0,0.55)', border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <Maximize2 size={16} color="white" />
+            </button>
           </div>
 
           {/* Orden: TikTok @chocofreseo · Instagram @chocofreseo · TikTok @sorprendetupaladar */}
