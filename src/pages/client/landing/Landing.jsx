@@ -33,26 +33,6 @@ export default function Landing() {
     document.title = 'ChocoFreseo | Chocolates, Fresas y Postres en Medellín';
   }, []);
 
-  // El navegador (sobre todo Chrome/Android) bloquea la orientación a
-  // landscape por su cuenta al entrar en fullscreen nativo de <video> --
-  // no hay ningún código nuestro forzándolo (se revisó CSS/JS del
-  // proyecto, no existe). screen.orientation.unlock() lo revierte para
-  // que el fullscreen respete portrait/landscape según como esté el
-  // celular en ese momento. Es un no-op seguro donde la Screen
-  // Orientation API no existe (ej. iOS Safari).
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const onFullscreenChange = () => {
-      const isFullscreen = document.fullscreenElement === video;
-      if (isFullscreen && screen.orientation?.unlock) {
-        try { screen.orientation.unlock(); } catch { /* no soportado */ }
-      }
-    };
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
-  }, []);
-
   useEffect(() => {
     const apiUrl = (process.env.REACT_APP_API_URL || 'https://mi-api-qpjo.onrender.com') + '/api';
     fetch(`${apiUrl}/catalogo/productos`)
@@ -92,6 +72,16 @@ export default function Landing() {
             aspectRatio: '16/9', position: 'relative',
             maxWidth: 640, margin: '0 auto 24px',
           }}>
+            {/* Sin JS de orientación a propósito: un intento anterior de forzar
+                screen.orientation.unlock() en fullscreenchange (para permitir
+                fullscreen vertical) causaba que el aviso nativo "pantalla
+                completa, presiona Atrás para salir" de Chrome/Android tardara
+                mucho más en desaparecer, y el video se veía roto en vertical
+                -- ambos síntomas apuntan a que ese código competía con el
+                bloqueo a landscape que Chrome ya hace por su cuenta para un
+                video más ancho que alto. Se quitó: forzar landscape en
+                fullscreen para un video horizontal es el comportamiento
+                estándar de facto (YouTube, Vimeo, etc.), no un bug. */}
             <video
               ref={videoRef}
               controls
