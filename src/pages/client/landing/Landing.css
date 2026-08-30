@@ -46,16 +46,11 @@
   height: 100%;
   object-fit: contain;
 }
-.video-fullscreen-wrap:fullscreen .video-fullscreen-btn,
-.video-fullscreen-wrap:-webkit-full-screen .video-fullscreen-btn {
-  display: none;
-}
-
 /* Refuerzo de controlsList="nofullscreen" -- algunos Chrome/Android no
    lo respetan de forma consistente. No afecta el resto de los
    controles nativos (play/pausa, progreso, volumen). El botón de
    fullscreen del <video> se oculta a propósito: la única forma de
-   entrar debe ser el botón propio, que apunta al contenedor. */
+   entrar/salir debe ser el botón propio, que apunta al contenedor. */
 .chocofreseo-video::-webkit-media-controls-fullscreen-button {
   display: none !important;
 }
