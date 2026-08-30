@@ -25,3 +25,10 @@
   margin-bottom: 48px;
   line-height: 1.2;
 }
+
+/* Refuerzo de controlsList="nofullscreen" (Landing.jsx) -- algunos
+   Chrome/Android no lo respetan de forma consistente. No afecta el
+   resto de los controles nativos (play/pausa, progreso, volumen). */
+.chocofreseo-video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+}

@@ -112,6 +112,7 @@ export default function Landing() {
                 Fullscreen API real), para permitir vertical libremente y no
                 disparar el aviso del SO de Android. */}
             <video
+              className="chocofreseo-video"
               controls
               controlsList="nofullscreen"
               preload="auto"
