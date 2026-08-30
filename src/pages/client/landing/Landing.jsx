@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ClientLayout from '../../../components/layout/ClientLayout';
 import Hero         from './components/Hero';
 import Conocenos    from './components/Conocenos';
@@ -27,9 +27,30 @@ const PASOS = [
 
 export default function Landing() {
   const [productosDB, setProductosDB] = useState([]);
+  const videoRef = useRef(null);
 
   useEffect(() => {
     document.title = 'ChocoFreseo | Chocolates, Fresas y Postres en Medellín';
+  }, []);
+
+  // El navegador (sobre todo Chrome/Android) bloquea la orientación a
+  // landscape por su cuenta al entrar en fullscreen nativo de <video> --
+  // no hay ningún código nuestro forzándolo (se revisó CSS/JS del
+  // proyecto, no existe). screen.orientation.unlock() lo revierte para
+  // que el fullscreen respete portrait/landscape según como esté el
+  // celular en ese momento. Es un no-op seguro donde la Screen
+  // Orientation API no existe (ej. iOS Safari).
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onFullscreenChange = () => {
+      const isFullscreen = document.fullscreenElement === video;
+      if (isFullscreen && screen.orientation?.unlock) {
+        try { screen.orientation.unlock(); } catch { /* no soportado */ }
+      }
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
   }, []);
 
   useEffect(() => {
@@ -72,9 +93,10 @@ export default function Landing() {
             maxWidth: 640, margin: '0 auto 24px',
           }}>
             <video
+              ref={videoRef}
               controls
-              preload="metadata"
-              style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }}
+              preload="auto"
+              style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
             >
               <source src="https://res.cloudinary.com/diqeuyoqo/video/upload/v1787968751/ChocoFreseo_video_landing_v2_fark9e.mp4" type="video/mp4" />
               Tu navegador no soporta la reproducción de video.
