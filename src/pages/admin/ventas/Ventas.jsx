@@ -8,6 +8,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
+import { useEstadoImpresora } from '../../../hooks/useEstadoImpresora';
 import FormDireccion from '../../../components/common/FormDireccion';
 import './Ventas.css';
 
@@ -1697,6 +1698,7 @@ function ModalAnular({ open, onClose, onConfirmar, venta }) {
 
 export default function Ventas() {
   const { tienePermiso } = useAuth();
+  const impresoraConectada = useEstadoImpresora();
   const [lista,          setLista]         = useState([]);
   const [clientesData,   setClientesData]  = useState([]);
   const [productosData,  setProductosData] = useState([]);
@@ -1937,6 +1939,19 @@ export default function Ventas() {
     const barrio    = typeof dirObj === 'object' ? dirObj?.barrio    || '' : '';
     const ciudad    = typeof dirObj === 'object' ? dirObj?.ciudad    || '' : '';
     const referencia = typeof dirObj === 'object' ? dirObj?.referencia || '' : '';
+
+    // El emit de abajo no tiene forma de confirmar que alguien lo recibió
+    // (io.emit() en el backend manda el evento igual con 0 o con 10
+    // impresores conectados) -- antes esto SIEMPRE mostraba "Enviando a
+    // imprimir..." como si hubiera funcionado, aunque el programa de la
+    // impresora estuviera cerrado. impresoraConectada === false es el
+    // único caso donde tenemos certeza real de que no va a imprimir; si
+    // todavía no se sabe (null) o si SÍ está conectada, se procede igual
+    // que antes.
+    if (impresoraConectada === false) {
+      toast.error('Impresora desconectada -- pídele a quien esté en el mostrador que abra el programa de la impresora.');
+      return;
+    }
 
     try {
       const socketUrl = (process.env.REACT_APP_API_URL || 'http://localhost:3000').replace('/api', '');
