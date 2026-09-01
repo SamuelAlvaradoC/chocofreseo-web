@@ -279,7 +279,11 @@ export default function Domicilios() {
   const [procesando,       setProcesando]       = useState(false);
 
   const cargar = () => api.listarVentas('pendiente').then((d) => setLista([...d].sort((a, b) => a.id_venta - b.id_venta).map(mapVentaDomi))).catch(() => {});
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    cargar();
+    const id = setInterval(cargar, 8000);
+    return () => clearInterval(id);
+  }, []);
 
   const filtrados = lista.filter((d) =>
     (d.cliente || '').toLowerCase().includes(busqueda.toLowerCase()) ||

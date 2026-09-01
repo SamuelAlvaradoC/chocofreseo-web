@@ -221,7 +221,7 @@ export default function Cocina() {
 
   useEffect(() => {
     cargar();
-    const id = setInterval(cargar, 30000);
+    const id = setInterval(cargar, 8000);
     return () => clearInterval(id);
   }, [cargar]);
 
