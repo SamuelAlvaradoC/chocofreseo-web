@@ -80,28 +80,6 @@
   text-transform: capitalize;
 }
 
-/* Estado del impresor */
-.topbar-impresora {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.topbar-impresora--ok {
-  background: #f0fdf4;
-  color: #166534;
-}
-.topbar-impresora--ok svg { stroke: #16a34a; }
-.topbar-impresora--mal {
-  background: #fff5f5;
-  color: #CA0B0B;
-}
-.topbar-impresora--mal svg { stroke: #CA0B0B; }
-
 /* Divider */
 .topbar-divider {
   width: 1px;
@@ -165,8 +143,6 @@
   .topbar-divider       { display: none; }
   .topbar-btn span      { display: none; }
   .topbar-btn           { padding: 8px 10px; min-width: 36px; justify-content: center; }
-  .topbar-impresora span { display: none; }
-  .topbar-impresora      { padding: 8px; }
 }
 @media (max-width: 480px) {
   .topbar               { height: 56px; }

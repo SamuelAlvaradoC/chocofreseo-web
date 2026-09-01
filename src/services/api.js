@@ -204,11 +204,6 @@ export const setTiempoEspera    = (m)  => patch('/configuracion/tiempo-espera', 
 export const getHorario         = ()     => get('/configuracion/horario').catch(() => ({ hora_apertura: 13, hora_cierre: 20, estado_tienda: 'schedule' }));
 export const setHorario         = (data) => patch('/configuracion/horario', data).catch(() => ({ hora_apertura: 13, hora_cierre: 20, estado_tienda: 'schedule' }));
 
-// false ante cualquier error de red -- no queremos que un fallo momentáneo
-// de la consulta se vea igual que "sí está conectado" (mejor una falsa
-// alarma ocasional que un falso positivo que oculte el problema real).
-export const getEstadoImpresora = () => get('/configuracion/estado-impresora').then((d) => !!d?.conectado).catch(() => false);
-
 // ── Puntos fidelidad ───────────────────────────────────────
 export const getMisPuntos       = ()    => get('/puntos/mis-puntos').catch(() => ({ puntos: 0, saldo_pesos: 0, movimientos: [] }));
 export const getPuntosCliente   = (id)  => get(`/puntos/cliente/${id}`).catch(() => ({ puntos: 0, saldo_pesos: 0, movimientos: [] }));

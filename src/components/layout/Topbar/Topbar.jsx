@@ -1,13 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Store, LogOut, User, Printer } from 'lucide-react';
+import { Store, LogOut, User } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
-import { useEstadoImpresora } from '../../../hooks/useEstadoImpresora';
 import './Topbar.css';
 
 export default function Topbar() {
   const navigate = useNavigate();
   const { usuario, logout } = useAuth();
-  const impresoraConectada = useEstadoImpresora();
 
   const handleSalir = () => {
     logout();
@@ -34,19 +32,6 @@ export default function Topbar() {
       </div>
 
       <div className="topbar-derecha">
-        {/* Estado del impresor -- badge persistente, no un toast que
-            desaparece, para que sea imposible no darse cuenta de que
-            hay que abrir el programa de la impresora. */}
-        {impresoraConectada !== null && (
-          <div
-            className={`topbar-impresora ${impresoraConectada ? 'topbar-impresora--ok' : 'topbar-impresora--mal'}`}
-            title={impresoraConectada ? 'El programa de la impresora está conectado' : 'El programa de la impresora está cerrado -- ábrelo para que los tickets se impriman'}
-          >
-            <Printer size={14} />
-            <span>{impresoraConectada ? 'Impresora conectada' : 'Impresora desconectada'}</span>
-          </div>
-        )}
-
         {/* Avatar + info */}
         <div className="topbar-usuario">
           <div className="topbar-avatar"><User size={17} strokeWidth={2.5} /></div>
