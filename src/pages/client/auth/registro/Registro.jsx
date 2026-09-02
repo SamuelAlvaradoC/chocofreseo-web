@@ -2,6 +2,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import * as api from '../../../../services/api';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../../utils/validarSinHtml';
 import './Registro.css';
 
 export default function Registro() {
@@ -18,6 +19,7 @@ export default function Registro() {
     e.preventDefault();
     if (!nombre.trim())    { setError('El nombre es obligatorio'); return; }
     if (nombre.trim().length < 2) { setError('El nombre debe tener al menos 2 caracteres'); return; }
+    if (contieneEtiquetaHtml(nombre)) { setError(MSG_HTML); return; }
     if (!email.trim())     { setError('El correo electrónico es obligatorio'); return; }
     if (!/\S+@\S+\.\S+/.test(email)) { setError('Ingresa un correo electrónico válido'); return; }
     if (!contrasena.trim()) { setError('La contraseña es obligatoria'); return; }

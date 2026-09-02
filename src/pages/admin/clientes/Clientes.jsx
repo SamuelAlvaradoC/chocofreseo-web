@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import './Clientes.css';
 import * as api from '../../../services/api';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 
 const POR_PAGINA = 10;
 
@@ -33,6 +34,7 @@ function ModalFormulario({ open, onClose, onGuardar, clienteEditar, procesando =
   const validar = () => {
     const e = {};
     if (!nombre.trim())  e.nombre  = 'El nombre es requerido';
+    else if (contieneEtiquetaHtml(nombre)) e.nombre = MSG_HTML;
     if (!email.trim())   e.email   = 'El email es requerido';
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Email no válido';
     if (!clienteEditar) {

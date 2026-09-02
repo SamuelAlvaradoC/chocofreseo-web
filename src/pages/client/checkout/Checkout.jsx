@@ -9,6 +9,7 @@ import { useCart } from '../../../context/CartContext';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import * as api from '../../../services/api';
 import FormDireccion from '../../../components/common/FormDireccion';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import './Checkout.css';
 
 const COSTO_DOMICILIO_DEFAULT = 5500;
@@ -625,6 +626,10 @@ export default function Checkout() {
 
   const handleConfirmar = async (pagoInfo) => {
     if (procesando) return;
+    if (contieneEtiquetaHtml(pagoInfo?.observaciones) || contieneEtiquetaHtml(direccion?.direccion_linea) || contieneEtiquetaHtml(direccion?.referencia)) {
+      toast.error(MSG_HTML);
+      return;
+    }
     setProcesando(true);
     try {
       // Subir comprobante a Cloudinary si existe

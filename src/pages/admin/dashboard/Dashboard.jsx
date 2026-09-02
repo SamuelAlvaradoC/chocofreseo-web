@@ -6,6 +6,7 @@ import { toast } from '../../../utils/toast';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import './Dashboard.css';
 
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
@@ -64,6 +65,7 @@ function ModalGasto({ open, onClose, onGuardar, procesando }) {
 
   const guardar = async () => {
     if (!descripcion.trim()) { toast.error('Ingresa una descripción'); return; }
+    if (contieneEtiquetaHtml(descripcion)) { toast.error(MSG_HTML); return; }
     const valorNum = Number(String(valor).replace(/\./g, '')) || 0;
     if (!valor || valorNum <= 0) { toast.error('Ingresa un valor mayor a 0'); return; }
     try {

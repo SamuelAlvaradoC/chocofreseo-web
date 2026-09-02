@@ -9,6 +9,7 @@ import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import FormDireccion from '../../../components/common/FormDireccion';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import './Ventas.css';
 
 const ESTADO_LABELS = {
@@ -1633,6 +1634,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                   return;
                 }
               }
+              if (contieneEtiquetaHtml(nombreCliente)) { toast.error(MSG_HTML); return; }
               setProcesando(true);
               try {
                 await onGuardar({
@@ -1688,7 +1690,11 @@ function ModalAnular({ open, onClose, onConfirmar, venta }) {
         <textarea className="form-input" rows={3} placeholder="Motivo de anulación..." value={motivo} onChange={(e) => setMotivo(e.target.value)} style={{ resize: 'none', marginTop: 12 }} />
         <div className="modal-pie centrado" style={{ marginTop: 16 }}>
           <button className="btn-secundario" onClick={onClose}>Cancelar</button>
-          <button className="btn-peligro" disabled={!motivo.trim() || procesando} onClick={() => { if (!motivo.trim() || procesando) return; setProcesando(true); onConfirmar(motivo); }}>{procesando ? 'Anulando...' : 'Anular venta'}</button>
+          <button className="btn-peligro" disabled={!motivo.trim() || procesando} onClick={() => {
+            if (!motivo.trim() || procesando) return;
+            if (contieneEtiquetaHtml(motivo)) { toast.error(MSG_HTML); return; }
+            setProcesando(true); onConfirmar(motivo);
+          }}>{procesando ? 'Anulando...' : 'Anular venta'}</button>
         </div>
       </div>
     </div>

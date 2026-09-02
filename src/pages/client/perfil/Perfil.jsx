@@ -7,6 +7,7 @@ import * as api from '../../../services/api';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { LogoWhatsApp, LogoBancolombia, LogoEfectivo } from '../../../components/common/LogosApps';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import './Perfil.css';
 
 const COLOR_SALSAS       = '#ea580c';
@@ -63,6 +64,7 @@ function SeccionDatos({ usuario }) {
     if (!nombre.trim() || nombre.trim().length < 2) {
       setError('El nombre debe tener al menos 2 caracteres'); return;
     }
+    if (contieneEtiquetaHtml(nombre)) { setError(MSG_HTML); return; }
     if (telefono && telefono.trim() !== '') {
       if (!/^3[0-9]{9}$/.test(telefono.trim())) {
         setError('El teléfono debe ser un número colombiano válido de 10 dígitos (ej: 3001234567)'); return;

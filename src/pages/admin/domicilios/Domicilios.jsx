@@ -5,6 +5,7 @@ import { toast } from '../../../utils/toast';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import './Domicilios.css';
 
 const COLOR_SALSAS = '#ea580c';
@@ -298,7 +299,9 @@ export default function Domicilios() {
   };
 
   const rechazar = async (motivo) => {
-    if (procesando) return; setProcesando(true);
+    if (procesando) return;
+    if (contieneEtiquetaHtml(motivo)) { toast.error(MSG_HTML); return; }
+    setProcesando(true);
     const id = (revisando || rechazandoRapido)?.id_venta;
     if (id) {
       try { await api.anularVenta(id, { motivo_anulacion: motivo || 'Rechazado por admin' }); toast.success('Pedido rechazado'); }

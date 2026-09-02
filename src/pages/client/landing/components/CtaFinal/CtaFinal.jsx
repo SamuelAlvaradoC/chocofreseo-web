@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MapPin, RefreshCw, ThumbsUp, Star, Clock, MessageSquare, Send, AlertTriangle } from 'lucide-react';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../../../utils/validarSinHtml';
 import './CtaFinal.css';
 
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
@@ -21,6 +22,10 @@ export default function CtaFinal() {
   const handleEnviarResena = async () => {
     if (!sede || !frecuencia || !califAtencion || !califProducto || !recomendaria || !tiempoAdecuado) {
       setErrorResena('Completa todos los campos obligatorios: sede, frecuencia, calificaciones, recomendación y tiempo de entrega.');
+      return;
+    }
+    if (contieneEtiquetaHtml(loQueGusto) || contieneEtiquetaHtml(productoDeseado) || contieneEtiquetaHtml(mejora)) {
+      setErrorResena(MSG_HTML);
       return;
     }
     setErrorResena('');
