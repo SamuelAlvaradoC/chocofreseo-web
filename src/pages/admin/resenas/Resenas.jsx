@@ -21,9 +21,17 @@ export default function Resenas() {
       .finally(() => setCargando(false));
   }, []);
 
+  // r.fecha viene en UTC (ISO). Comparar su string crudo contra el valor
+  // de un <input type="date"> (que el admin piensa en hora Colombia,
+  // UTC-5) fallaba para cualquier reseña creada después de las 7pm: su
+  // fecha en UTC ya cae al día siguiente, así que aparecía bajo la fecha
+  // de "mañana" en vez de "hoy". Mismo ajuste que ya usa cierreCaja
+  // (rangoHoy) para calcular el día en hora Colombia.
+  const fechaLocalCO = (iso) => iso ? new Date(new Date(iso).getTime() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10) : null;
+
   const filtradas = lista.filter((r) => {
     const matchSede = filtroSede === '' || r.sede === filtroSede;
-    const matchFecha = !filtroFecha || r.fecha?.startsWith(filtroFecha);
+    const matchFecha = !filtroFecha || fechaLocalCO(r.fecha) === filtroFecha;
     return matchSede && matchFecha;
   });
 
