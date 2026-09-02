@@ -31,7 +31,7 @@ export default function CtaFinal() {
     setErrorResena('');
     setEnviandoResena(true);
     try {
-      await fetch(`${API_URL}/resenas`, {
+      const res = await fetch(`${API_URL}/resenas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -45,13 +45,24 @@ export default function CtaFinal() {
           mejora,
         }),
       });
+      // fetch() solo rechaza (catch) por fallos de red -- un 429 (límite
+      // diario) o 422 (validación) del backend llega aquí igual como
+      // "éxito" si no se revisa res.ok explícitamente. Antes de este fix,
+      // el backend SÍ rechazaba la 5ta reseña del día, pero el usuario
+      // veía el mismo "¡Reseña enviada!" de siempre sin enterarse.
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setErrorResena(data?.message || 'No se pudo enviar la reseña. Inténtalo de nuevo.');
+        return;
+      }
       setEnviado(true);
       setSede(''); setFrecuencia(''); setCalifAtencion(0); setCalifProducto(0);
       setRecomendaria(''); setTiempoAdecuado('');
       setLoQueGusto(''); setProductoDeseado(''); setMejora('');
       setTimeout(() => setEnviado(false), 5000);
-    } catch (e) { console.error(e); }
-    finally { setEnviandoResena(false); }
+    } catch (e) {
+      setErrorResena('Sin conexión. Inténtalo de nuevo.');
+    } finally { setEnviandoResena(false); }
   };
 
   return (
