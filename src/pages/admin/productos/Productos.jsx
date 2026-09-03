@@ -91,7 +91,7 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
   const [tamano,            setTamano]            = useState(productoEditar?.tamano ?? '');
   const [precio,            setPrecio]            = useState(productoEditar?.precio ? Number(productoEditar.precio).toLocaleString('es-CO') : '');
   const [permiteToppings,   setPermiteToppings]   = useState(productoEditar?.permite_toppings ?? 0);
-  const [maxToppings,       setMaxToppings]       = useState([1, 2, 3].includes(productoEditar?.max_toppings) ? productoEditar.max_toppings : 1);
+  const [maxToppings,       setMaxToppings]       = useState([1, 2].includes(productoEditar?.max_toppings) ? productoEditar.max_toppings : 1);
   const [permiteChocolate,  setPermiteChocolate]  = useState(productoEditar?.permite_chocolate ? 1 : 0);
   const [permiteSalsas,     setPermiteSalsas]     = useState(Boolean(productoEditar?.permite_salsas));
   const [esBowl,            setEsBowl]            = useState(Boolean(productoEditar?.es_bowl));
@@ -223,7 +223,7 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
           <div className="form-grupo" style={{ marginBottom: 16 }}>
             <label className="form-label">¿Cuántos toppings van incluidos gratis?</label>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              {[1, 2, 3].map(n => (
+              {[1, 2].map(n => (
                 <button key={n} type="button" onClick={() => setMaxToppings(n)}
                   style={{ width: 40, height: 40, borderRadius: 8, border: maxToppings === n ? '2px solid #CA0B0B' : '1px solid #e5e7eb', background: maxToppings === n ? '#fff5f5' : 'white', color: maxToppings === n ? '#CA0B0B' : '#555', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
                   {n}
