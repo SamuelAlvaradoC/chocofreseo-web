@@ -260,7 +260,10 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
           <div>
             <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>Elige tus toppings</p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4, background: '#f9fafb', borderRadius: 20, padding: '4px 12px', fontSize: 12, color: '#666' }}>
-              <span>Los primeros <strong>{maxTop}</strong> son gratis · Extra: <strong>$2.000 c/u</strong></span>
+              {/* "Los primeros 1 son gratis" no tiene sentido en singular --
+                  mismo criterio que el badge de la tarjeta de producto (ver
+                  labelTop más abajo en este archivo). */}
+              <span><strong>{maxTop} topping{maxTop === 1 ? '' : 's'} gratis</strong> · Extra: <strong>$2.000 c/u</strong></span>
             </div>
           </div>
           <button onClick={cerrar} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#aaa', lineHeight: 1, padding: 4 }}>✕</button>
