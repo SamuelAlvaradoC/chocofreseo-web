@@ -54,13 +54,7 @@ export default function Hero() {
 
       <div className="hero-imagen">
         <div className="hero-imagen-wrap">
-          <div style={{
-            width: '100%',
-            height: 'clamp(200px, 40vw, 400px)',
-            borderRadius: 16,
-            overflow: 'hidden',
-            position: 'relative',
-          }}>
+          <div className="hero-imagen-tonalizada">
             <img
               src="https://res.cloudinary.com/diqeuyoqo/image/upload/v1780607775/40bc9e7c-2c1d-48a5-a4b8-fdcd46a17a4e_al6zv9.jpg"
               alt="ChocoFreseo - Puro Freseo"
@@ -72,6 +66,7 @@ export default function Hero() {
                 display: 'block',
               }}
             />
+            <div className="hero-imagen-overlay" />
           </div>
         </div>
       </div>

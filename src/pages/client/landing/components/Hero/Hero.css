@@ -160,6 +160,30 @@
   position: relative;
 }
 
+/* ── Igualar tono con el fondo del hero -- el fondo de la foto es un
+   rojo más anaranjado/saturado que el rojo marca (#CA0B0B) del hero,
+   por eso se notaba el corte recto de la imagen como una calcomanía
+   pegada encima. Un overlay semitransparente del mismo rojo de marca,
+   con mix-blend-mode "multiply", tiñe la foto completa hacia ese tono
+   sin aplanarla (las luces/sombras de los vasos se conservan),
+   reduciendo el contraste en el borde sin tocar la forma del recorte
+   ni el archivo original. ── */
+.hero-imagen-tonalizada {
+  width: 100%;
+  height: clamp(200px, 40vw, 400px);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+.hero-imagen-overlay {
+  position: absolute;
+  inset: 0;
+  background: #CA0B0B;
+  mix-blend-mode: multiply;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 .hero-imagen-placeholder {
   width: 100%;
   height: 100%;
