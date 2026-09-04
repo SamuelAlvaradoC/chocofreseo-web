@@ -2,6 +2,7 @@
 import { Banknote, Smartphone, Zap, Bike, Check } from 'lucide-react';
 import DomiciliarioLayout from '../../../components/layout/DomiciliarioLayout/DomiciliarioLayout';
 import * as api from '../../../services/api';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './CierreCaja.css';
 
 const coloresTarjeta = [
@@ -51,6 +52,7 @@ export default function CierreCaja() {
   };
 
   useEffect(() => { cargarVentas(fecha); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useRefrescoHeader(() => cargarVentas(fecha));
 
   const totalDia        = ventasMock.reduce((a, v) => a + v.valor, 0);
   // Para mixto: usar los montos parciales, no el valor total

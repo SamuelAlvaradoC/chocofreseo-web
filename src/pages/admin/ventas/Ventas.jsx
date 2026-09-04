@@ -10,6 +10,7 @@ import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './Ventas.css';
 
 const ESTADO_LABELS = {
@@ -1723,6 +1724,7 @@ export default function Ventas() {
   const [confirmarImpresion, setConfirmarImpresion] = useState(null);
 
   const cargar = (f = filtroFecha) => api.listarVentas(null, f || undefined).then((d) => setLista(d.map(mapVenta))).catch(() => {});
+  useRefrescoHeader(cargar);
 
   const limpiarFiltros = () => {
     setFiltroEstado('todos');

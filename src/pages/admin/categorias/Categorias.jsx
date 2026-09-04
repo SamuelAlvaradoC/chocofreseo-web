@@ -3,6 +3,7 @@ import { toast } from '../../../utils/toast';
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './Categorias.css';
 
 function Toggle({ activo, onChange }) {
@@ -166,6 +167,7 @@ export default function Categorias() {
 
   const cargar = () => api.listarCategorias().then(setLista).catch(() => {});
   useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
   useEffect(() => { setPagina(1); }, [busqueda]);
 
   const filtradas = lista.filter((c) =>

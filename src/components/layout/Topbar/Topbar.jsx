@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { Store, LogOut, User } from 'lucide-react';
+import { Store, LogOut, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
+import { useRefresco } from '../../../context/RefrescoContext';
 import './Topbar.css';
 
 export default function Topbar() {
   const navigate = useNavigate();
   const { usuario, logout } = useAuth();
+  const { refrescar, refrescando, hayRefresco } = useRefresco();
 
   const handleSalir = () => {
     logout();
@@ -32,6 +34,20 @@ export default function Topbar() {
       </div>
 
       <div className="topbar-derecha">
+        {/* Refrescar los datos de la pantalla actual -- solo aparece si
+            esa pantalla registró una función de recarga (ver
+            RefrescoContext); no recarga toda la página. */}
+        {hayRefresco && (
+          <button
+            className="topbar-btn topbar-btn--refrescar"
+            title="Refrescar"
+            onClick={refrescar}
+            disabled={refrescando}
+          >
+            <RefreshCw size={15} className={refrescando ? 'topbar-icono-girando' : ''} />
+          </button>
+        )}
+
         {/* Avatar + info */}
         <div className="topbar-usuario">
           <div className="topbar-avatar"><User size={17} strokeWidth={2.5} /></div>

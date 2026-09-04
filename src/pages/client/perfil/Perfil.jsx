@@ -8,6 +8,7 @@ import FormDireccion from '../../../components/common/FormDireccion';
 import { LogoWhatsApp, LogoBancolombia, LogoEfectivo } from '../../../components/common/LogosApps';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './Perfil.css';
 
 const COLOR_SALSAS       = '#ea580c';
@@ -218,12 +219,12 @@ function SeccionDirecciones({ usuario }) {
   const [procesando,       setProcesando]       = useState(false);
   const [confirmarEliminar,setConfirmarEliminar]= useState(null);
 
-  useEffect(() => {
-    api.misDirecciones()
-      .then((data) => setDirecciones((data || []).filter((d) => d.estado !== 0)))
-      .catch(() => setDirecciones([]))
-      .finally(() => setCargando(false));
-  }, []);
+  const cargar = () => api.misDirecciones()
+    .then((data) => setDirecciones((data || []).filter((d) => d.estado !== 0)))
+    .catch(() => setDirecciones([]))
+    .finally(() => setCargando(false));
+  useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
 
   const handleAgregar = async () => {
     if (procesando) return;
@@ -396,12 +397,12 @@ function SeccionHistorial() {
   const tiempoEspera = useTiempoEspera();
   const porPagina    = 5;
 
-  useEffect(() => {
-    api.misVentas()
-      .then((data) => setHistorial(data || []))
-      .catch(() => setHistorial([]))
-      .finally(() => setCargando(false));
-  }, []);
+  const cargar = () => api.misVentas()
+    .then((data) => setHistorial(data || []))
+    .catch(() => setHistorial([]))
+    .finally(() => setCargando(false));
+  useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
 
   const totalPaginas     = Math.max(1, Math.ceil(historial.length / porPagina));
   const pedidosPaginados = historial.slice((pagina - 1) * porPagina, pagina * porPagina);

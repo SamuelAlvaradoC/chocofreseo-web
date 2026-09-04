@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { Bike, LayoutDashboard, ChefHat, User } from 'lucide-react';
+import { useRefresco } from '../../../context/RefrescoContext';
+import { Bike, LayoutDashboard, ChefHat, User, RefreshCw } from 'lucide-react';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -11,6 +12,7 @@ export default function Navbar() {
   const location  = useLocation();
   const navigate  = useNavigate();
   const { usuario, logout } = useAuth();
+  const { refrescar, refrescando, hayRefresco } = useRefresco();
 
   useEffect(() => {
     if (!perfilAbierto) return;
@@ -102,6 +104,23 @@ export default function Navbar() {
             </>
           )}
         </div>
+
+        {/* Refrescar los datos de la pantalla actual -- fuera de
+            .navbar-acciones a propósito (esa se esconde en mobile detrás
+            del hamburguesa) para que siga visible en celular, donde se
+            usa la mayoría del catálogo. Solo aparece si la pantalla
+            actual registró una función de recarga (ver RefrescoContext);
+            no recarga toda la página. */}
+        {hayRefresco && (
+          <button
+            className="navbar-btn-refrescar"
+            title="Refrescar"
+            onClick={refrescar}
+            disabled={refrescando}
+          >
+            <RefreshCw size={16} className={refrescando ? 'navbar-icono-girando' : ''} />
+          </button>
+        )}
 
         <button className="navbar-hamburguesa" onClick={() => setMenuAbierto(!menuAbierto)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

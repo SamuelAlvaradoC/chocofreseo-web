@@ -4,6 +4,7 @@ import Navbar from '../../../components/layout/Navbar/Navbar';
 import Footer from '../../../components/layout/Footer/Footer';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import * as api from '../../../services/api';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import '../perfil/Perfil.css';
 
 const COLOR_SALSAS       = '#ea580c';
@@ -55,12 +56,12 @@ export default function MisPedidos() {
   const [cargando,  setCargando]  = useState(true);
   const tiempoEspera = useTiempoEspera();
 
-  useEffect(() => {
-    api.misVentas()
-      .then((data) => setHistorial(data || []))
-      .catch(() => setHistorial([]))
-      .finally(() => setCargando(false));
-  }, []);
+  const cargar = () => api.misVentas()
+    .then((data) => setHistorial(data || []))
+    .catch(() => setHistorial([]))
+    .finally(() => setCargando(false));
+  useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
 
   return (
     <div className="perfil-wrapper">

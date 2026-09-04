@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, HelpCircle, RefreshCw } from 'lucide-react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 
 const Estrellas = ({ valor }) => (
   <span style={{ color: '#f59e0b' }}>{'★'.repeat(valor)}{'☆'.repeat(5 - valor)}</span>
@@ -14,12 +15,12 @@ export default function Resenas() {
   const [filtroSede,  setFiltroSede]  = useState('');
   const [filtroFecha, setFiltroFecha] = useState('');
 
-  useEffect(() => {
-    api.listarResenas()
-      .then((data) => setLista(Array.isArray(data) ? data : []))
-      .catch(() => setLista([]))
-      .finally(() => setCargando(false));
-  }, []);
+  const cargar = () => api.listarResenas()
+    .then((data) => setLista(Array.isArray(data) ? data : []))
+    .catch(() => setLista([]))
+    .finally(() => setCargando(false));
+  useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
 
   // r.fecha viene en UTC (ISO). Comparar su string crudo contra el valor
   // de un <input type="date"> (que el admin piensa en hora Colombia,

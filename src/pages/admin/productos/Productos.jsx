@@ -6,6 +6,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './Productos.css';
 
 const TAMANOS = [
@@ -380,6 +381,7 @@ export default function Productos() {
     api.listarCategorias().then(setCategoriasLista).catch(() => {});
   };
   useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
   useEffect(() => { setPagina(1); }, [busqueda, filtroCategoria]);
 
   const filtrados = lista.filter((p) => {

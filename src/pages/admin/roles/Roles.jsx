@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import './Roles.css';
 import * as api from '../../../services/api';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 
 
 
@@ -270,17 +271,17 @@ export default function Roles() {
   const [detalle,            setDetalle]            = useState(null);
   const [modalPermisos,      setModalPermisos]      = useState(null);
 
-  useEffect(() => {
-    Promise.all([
-      api.listarRoles(),
-      api.listarPermisos(),
-    ])
-      .then(([roles, permisos]) => {
-        setLista(roles.map((r) => ({ ...r, permisos: r.rolPermisos?.map((rp) => rp.id_permiso) || r.permisos || [] })));
-        setPermisosDisponibles(permisos || []);
-      })
-      .catch((err) => console.error('Error cargando roles:', err));
-  }, []);
+  const cargar = () => Promise.all([
+    api.listarRoles(),
+    api.listarPermisos(),
+  ])
+    .then(([roles, permisos]) => {
+      setLista(roles.map((r) => ({ ...r, permisos: r.rolPermisos?.map((rp) => rp.id_permiso) || r.permisos || [] })));
+      setPermisosDisponibles(permisos || []);
+    })
+    .catch((err) => console.error('Error cargando roles:', err));
+  useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
 
   useEffect(() => { setPagina(1); }, [busqueda]);
 

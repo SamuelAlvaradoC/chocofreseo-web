@@ -6,6 +6,7 @@ import { toast } from '../../../utils/toast';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import './Dashboard.css';
 
@@ -320,6 +321,15 @@ export default function Dashboard() {
     api.getTiempoEspera().then((min) => { setTiempoEspera(min); setNuevoTiempo(min); }).catch(() => {});
     api.getHorario().then((h) => { setHorario(h); setNuevoHorario({ hora_apertura: h.hora_apertura, hora_cierre: h.hora_cierre }); }).catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Refresco desde el header: reusa cargar() (stats) y la versión "silenciosa"
+  // del cierre de caja (no resetea editandoBase ni parpadea la card).
+  const recargarDashboard = () => {
+    cargar();
+    cargarCierreSilencioso();
+    fetch(`${API_URL}/resenas/resumen`).then((r) => r.json()).then((d) => { if (d.success) setResumenResenas(d.data); }).catch(() => {});
+  };
+  useRefrescoHeader(recargarDashboard);
 
   return (
     <AdminLayout>

@@ -4,6 +4,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import { toast } from '../../../utils/toast';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
+import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import '../categorias/Categorias.css';
 
 function Toggle({ activo, onChange }) {
@@ -94,6 +95,7 @@ export default function Ciudades() {
 
   const cargar = () => api.listarCiudades().then(setLista).catch(() => {});
   useEffect(() => { cargar(); }, []);
+  useRefrescoHeader(cargar);
   useEffect(() => { setPagina(1); }, [busqueda]);
 
   const filtradas   = lista.filter((c) => c.nombre.toLowerCase().includes(busqueda.toLowerCase()));
