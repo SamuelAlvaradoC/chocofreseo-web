@@ -94,24 +94,7 @@
   font-size: 15px;
   color: #1a1a1a;
   white-space: nowrap;
-  flex: 1;
 }
-
-.domi-drawer-cerrar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: none;
-  background: none;
-  color: #888;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background .15s, color .15s;
-}
-.domi-drawer-cerrar:hover { background: #fff5f5; color: #CA0B0B; }
 
 /* ── Nav del drawer ── */
 .domi-drawer-nav {
