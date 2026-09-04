@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Settings, Users, ShoppingBag,
   ClipboardList, CheckCircle, ChefHat, MessageSquare,
-  ChevronRight, ChevronDown, MapPin,
+  ChevronRight, ChevronDown, ChevronLeft, MapPin,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import './Sidebar.css';
@@ -122,6 +122,20 @@ export default function Sidebar({ collapsed = false, onToggle }) {
 
   return (
     <aside className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}>
+
+      {/* Flecha para abrir/cerrar -- forma principal y obvia de hacerlo
+          (el logo sigue siendo clicable también, ver más abajo). Un
+          calificador externo señaló que depender solo del logo no es
+          nada intuitivo para un usuario nuevo. */}
+      <button
+        type="button"
+        className="sidebar-toggle-btn"
+        onClick={onToggle}
+        title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+        aria-label={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+      >
+        <ChevronLeft size={14} className={`sidebar-toggle-icono${collapsed ? ' girado' : ''}`} />
+      </button>
 
       {/* Logo */}
       <div

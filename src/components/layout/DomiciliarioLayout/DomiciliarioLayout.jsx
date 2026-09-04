@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Truck, DollarSign, Menu } from 'lucide-react';
+import { Truck, DollarSign, Menu, X } from 'lucide-react';
 import Topbar from '../Topbar';
 import './DomiciliarioLayout.css';
 
@@ -43,6 +43,17 @@ export default function DomiciliarioLayout({ children }) {
             className="domi-drawer-header-logo"
           />
           <span className="domi-drawer-header-texto">ChocoFreseo</span>
+          {/* Cierre explícito -- antes solo se podía cerrar tocando el
+              overlay o un ítem del menú, nada obvio dentro del drawer. */}
+          <button
+            type="button"
+            className="domi-drawer-cerrar"
+            onClick={() => setOpen(false)}
+            aria-label="Cerrar menú"
+            title="Cerrar menú"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Nav */}

@@ -14,6 +14,37 @@
 
 .sidebar--collapsed { width: 60px; }
 
+/* ── Flecha abrir/cerrar -- botón circular que "monta" el borde derecho
+   del sidebar (mitad adentro, mitad afuera), siempre a la misma altura
+   sin importar el ancho actual del sidebar. */
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 32px;
+  right: -12px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  color: #888;
+  z-index: 101;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.sidebar-toggle-btn:hover {
+  background: #fff5f5;
+  color: #CA0B0B;
+  border-color: #CA0B0B;
+}
+
+.sidebar-toggle-icono { transition: transform .2s ease; }
+.sidebar-toggle-icono.girado { transform: rotate(180deg); }
 
 /* ── Logo — acento rojo en el ícono ── */
 .sidebar-logo {
