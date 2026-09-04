@@ -12,6 +12,7 @@ import ClientesPage   from './pages/admin/clientes';
 import EmpleadosPage  from './pages/admin/empleados';
 import RolesPage      from './pages/admin/roles';
 import VentasPage     from './pages/admin/ventas';
+import PedidosPage    from './pages/admin/pedidos';
 import DomiciliosPage from './pages/admin/domicilios';
 import CiudadesPage   from './pages/admin/ciudades';
 import BarriosPage    from './pages/admin/barrios';
@@ -114,6 +115,7 @@ function App() {
         <Route path="/admin/clientes"   element={<RutaAdmin><ClientesPage /></RutaAdmin>} />
         <Route path="/admin/empleados"  element={<RutaAdmin><EmpleadosPage /></RutaAdmin>} />
         <Route path="/admin/roles"      element={<RutaAdmin><RolesPage /></RutaAdmin>} />
+        <Route path="/admin/pedidos"    element={<RutaAdminOConfirmador><PedidosPage /></RutaAdminOConfirmador>} />
         <Route path="/admin/ventas"     element={<RutaAdminOConfirmador><VentasPage /></RutaAdminOConfirmador>} />
         <Route path="/admin/domicilios" element={<RutaAdminOConfirmador><DomiciliosPage /></RutaAdminOConfirmador>} />
         <Route path="/admin/ciudades"   element={<RutaAdmin><CiudadesPage /></RutaAdmin>} />

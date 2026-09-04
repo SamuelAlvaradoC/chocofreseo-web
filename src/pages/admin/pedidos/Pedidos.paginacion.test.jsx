@@ -1,13 +1,13 @@
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Ventas from './Ventas';
+import Pedidos from './Pedidos';
 import * as api from '../../../services/api';
 
 // Mismo workaround que Ventas.crearVenta.repro.test.jsx: react-router-dom@7
 // no se puede resolver bajo el Jest de react-scripts@5.0.1.
 jest.mock('react-router-dom', () => ({
   useNavigate: () => jest.fn(),
-  useLocation: () => ({ pathname: '/admin/ventas' }),
+  useLocation: () => ({ pathname: '/admin/pedidos' }),
   NavLink: ({ children }) => <a>{children}</a>,
 }), { virtual: true });
 
@@ -57,12 +57,12 @@ function mockApiDefaults() {
 
 const filasVenta = () => screen.getAllByText((_, el) => el.tagName === 'SPAN' && el.className === 'id-badge');
 
-describe('Ventas admin — selector "Mostrar" y paginación', () => {
+describe('Pedidos admin — selector "Mostrar" y paginación', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('por defecto muestra 10 por página, seleccionado en el dropdown', async () => {
     mockApiDefaults();
-    render(<Ventas />);
+    render(<Pedidos />);
 
     await screen.findByText('Cliente 1');
     expect(filasVenta()).toHaveLength(10);
@@ -71,7 +71,7 @@ describe('Ventas admin — selector "Mostrar" y paginación', () => {
 
   test('"Todos" desactiva la paginación y muestra el listado completo', async () => {
     mockApiDefaults();
-    render(<Ventas />);
+    render(<Pedidos />);
 
     await screen.findByText('Cliente 1');
     fireEvent.change(screen.getByDisplayValue('10'), { target: { value: 'todos' } });
@@ -83,7 +83,7 @@ describe('Ventas admin — selector "Mostrar" y paginación', () => {
 
   test('cambiar a un tamaño mayor estando en una página alta no deja una página vacía', async () => {
     mockApiDefaults();
-    render(<Ventas />);
+    render(<Pedidos />);
 
     await screen.findByText('Cliente 1');
     // Con 10/página y 25 ventas hay 3 páginas -- ir a la página 3.

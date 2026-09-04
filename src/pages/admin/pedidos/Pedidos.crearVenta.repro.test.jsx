@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Ventas from './Ventas';
+import Pedidos from './Pedidos';
 import * as api from '../../../services/api';
 
 // react-router-dom@7 no se puede resolver bajo el Jest de react-scripts@5.0.1
 // (mismo workaround usado en Catalogo.masPedidos.test.jsx).
 jest.mock('react-router-dom', () => ({
   useNavigate: () => jest.fn(),
-  useLocation: () => ({ pathname: '/admin/ventas' }),
+  useLocation: () => ({ pathname: '/admin/pedidos' }),
   NavLink: ({ children }) => <a>{children}</a>,
 }), { virtual: true });
 
@@ -46,14 +46,14 @@ function mockApiDefaults() {
   api.listarCategorias.mockResolvedValue([]);
 }
 
-describe('Ventas admin — botón "+ Nueva venta" abre ModalCrearVenta', () => {
+describe('Pedidos admin — botón "+ Nueva venta" abre ModalCrearVenta', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('al abrir el modal, la app no debe crashear (blank page)', async () => {
     mockApiDefaults();
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    render(<Ventas />);
+    render(<Pedidos />);
 
     const btn = await screen.findByText('+ Nueva venta');
     fireEvent.click(btn);

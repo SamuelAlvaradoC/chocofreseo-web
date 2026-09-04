@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Settings, Users, ShoppingBag,
-  ClipboardList, CheckCircle, ChefHat, MessageSquare,
+  ClipboardList, Receipt, CheckCircle, ChefHat, MessageSquare,
   ChevronRight, ChevronDown, MapPin,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
@@ -44,6 +44,13 @@ const menu = [
   },
   {
     icon: <ClipboardList size={18} />,
+    label: 'Pedidos',
+    path: '/admin/pedidos',
+    hijos: [],
+    permiso: 'ver_ventas',
+  },
+  {
+    icon: <Receipt size={18} />,
     label: 'Ventas',
     path: '/admin/ventas',
     hijos: [],
