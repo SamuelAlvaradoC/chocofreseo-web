@@ -5,7 +5,6 @@ import Paginacion, { SelectorPorPagina } from '../../../components/Paginacion';
 import { toast } from '../../../utils/toast';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import '../categorias/Categorias.css';
 
 const fmt = (v) => '$' + Number(v).toLocaleString('es-CO');
@@ -138,7 +137,6 @@ export default function Barrios() {
   const [procesando,   setProcesando]   = useState(false);
 
   const cargar = () => api.listarBarrios().then(setLista).catch(() => {});
-  useRefrescoHeader(cargar);
   useEffect(() => {
     cargar();
     api.listarCiudades().then(setCiudades).catch(() => {});

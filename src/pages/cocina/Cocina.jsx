@@ -3,7 +3,6 @@ import { Eye, RefreshCw, Check, AlertTriangle } from 'lucide-react';
 import { toast } from '../../utils/toast';
 import AdminLayout from '../../components/layout/AdminLayout';
 import * as api from '../../services/api';
-import { useRefrescoHeader } from '../../context/RefrescoContext';
 
 const hoyISO = () => new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
@@ -225,7 +224,6 @@ export default function Cocina() {
     const id = setInterval(cargar, 8000);
     return () => clearInterval(id);
   }, [cargar]);
-  useRefrescoHeader(cargar);
 
   const marcarListo = async (id) => {
     setMarcando(true);

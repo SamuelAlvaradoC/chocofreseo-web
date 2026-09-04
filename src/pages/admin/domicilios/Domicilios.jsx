@@ -6,7 +6,6 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './Domicilios.css';
 
 const COLOR_SALSAS = '#ea580c';
@@ -286,7 +285,6 @@ export default function Domicilios() {
     const id = setInterval(cargar, 8000);
     return () => clearInterval(id);
   }, []);
-  useRefrescoHeader(cargar);
 
   const filtrados = lista.filter((d) =>
     (d.cliente || '').toLowerCase().includes(busqueda.toLowerCase()) ||

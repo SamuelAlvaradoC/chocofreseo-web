@@ -3,7 +3,6 @@ import { Check, CheckCircle, PackageOpen, Bike } from 'lucide-react';
 import { LogoWhatsApp, LogoBancolombia, LogoNequi, LogoEfectivo } from '../../../components/common/LogosApps';
 import DomiciliarioLayout from '../../../components/layout/DomiciliarioLayout/DomiciliarioLayout';
 import * as api from '../../../services/api';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './PedidosDomiciliario.css';
 
 const COLOR_SALSAS = '#ea580c';
@@ -389,7 +388,6 @@ export default function PedidosDomiciliario() {
     }).catch(console.error);
   };
   useEffect(() => { cargar(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  useRefrescoHeader(cargar);
 
   const coger = async (pedido) => {
     if (procesando) return;

@@ -5,7 +5,6 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import './Toppings.css';
 import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 
 const POR_PAGINA = 10;
 
@@ -221,7 +220,6 @@ export default function Toppings() {
 
   const cargar = () => api.listarToppings().then(setLista).catch((err) => console.error('Error cargando toppings:', err));
   useEffect(() => { cargar(); }, []);
-  useRefrescoHeader(cargar);
   useEffect(() => { setPagina(1); }, [busqueda]);
 
   const filtrados = lista.filter((t) => t.nombre.toLowerCase().includes(busqueda.toLowerCase()));

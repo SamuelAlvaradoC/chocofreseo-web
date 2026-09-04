@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import './Roles.css';
 import * as api from '../../../services/api';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 
 
 
@@ -281,7 +280,6 @@ export default function Roles() {
     })
     .catch((err) => console.error('Error cargando roles:', err));
   useEffect(() => { cargar(); }, []);
-  useRefrescoHeader(cargar);
 
   useEffect(() => { setPagina(1); }, [busqueda]);
 

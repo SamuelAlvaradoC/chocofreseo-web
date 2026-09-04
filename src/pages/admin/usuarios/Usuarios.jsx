@@ -5,7 +5,6 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import './Usuarios.css';
 import * as api from '../../../services/api';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 
 const POR_PAGINA = 10;
 
@@ -213,7 +212,6 @@ export default function Usuarios() {
   const cargar = () => api.listarUsuarios()
     .then((data) => setLista(data.map((u) => ({ ...u, id_rol: u.rol?.id_rol || u.id_rol }))))
     .catch((err) => console.error('Error cargando usuarios:', err));
-  useRefrescoHeader(cargar);
 
   useEffect(() => {
     cargar();

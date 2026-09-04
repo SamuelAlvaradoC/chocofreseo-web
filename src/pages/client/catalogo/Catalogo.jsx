@@ -9,7 +9,6 @@ import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
 import { formatHora12 } from '../../../utils/formatHora';
 import * as api from '../../../services/api';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './Catalogo.css';
 
 
@@ -956,7 +955,6 @@ export default function Catalogo() {
     api.catalogoMasPedidos().then((prods) => setMasPedidos(prods || [])).catch(console.error);
   };
   useEffect(() => { cargar(); }, []);
-  useRefrescoHeader(cargar);
 
   // Ranking de "más pedidos": Map id_producto -> posición (0 = el más
   // pedido). Se usa tanto para decidir la insignia como para reordenar.

@@ -5,7 +5,6 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import './Clientes.css';
 import * as api from '../../../services/api';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 
 const POR_PAGINA = 10;
 
@@ -255,7 +254,6 @@ export default function Clientes() {
     .then((data) => setLista(data.map((c) => ({ ...c, nombre: c.usuario?.nombre || c.nombre }))))
     .catch((err) => console.error('Error cargando clientes:', err));
   useEffect(() => { cargar(); }, []);
-  useRefrescoHeader(cargar);
 
   useEffect(() => { setPagina(1); }, [busqueda, filtroEstado]);
 

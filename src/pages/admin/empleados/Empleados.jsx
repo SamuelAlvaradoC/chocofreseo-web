@@ -3,7 +3,6 @@ import { toast } from '../../../utils/toast';
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
-import { useRefrescoHeader } from '../../../context/RefrescoContext';
 import './Empleados.css';
 
 const POR_PAGINA = 10;
@@ -247,7 +246,6 @@ export default function Empleados() {
 
   const cargar = () => api.listarEmpleados().then((d) => { setLista(d.map(mapEmpleado)); setCargando(false); }).catch(() => setCargando(false));
   useEffect(() => { cargar(); }, []);
-  useRefrescoHeader(cargar);
   useEffect(() => { setPagina(1); }, [busqueda, filtroCargo]);
 
   // Solo cargos válidos que existen en la lista
