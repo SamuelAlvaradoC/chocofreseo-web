@@ -23,9 +23,42 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handler);
   }, [perfilAbierto]);
 
+  // "Nosotros" es una sección DENTRO de /landing, no una ruta aparte -- por
+  // eso comparar location.pathname nunca la distingue de "Inicio" (ambas
+  // rutas son literalmente '/landing'). Un IntersectionObserver con
+  // rootMargin -50%/-50% reduce el root a una línea horizontal en la mitad
+  // del viewport: nosotrosActivo es true exactamente mientras esa línea cae
+  // dentro de la sección #nosotros, sin importar si se llegó con scroll
+  // manual o con scrollIntoView. Al ser un solo booleano derivado (Inicio
+  // = !nosotrosActivo), los dos estados son mutuamente excluyentes por
+  // construcción -- no hay forma de que ambos queden "activos" a la vez ni
+  // de que parpadeen entre sí en scroll rápido.
+  const [nosotrosActivo, setNosotrosActivo] = useState(false);
+
+  useEffect(() => {
+    if (location.pathname !== '/landing') {
+      setNosotrosActivo(false);
+      return;
+    }
+    const seccion = document.querySelector('#nosotros');
+    if (!seccion) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setNosotrosActivo(entry.isIntersecting),
+      { rootMargin: '-50% 0px -50% 0px', threshold: 0 }
+    );
+    observer.observe(seccion);
+    return () => observer.disconnect();
+  }, [location.pathname]);
+
+  const handleInicio = () => {
+    setMenuAbierto(false);
+    setNosotrosActivo(false);
+  };
+
   const handleNosotros = (e) => {
     e.preventDefault();
     setMenuAbierto(false);
+    setNosotrosActivo(true);
     if (location.pathname === '/landing') {
       document.querySelector('#nosotros')?.scrollIntoView({ behavior: 'smooth' });
     } else {
@@ -58,12 +91,13 @@ export default function Navbar() {
             <Link
               key={l.path}
               to={l.path}
-              className={`navbar-link ${location.pathname === l.path ? 'activo' : ''}`}
+              onClick={l.path === '/landing' ? handleInicio : undefined}
+              className={`navbar-link ${location.pathname === l.path && !(l.path === '/landing' && nosotrosActivo) ? 'activo' : ''}`}
             >
               {l.label}
             </Link>
           ))}
-          <a href="#nosotros" className="navbar-link" onClick={handleNosotros}>Nosotros</a>
+          <a href="#nosotros" className={`navbar-link ${nosotrosActivo ? 'activo' : ''}`} onClick={handleNosotros}>Nosotros</a>
 
           {/* Panel por rol */}
           {usuario?.rol === 'admin'                  && <Link to="/admin/dashboard"        className="navbar-link admin-link">Panel Admin</Link>}
