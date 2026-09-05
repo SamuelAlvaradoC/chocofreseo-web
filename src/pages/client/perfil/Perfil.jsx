@@ -649,25 +649,49 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
     }
   };
 
+  // Trigger integrado en la tarjeta roja de puntos (ver Perfil()) -- el
+  // formulario y las alertas siguen siendo exactamente los mismos, solo que
+  // ahora se presentan en un modal propio en vez de expandirse inline en una
+  // tarjeta separada, para no forzar inputs blancos sobre el fondo rojo.
   return (
-    <div className="perfil-card" style={{ margin: '0 0 24px', padding: '18px 20px', background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>
-            Solo administradores
-          </div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: '#1a1a1a' }}>
-            Valor del punto de fidelidad: <span style={{ color: '#CA0B0B' }}>${valorPunto.toLocaleString('es-CO', { maximumFractionDigits: 2 })} por punto</span>
-          </div>
+    <>
+      {!editando && (
+        <button
+          onClick={abrirEdicion}
+          title="Editar valor del punto (solo administradores)"
+          style={{
+            background: 'rgba(255,255,255,0.18)',
+            border: '1px solid rgba(255,255,255,0.4)',
+            borderRadius: 6,
+            color: '#fff',
+            cursor: 'pointer',
+            padding: '2px 8px',
+            fontSize: 10,
+            fontWeight: 700,
+            marginLeft: 8,
+            fontFamily: 'inherit',
+            verticalAlign: 'middle',
+          }}
+        >
+          ✎ Editar
+        </button>
+      )}
+
+      {exito && (
+        <div style={{ marginTop: 6, fontSize: 11, color: '#dcfce7', fontWeight: 700 }}>
+          ✓ {exito}
         </div>
-        {!editando && (
-          <button className="perfil-btn-sec" onClick={abrirEdicion}>Editar</button>
-        )}
-      </div>
+      )}
 
       {editando && (
-        <div style={{ marginTop: 14 }}>
-          <div className="perfil-form-fila">
+        <div onClick={() => !guardando && setEditando(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 380, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>
+              Solo administradores
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#1a1a1a', marginBottom: 16 }}>
+              Valor del punto de fidelidad
+            </div>
             <div className="perfil-campo">
               <label className="perfil-label">Nuevo valor (pesos por punto)</label>
               <input
@@ -677,19 +701,17 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
                 value={valor}
                 onChange={(e) => { setValor(e.target.value); setError(''); }}
                 placeholder="Ej: 12.5"
+                autoFocus
               />
             </div>
-          </div>
-          {error && <div className="perfil-alerta-err">{error}</div>}
-          {exito && <div style={{ marginTop: 10, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700 }}>{exito}</div>}
-          <div className="perfil-form-botones" style={{ marginTop: 14 }}>
-            <button className="perfil-btn-sec" onClick={() => setEditando(false)} disabled={guardando}>Cancelar</button>
-            <button className="perfil-btn-pri" onClick={() => guardar()} disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar'}</button>
+            {error && <div className="perfil-alerta-err" style={{ marginTop: 10 }}>{error}</div>}
+            <div className="perfil-form-botones" style={{ marginTop: 18 }}>
+              <button className="perfil-btn-sec" onClick={() => setEditando(false)} disabled={guardando}>Cancelar</button>
+              <button className="perfil-btn-pri" onClick={() => guardar()} disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar'}</button>
+            </div>
           </div>
         </div>
       )}
-
-      {!editando && exito && <div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700 }}>{exito}</div>}
 
       {confirmarFueraDeRango !== null && (
         <div onClick={() => setConfirmarFueraDeRango(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -706,7 +728,7 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -781,23 +803,22 @@ export default function Perfil() {
               </div>
               <div style={{ fontSize: 11, opacity: 0.6, marginTop: 12 }}>
                 1 punto = ${valorPunto.toLocaleString('es-CO', { maximumFractionDigits: 2 })} · Se acumulan con cada compra
+                {esAdmin && (
+                  <AdminValorPuntoConfig
+                    valorPunto={valorPunto}
+                    onActualizado={(v) => {
+                      setValorPunto(v);
+                      // El admin puede estar viendo su propia tarjeta de puntos en
+                      // esta misma pantalla -- refrescarla evita que se quede
+                      // mostrando el saldo con el valor viejo hasta el próximo reload.
+                      if (puedeVerPuntos) api.getMisPuntos().then(setPuntos).catch(() => {});
+                    }}
+                  />
+                )}
               </div>
             </div>
           )}
         </div>
-
-        {esAdmin && (
-          <AdminValorPuntoConfig
-            valorPunto={valorPunto}
-            onActualizado={(v) => {
-              setValorPunto(v);
-              // El admin puede estar viendo su propia tarjeta de puntos en esta
-              // misma pantalla -- refrescarla evita que se quede mostrando el
-              // saldo con el valor viejo hasta el próximo reload.
-              if (puedeVerPuntos) api.getMisPuntos().then(setPuntos).catch(() => {});
-            }}
-          />
-        )}
 
         <div className="perfil-layout">
           <aside className="perfil-sidebar perfil-tabs">
