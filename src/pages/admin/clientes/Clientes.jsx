@@ -1,12 +1,15 @@
-﻿import { Search } from 'lucide-react';
+﻿import { Search, Pencil } from 'lucide-react';
 import { toast } from '../../../utils/toast';
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
+import FormDireccion from '../../../components/common/FormDireccion';
 import './Clientes.css';
 import * as api from '../../../services/api';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 
 const POR_PAGINA = 10;
+
+const DIRECCION_VACIA = { direccion_linea: '', barrio: '', ciudad: '', id_barrio: null, id_ciudad: null, referencia: '', tipo_via: '', numero: '', numeral: '', complemento: '' };
 
 function Toggle({ activo, onChange }) {
   return (
@@ -124,7 +127,13 @@ function ModalEliminar({ open, onClose, onConfirmar, nombre, procesando = false 
   );
 }
 
-function ModalDetalle({ clienteDetalle, onClose, valorPunto }) {
+function ModalDetalle({ clienteDetalle, onClose, valorPunto, onActualizarDirecciones }) {
+  const [formDirAbierto, setFormDirAbierto] = useState(null); // null | 'nueva' | id_direccion
+  const [formDir,        setFormDir]        = useState(DIRECCION_VACIA);
+  const [errDirForm,     setErrDirForm]     = useState({});
+  const [procesandoDir,  setProcesandoDir]  = useState(false);
+  const [errorDirForm,   setErrorDirForm]   = useState('');
+
   if (!clienteDetalle) return null;
 
   const cargando = !!clienteDetalle.cargando;
@@ -135,6 +144,64 @@ function ModalDetalle({ clienteDetalle, onClose, valorPunto }) {
   const ventas = c.ventas || [];
 
   const secLabel = { fontSize: 11, fontWeight: 700, color: '#999', letterSpacing: 1, marginBottom: 10, marginTop: 16 };
+
+  const abrirNuevaDireccion = () => {
+    setFormDir(DIRECCION_VACIA);
+    setErrDirForm({});
+    setErrorDirForm('');
+    setFormDirAbierto('nueva');
+  };
+
+  const abrirEditarDireccion = (dir) => {
+    setFormDir({
+      direccion_linea: dir.direccion_linea || '',
+      barrio:          dir.barrio || '',
+      ciudad:          dir.ciudad || '',
+      id_barrio:       dir.id_barrio || null,
+      id_ciudad:       null, // se resuelve dentro de FormDireccion a partir del nombre de la ciudad
+      referencia:      dir.referencia || '',
+      tipo_via: '', numero: '', numeral: '', complemento: '',
+    });
+    setErrDirForm({});
+    setErrorDirForm('');
+    setFormDirAbierto(dir.id_direccion);
+  };
+
+  const cerrarFormDireccion = () => { setFormDirAbierto(null); setErrDirForm({}); setErrorDirForm(''); };
+
+  const guardarDireccion = async () => {
+    if (procesandoDir) return;
+    const errs = {};
+    if (!formDir.direccion_linea?.trim()) errs.direccion_linea = 'Ingresa la dirección';
+    if (!formDir.id_barrio)               errs.barrio          = 'Selecciona el barrio';
+    if (!formDir.ciudad?.trim())          errs.ciudad          = 'Selecciona el municipio';
+    if (Object.keys(errs).length > 0) { setErrDirForm(errs); return; }
+    setProcesandoDir(true);
+    try {
+      // barrio/ciudad/referencia son opcionales en el schema (z.string().optional(),
+      // sin .nullable()) -- hay que omitirlos si están vacíos, no mandar null,
+      // o el backend los rechaza con "Expected string, received null".
+      const datos = { direccion_linea: formDir.direccion_linea, id_barrio: formDir.id_barrio || null };
+      if (formDir.barrio)     datos.barrio     = formDir.barrio;
+      if (formDir.ciudad)     datos.ciudad     = formDir.ciudad;
+      if (formDir.referencia) datos.referencia = formDir.referencia;
+      const actualizada = formDirAbierto === 'nueva'
+        ? await api.crearDireccionCliente(c.id_cliente, datos)
+        : await api.editarDireccionCliente(c.id_cliente, formDirAbierto, datos);
+      onActualizarDirecciones((prev) => {
+        const existe = prev.some((d) => d.id_direccion === actualizada.id_direccion);
+        return existe
+          ? prev.map((d) => (d.id_direccion === actualizada.id_direccion ? actualizada : d))
+          : [...prev, actualizada];
+      });
+      cerrarFormDireccion();
+    } catch (err) {
+      const detalle = Array.isArray(err?.response?.data?.data)
+        ? err.response.data.data.map((d) => d.mensaje).join(', ')
+        : null;
+      setErrorDirForm(detalle || err?.response?.data?.message || 'Error al guardar la dirección');
+    } finally { setProcesandoDir(false); }
+  };
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -177,18 +244,70 @@ function ModalDetalle({ clienteDetalle, onClose, valorPunto }) {
               </div>
 
               {/* Direcciones */}
-              <div style={secLabel}>DIRECCIONES</div>
-              {dirs.length === 0 ? (
+              <div style={{ ...secLabel, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>DIRECCIONES</span>
+                <button
+                  onClick={abrirNuevaDireccion}
+                  style={{ background: 'none', border: '1px solid #e5e7eb', borderRadius: 6, padding: '3px 10px', fontSize: 11, fontWeight: 700, color: '#CA0B0B', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  + Agregar
+                </button>
+              </div>
+
+              {formDirAbierto === 'nueva' && (
+                <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: 14, marginBottom: 10 }}>
+                  <FormDireccion
+                    value={formDir}
+                    onChange={(f, v) => { setFormDir((p) => ({ ...p, [f]: v })); setErrDirForm((p) => ({ ...p, [f]: '' })); }}
+                    errors={errDirForm}
+                    layout="admin"
+                  />
+                  {errorDirForm && <div style={{ color: '#CA0B0B', fontSize: 12, marginBottom: 8 }}>{errorDirForm}</div>}
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button className="btn-secundario" onClick={cerrarFormDireccion}>Cancelar</button>
+                    <button className="btn-primario" onClick={guardarDireccion} disabled={procesandoDir}>{procesandoDir ? 'Guardando...' : 'Guardar dirección'}</button>
+                  </div>
+                </div>
+              )}
+
+              {dirs.length === 0 && formDirAbierto !== 'nueva' ? (
                 <div style={{ fontSize: 13, color: '#aaa' }}>Sin direcciones registradas</div>
               ) : (
                 dirs.map((dir, i) => (
-                  <div key={i} style={{ background: '#f9fafb', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{dir.direccion_linea}</div>
-                    <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
-                      {[dir.barrio, dir.ciudad, dir.departamento].filter(Boolean).join(', ')}
-                    </div>
-                    {dir.referencia && (
-                      <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>Ref: {dir.referencia}</div>
+                  <div key={dir.id_direccion || i}>
+                    {formDirAbierto === dir.id_direccion ? (
+                      <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: 14, marginBottom: 8 }}>
+                        <FormDireccion
+                          value={formDir}
+                          onChange={(f, v) => { setFormDir((p) => ({ ...p, [f]: v })); setErrDirForm((p) => ({ ...p, [f]: '' })); }}
+                          errors={errDirForm}
+                          layout="admin"
+                        />
+                        {errorDirForm && <div style={{ color: '#CA0B0B', fontSize: 12, marginBottom: 8 }}>{errorDirForm}</div>}
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                          <button className="btn-secundario" onClick={cerrarFormDireccion}>Cancelar</button>
+                          <button className="btn-primario" onClick={guardarDireccion} disabled={procesandoDir}>{procesandoDir ? 'Guardando...' : 'Guardar cambios'}</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ background: '#f9fafb', borderRadius: 8, padding: '10px 12px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{dir.direccion_linea}</div>
+                          <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                            {[dir.barrio, dir.ciudad, dir.departamento].filter(Boolean).join(', ')}
+                          </div>
+                          {dir.referencia && (
+                            <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>Ref: {dir.referencia}</div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => abrirEditarDireccion(dir)}
+                          title="Editar dirección"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: 4, flexShrink: 0 }}
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))
@@ -434,7 +553,12 @@ export default function Clientes() {
         <ModalEliminar open={true} onClose={() => setEliminando(null)} onConfirmar={eliminar} nombre={eliminando?.nombre} procesando={procesando} />
       )}
       {clienteDetalle && (
-        <ModalDetalle clienteDetalle={clienteDetalle} onClose={() => setClienteDetalle(null)} valorPunto={valorPunto} />
+        <ModalDetalle
+          clienteDetalle={clienteDetalle}
+          onClose={() => setClienteDetalle(null)}
+          valorPunto={valorPunto}
+          onActualizarDirecciones={(updater) => setClienteDetalle((prev) => ({ ...prev, direcciones: updater(prev.direcciones || []) }))}
+        />
       )}
     </AdminLayout>
   );

@@ -91,6 +91,33 @@ export default function FormDireccion({ value = {}, onChange, errors = {}, layou
     fetchPublic(`${API_BASE}/ciudades/activas`).then(setCiudades);
   }, []);
 
+  // Al editar una dirección existente solo se conoce el nombre de la ciudad
+  // (no su id_ciudad, que no se guarda en la tabla direcciones) -- se
+  // resuelve apenas cargue la lista de ciudades, para poder preseleccionarla.
+  useEffect(() => {
+    if (value?.id_ciudad) return;
+    if (value?.ciudad && ciudades.length > 0) {
+      const match = ciudades.find((c) => c.nombre === value.ciudad);
+      if (match) onChange('id_ciudad', match.id_ciudad);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ciudades, value?.ciudad]);
+
+  // Fallback para direcciones antiguas que tienen id_barrio pero no
+  // guardaron el texto de ciudad -- se busca el barrio en el listado
+  // completo (sin filtrar por ciudad) para sacar su id_ciudad.
+  useEffect(() => {
+    if (value?.id_ciudad || value?.ciudad || !value?.id_barrio) return;
+    fetchPublic(`${API_BASE}/barrios/activos`).then((todos) => {
+      const b = todos.find((x) => x.id_barrio === value.id_barrio);
+      if (b) {
+        onChange('id_ciudad', b.id_ciudad);
+        onChange('ciudad', b.ciudad?.nombre || '');
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value?.id_barrio, value?.id_ciudad, value?.ciudad]);
+
   useEffect(() => {
     const id = value?.id_ciudad;
     if (!id) { setBarrios([]); return; }

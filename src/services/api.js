@@ -140,6 +140,8 @@ export const actualizarCliente          = (id,d) => put(`/clientes/${id}`, d);
 export const eliminarCliente            = (id)   => del(`/clientes/${id}`);
 export const estadoCliente              = (id,d) => patch(`/clientes/${id}/estado`, d);
 export const listarDireccionesCliente   = (id)   => get(`/clientes/${id}/direcciones`);
+export const crearDireccionCliente      = (id,d) => post(`/clientes/${id}/direcciones`, d);
+export const editarDireccionCliente     = (id,idDir,d) => put(`/clientes/${id}/direcciones/${idDir}`, d);
 export const obtenerClienteDetalle      = (id)   => get(`/clientes/${id}/detalle`);
 
 // ── Empleados ─────────────────────────────────────────────────
