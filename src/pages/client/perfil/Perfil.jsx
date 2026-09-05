@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, User, Trash2, Eye } from 'lucide-react';
 import Navbar from '../../../components/layout/Navbar/Navbar';
 import Footer from '../../../components/layout/Footer/Footer';
@@ -683,7 +684,7 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
         </div>
       )}
 
-      {editando && (
+      {editando && createPortal(
         <div onClick={() => !guardando && setEditando(false)} style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 380, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>
@@ -710,10 +711,11 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
               <button className="perfil-btn-pri" onClick={() => guardar()} disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar'}</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {confirmarFueraDeRango !== null && (
+      {confirmarFueraDeRango !== null && createPortal(
         <div onClick={() => setConfirmarFueraDeRango(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 380, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
             <div style={{ fontSize: 32, marginBottom: 10 }}>⚠️</div>
@@ -726,7 +728,8 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
               <button className="perfil-btn-pri" style={{ background: '#CA0B0B' }} onClick={() => guardar(confirmarFueraDeRango)}>Sí, guardar</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
