@@ -48,7 +48,7 @@ function mockApiDefaults() {
   api.getValorPunto.mockResolvedValue(12.5);
 }
 
-describe('Pedidos admin — botón "+ Nueva venta" abre ModalCrearVenta', () => {
+describe('Pedidos admin — botón "+ Nuevo Pedido" abre ModalCrearVenta', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('al abrir el modal, la app no debe crashear (blank page)', async () => {
@@ -57,13 +57,13 @@ describe('Pedidos admin — botón "+ Nueva venta" abre ModalCrearVenta', () => 
 
     render(<Pedidos />);
 
-    const btn = await screen.findByText('+ Nueva venta');
+    const btn = await screen.findByText('+ Nuevo Pedido');
     fireEvent.click(btn);
 
     // Si el bug de "Rendered more hooks than during the previous render"
     // ocurre, React lanza durante el render y RTL relanza el error hacia
     // el test en vez de simplemente pintar el modal. El modal abre en el
-    // paso 1 ("Cliente y Dirección"); el botón "✓ Crear venta" solo
+    // paso 1 ("Cliente y Dirección"); el botón "✓ Crear pedido" solo
     // aparece hasta el paso 3, así que no sirve como señal de apertura.
     expect(await screen.findByText('Buscar cliente')).toBeInTheDocument();
     expect(screen.getByText('Cliente y Dirección')).toBeInTheDocument();

@@ -614,7 +614,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
         {/* ── Encabezado + indicador de pasos ── */}
         <div style={{ padding: '16px 24px 0', borderBottom: '1px solid #f0f0f0', flexShrink: 0, background: '#fff' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <span style={{ fontWeight: 800, fontSize: 16, color: '#1a1a1a' }}>Nueva venta</span>
+            <span style={{ fontWeight: 800, fontSize: 16, color: '#1a1a1a' }}>Nuevo Pedido</span>
             <button onClick={() => { reset(); onClose(); }} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#888', lineHeight: 1 }}>✕</button>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16, gap: 0 }}>
@@ -1023,7 +1023,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
             ) : (
               <button onClick={guardar} disabled={!canCreate}
                 style={{ padding: '9px 28px', borderRadius: 10, border: 'none', background: canCreate ? '#CA0B0B' : '#e5e7eb', color: canCreate ? '#fff' : '#aaa', fontWeight: 700, fontSize: 13, cursor: canCreate ? 'pointer' : 'not-allowed', fontFamily: 'inherit' }}>
-                {procesandoVenta ? 'Creando...' : '✓ Crear venta'}
+                {procesandoVenta ? 'Creando...' : '✓ Crear pedido'}
               </button>
             )}
           </div>
@@ -1814,7 +1814,7 @@ export default function Pedidos() {
       payload.id_direccion = f.direccion?.id_direccion;
     }
 
-    try { await api.crearVenta(payload); toast.success('¡Venta creada correctamente!'); cargar(); setModalCrear(false); }
+    try { await api.crearVenta(payload); toast.success('¡Pedido creado correctamente!'); cargar(); setModalCrear(false); }
     catch (err) { toast.error(err?.response?.data?.message || 'Error al crear la venta'); throw err; }
   };
 
@@ -1997,7 +1997,7 @@ export default function Pedidos() {
           <p className="page-subtitulo">{lista.filter((v) => v.estado !== 'entregado').length} pedidos registrados</p>
         </div>
         {tienePermiso('gestionar_ventas') && (
-          <button className="btn-primario" onClick={() => setModalCrear(true)}>+ Nueva venta</button>
+          <button className="btn-primario" onClick={() => setModalCrear(true)}>+ Nuevo Pedido</button>
         )}
       </div>
 
