@@ -685,7 +685,7 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
       )}
 
       {editando && createPortal(
-        <div onClick={() => !guardando && setEditando(false)} style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+        <div onClick={() => !guardando && setEditando(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 380, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>
               Solo administradores
@@ -716,7 +716,7 @@ function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
       )}
 
       {confirmarFueraDeRango !== null && createPortal(
-        <div onClick={() => setConfirmarFueraDeRango(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+        <div onClick={() => setConfirmarFueraDeRango(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 380, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
             <div style={{ fontSize: 32, marginBottom: 10 }}>⚠️</div>
             <p style={{ fontSize: 14, color: '#333', lineHeight: 1.5, marginBottom: 18 }}>
