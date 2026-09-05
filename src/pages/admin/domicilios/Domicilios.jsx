@@ -313,7 +313,7 @@ export default function Domicilios() {
   const urlWpp = (telefono, idVenta) => {
     const digits = String(telefono || '').replace(/\D/g, '');
     const numero = digits.startsWith('57') ? digits : `57${digits}`;
-    return `https://wa.me/${numero}?text=Hola,%20confirmamos%20tu%20pedido%20%23${idVenta}%20de%20ChocoFreseo`;
+    return `https://web.whatsapp.com/send?phone=${numero}&text=Hola,%20confirmamos%20tu%20pedido%20%23${idVenta}%20de%20ChocoFreseo`;
   };
 
   return (
