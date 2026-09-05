@@ -217,7 +217,14 @@ function ModalDetalle({ open, onClose, venta }) {
               </div>
             )}
             {(() => {
-              const ganados = (venta.movimientosPuntos || []).filter((m) => m.tipo === 'acumulacion').reduce((s, m) => s + m.puntos, 0);
+              // Neto acumulacion - reversion, no solo la suma de acumulaciones: una
+              // venta que pasó por entregado más de una vez (devuelta a listo y
+              // reentregada) tiene una fila de reversion por cada retroceso, y
+              // sumarlas sin descontar mostraba el doble de los puntos que el
+              // cliente realmente tiene ganados en esta venta.
+              const ganados = (venta.movimientosPuntos || [])
+                .filter((m) => m.tipo === 'acumulacion' || m.tipo === 'reversion')
+                .reduce((s, m) => s + m.puntos, 0);
               if (ganados <= 0) return null;
               return (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#d97706', marginBottom: 6, fontWeight: 700 }}>
