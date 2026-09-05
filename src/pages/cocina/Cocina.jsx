@@ -29,6 +29,7 @@ const mapPedido = (v) => ({
   productos:          (v.detalleVentas || []).map((d) => ({
     nombre:    d.producto?.nombre || '—',
     cantidad:  d.cantidad || 1,
+    esBowl:    !!d.producto?.es_bowl,
     chocolate: d.chocolate || null,
     salsas:    parsearSalsas(d.salsas),
     toppings:  (d.detalleToppings  || []).map((t) => {
@@ -91,6 +92,41 @@ function PersonalizacionProducto({ p }) {
   );
 }
 
+// Formato compacto "Etiqueta: valores" para el modal "Ver detalle".
+// A diferencia de PersonalizacionProducto (usado en la tarjeta de la lista,
+// que no se toca), aquí sí se distingue la columna `salsas` según el tipo de
+// producto: en un producto es_bowl esa columna guarda su Cobertura elegida
+// (negro/blanco/arequipe), no untables reales -- ver Catalogo.jsx donde se
+// arma el pedido (`salsas: producto.es_bowl ? [...cobertura] : salsasElegidas`).
+function LineaCompacta({ label, valor }) {
+  if (!valor) return null;
+  return (
+    <div style={{ fontSize: 13, color: '#333', marginBottom: 3, lineHeight: 1.4 }}>
+      <span style={{ fontWeight: 700, color: '#1a1a1a' }}>{label}:</span> {valor}
+    </div>
+  );
+}
+
+function PersonalizacionCompacta({ p }) {
+  const cobertura = p.esBowl && p.salsas.length > 0 ? p.salsas.map(nombreSalsa).join(', ') : null;
+  const untables  = !p.esBowl && p.salsas.length > 0 ? p.salsas.map(nombreSalsa).join(', ') : null;
+  const chocolate = p.chocolate || null;
+  const toppings  = p.toppings.length > 0 ? p.toppings.join(', ') : null;
+  const adiciones = p.adiciones.length > 0 ? p.adiciones.join(', ') : null;
+
+  if (!cobertura && !chocolate && !toppings && !adiciones && !untables) return null;
+
+  return (
+    <div style={{ marginTop: 4 }}>
+      <LineaCompacta label="Cobertura" valor={cobertura} />
+      <LineaCompacta label="Elección de chocolate" valor={chocolate} />
+      <LineaCompacta label="Toppings" valor={toppings} />
+      <LineaCompacta label="Adiciones" valor={adiciones} />
+      <LineaCompacta label="Untables" valor={untables} />
+    </div>
+  );
+}
+
 function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
   if (!pedido) return null;
   return (
@@ -147,7 +183,7 @@ function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
           {pedido.productos.map((p, i) => (
             <div key={i} style={{ marginBottom: 14, paddingBottom: 14, borderBottom: i < pedido.productos.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
               <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1a1a' }}>{p.cantidad}× {p.nombre}</div>
-              <PersonalizacionProducto p={p} />
+              <PersonalizacionCompacta p={p} />
             </div>
           ))}
 
