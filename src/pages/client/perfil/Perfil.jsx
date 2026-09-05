@@ -491,10 +491,10 @@ function SeccionHistorial() {
                   ⏱️ Tiempo estimado: {tiempoEspera}–{tiempoEspera + 20} min
                 </div>
               )}
-              {v.direccion && (
+              {v.direccion_linea && (
                 <div style={{ fontSize: 12, color: '#888', marginBottom: 12, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#CA0B0B" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>{v.direccion?.direccion_linea || '—'}{v.direccion?.barrio ? `, ${v.direccion.barrio}` : ''}</span>
+                  <span>{v.direccion_linea || '—'}{v.barrio ? `, ${v.barrio}` : ''}</span>
                 </div>
               )}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>

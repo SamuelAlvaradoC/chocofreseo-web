@@ -46,9 +46,9 @@ const mapVenta = (v) => ({
   cliente:          v.nombre_cliente    || v.cliente?.usuario?.nombre || v.cliente?.nombre || '—',
   telefono_cliente: v.telefono_cliente  || v.cliente?.telefono || '—',
   estado:           v.estado?.nombre_estado    || v.estado          || 'pendiente',
-  direccion:        v.direccion?.direccion_linea || v.direccion     || '—',
-  barrio:           v.direccion?.barrio  || '',
-  ciudad:           v.direccion?.ciudad  || '',
+  direccion:        v.direccion_linea || v.direccion || '—',
+  barrio:           v.barrio  || '',
+  ciudad:           v.ciudad  || '',
   fecha:            v.fecha ? new Date(v.fecha).toLocaleString('es-CO') : '—',
   metodo_pago:      getMetodoPago(v),
   monto_efectivo:   getMontoPorMetodo(v, 'efectivo'),
@@ -1531,7 +1531,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
             que el admin pida explícitamente cambiarlo (override_costo_domicilio). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '12px 0', padding: '10px 12px', background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb' }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: '#555', whiteSpace: 'nowrap' }}>Costo domicilio $</label>
-          {venta.direccion?.id_barrio && !overrideDomicilio
+          {venta.barrio && !overrideDomicilio
             ? <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>${Number(costoEnvio).toLocaleString('es-CO')}</span>
             : <input type="number" className="input-monto" step="1" min="0" value={costoEnvio} onChange={(e) => setCostoEnvio(Number(e.target.value) || 0)}
                 onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
@@ -1539,7 +1539,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                 style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 6, padding: '6px 10px', fontSize: 13, fontFamily: 'inherit' }} />
           }
         </div>
-        {venta.direccion?.id_barrio && !overrideDomicilio && (
+        {venta.barrio && !overrideDomicilio && (
           <div style={{ fontSize: 11, color: '#888', marginTop: -8, marginBottom: 12, textAlign: 'right' }}>
             Precio fijado por el barrio del catálogo ·{' '}
             <button type="button" onClick={() => setOverrideDomicilio(true)} style={{ background: 'none', border: 'none', padding: 0, color: '#CA0B0B', fontWeight: 700, fontSize: 11, cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
@@ -1547,7 +1547,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
             </button>
           </div>
         )}
-        {venta.direccion?.id_barrio && overrideDomicilio && (
+        {venta.barrio && overrideDomicilio && (
           <div style={{ fontSize: 11, color: '#CA0B0B', marginTop: -8, marginBottom: 12, textAlign: 'right', fontWeight: 600 }}>
             Precio manual — distinto al del barrio del catálogo
           </div>
