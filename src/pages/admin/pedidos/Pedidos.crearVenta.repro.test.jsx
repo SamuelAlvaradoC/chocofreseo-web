@@ -29,6 +29,7 @@ jest.mock('../../../services/api', () => ({
   cambiarEstadoVenta: jest.fn(),
   anularVenta: jest.fn(),
   obtenerVenta: jest.fn(),
+  getValorPunto: jest.fn().mockResolvedValue(12.5),
 }));
 
 jest.mock('../../../context/AuthContext', () => ({
@@ -44,6 +45,7 @@ function mockApiDefaults() {
   api.listarToppings.mockResolvedValue([]);
   api.listarAdiciones.mockResolvedValue([]);
   api.listarCategorias.mockResolvedValue([]);
+  api.getValorPunto.mockResolvedValue(12.5);
 }
 
 describe('Pedidos admin — botón "+ Nueva venta" abre ModalCrearVenta', () => {

@@ -208,4 +208,12 @@ export const setHorario         = (data) => patch('/configuracion/horario', data
 export const getMisPuntos       = ()    => get('/puntos/mis-puntos').catch(() => ({ puntos: 0, saldo_pesos: 0, movimientos: [] }));
 export const getPuntosCliente   = (id)  => get(`/puntos/cliente/${id}`).catch(() => ({ puntos: 0, saldo_pesos: 0, movimientos: [] }));
 
+// Valor de 1 punto en pesos — configurable por el admin desde Perfil.
+// getValorPunto cae a 12.5 (el valor que estaba quemado antes) si la
+// llamada falla, para no dejar el checkout/catálogo sin poder calcular.
+// setValorPunto NO atrapa el error: el 400 de validación del backend debe
+// llegar al componente para mostrarlo (valor <=0, >100, o con más de 2 decimales).
+export const getValorPunto      = ()   => get('/configuracion/valor-punto').then((d) => Number(d?.valor_punto_pesos) || 12.5).catch(() => 12.5);
+export const setValorPunto      = (v)  => patch('/configuracion/valor-punto', { valor_punto_pesos: v });
+
 export default http;

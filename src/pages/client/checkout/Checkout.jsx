@@ -7,6 +7,7 @@ import Navbar from '../../../components/layout/Navbar/Navbar';
 import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
+import { useValorPunto } from '../../../hooks/useValorPunto';
 import * as api from '../../../services/api';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
@@ -200,9 +201,10 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
   const [error,          setError]          = useState('');
   const [verQR,          setVerQR]          = useState(false);
 
+  const valorPunto        = useValorPunto();
   const costoDomicilio    = direccion?.costo_domicilio || COSTO_DOMICILIO_DEFAULT;
   const subtotalProductos = carrito.reduce((a, x) => a + Number(x.subtotal || 0), 0);
-  const descuentoPuntos   = puntosAUsar * 12.5;
+  const descuentoPuntos   = puntosAUsar * valorPunto;
   const total             = Math.max(0, subtotalProductos - descuentoPuntos) + Number(costoDomicilio);
   const efNum             = Number(String(pagoEfectivo).replace(/\./g, '')) || 0;
   const totalPagado       = efNum + (Number(String(pagoTransfer).replace(/\./g, '')) || 0);

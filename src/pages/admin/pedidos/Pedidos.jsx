@@ -405,7 +405,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
   );
 }
 
-function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], productosData = [], toppingsData = [], adicionesData = [], categoriasData = [] }) {
+function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], productosData = [], toppingsData = [], adicionesData = [], categoriasData = [], valorPunto = 12.5 }) {
   const [pasoActual,         setPasoActual]         = useState(1);
   const [cliente,            setCliente]            = useState(null);
   const [busquedaCliente,    setBusquedaCliente]    = useState('');
@@ -436,9 +436,9 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   if (!open) return null;
 
   const subtotal              = carrito.reduce((a, i) => a + calcularPrecioItem(i) * i.cantidad, 0);
-  const maxPuntosApl          = puntosCliente > 0 ? redondearPuntos(Math.min(puntosCliente, Math.floor(subtotal / 12.5))) : 0;
+  const maxPuntosApl          = puntosCliente > 0 ? redondearPuntos(Math.min(puntosCliente, Math.floor(subtotal / valorPunto))) : 0;
   const puntosAplicarEfectivo = Math.min(puntosAplicar, maxPuntosApl);
-  const descuentoPuntos       = usarPuntos ? puntosAplicarEfectivo * 12.5 : 0;
+  const descuentoPuntos       = usarPuntos ? puntosAplicarEfectivo * valorPunto : 0;
   const totalConDesc          = Math.max(0, subtotal - descuentoPuntos);
   const total                 = totalConDesc + Number(costoEnvio || 0);
   const montoEfectivo   = Number(efDisplay.replace(/\./g, '')) || 0;
@@ -838,7 +838,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                   <div style={{ padding: '12px 14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                       <span style={{ fontWeight: 700, fontSize: 13, color: '#1d4ed8' }}>🎯 Puntos de fidelidad</span>
-                      <span style={{ fontSize: 12, color: '#1d4ed8', fontWeight: 600 }}>{puntosCliente} pts = ${(puntosCliente * 12.5).toLocaleString('es-CO')}</span>
+                      <span style={{ fontSize: 12, color: '#1d4ed8', fontWeight: 600 }}>{puntosCliente} pts = ${(puntosCliente * valorPunto).toLocaleString('es-CO')}</span>
                     </div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 8 }}>
                       <input type="checkbox" checked={usarPuntos} onChange={(e) => { setUsarPuntos(e.target.checked); if (!e.target.checked) setPuntosAplicar(0); else setPuntosAplicar(maxPuntosApl); }} />
@@ -855,7 +855,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                         )}
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                           <span style={{ color: '#555' }}>Aplicar: {puntosAplicarEfectivo} pts</span>
-                          {puntosAplicarEfectivo > 0 && <span style={{ color: '#16a34a', fontWeight: 700 }}>−${(puntosAplicarEfectivo * 12.5).toLocaleString('es-CO')}</span>}
+                          {puntosAplicarEfectivo > 0 && <span style={{ color: '#16a34a', fontWeight: 700 }}>−${(puntosAplicarEfectivo * valorPunto).toLocaleString('es-CO')}</span>}
                         </div>
                       </>
                     )}
@@ -1162,7 +1162,14 @@ function ModalDetalle({ open, onClose, venta }) {
               </div>
             )}
             {(() => {
-              const ganados = (venta.movimientosPuntos || []).filter((m) => m.tipo === 'acumulacion').reduce((s, m) => s + m.puntos, 0);
+              // Neto acumulacion - reversion, no solo la suma de acumulaciones: una
+              // venta que pasó por entregado más de una vez (devuelta a listo y
+              // reentregada) tiene una fila de reversion por cada retroceso, y
+              // sumarlas sin descontar mostraba el doble de los puntos que el
+              // cliente realmente tiene ganados en esta venta.
+              const ganados = (venta.movimientosPuntos || [])
+                .filter((m) => m.tipo === 'acumulacion' || m.tipo === 'reversion')
+                .reduce((s, m) => s + m.puntos, 0);
               if (ganados <= 0) return null;
               return (
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#d97706', marginBottom: 6, fontWeight: 700 }}>
@@ -1725,6 +1732,7 @@ export default function Pedidos() {
   const [anulando,       setAnulando]      = useState(null);
   const [devolviendo,    setDevolviendo]   = useState(null);
   const [confirmarImpresion, setConfirmarImpresion] = useState(null);
+  const [valorPunto,     setValorPunto]    = useState(12.5);
 
   const cargar = (f = filtroFecha) => api.listarVentas(null, f || undefined).then((d) => setLista(d.map(mapVenta))).catch(() => {});
 
@@ -1743,6 +1751,7 @@ export default function Pedidos() {
     api.listarToppings().then(setToppingsData).catch(() => {});
     api.listarAdiciones().then(setAdicionesData).catch(() => {});
     api.listarCategorias().then(setCategoriasData).catch(() => {});
+    api.getValorPunto().then(setValorPunto);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { setPagina(1); }, [busqueda, filtroEstado, filtroMetodo, filtroFecha]);
@@ -2094,7 +2103,7 @@ export default function Pedidos() {
 
       <ModalCrearVenta open={modalCrear} onClose={() => setModalCrear(false)} onGuardar={crearVenta}
         clientesData={clientesData} productosData={productosData} toppingsData={toppingsData}
-        adicionesData={adicionesData} categoriasData={categoriasData} />
+        adicionesData={adicionesData} categoriasData={categoriasData} valorPunto={valorPunto} />
       <ModalEditarVenta open={!!editandoVenta} onClose={() => setEditandoVenta(null)} onGuardar={handleEditarVenta}
         venta={editandoVenta} productosData={productosData} toppingsData={toppingsData}
         adicionesData={adicionesData} categoriasData={categoriasData} />

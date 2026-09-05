@@ -587,17 +587,146 @@ function SeccionHistorial() {
   );
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Configuración admin — valor del punto de fidelidad
+// ────────────────────────────────────────────────────────────────────────────
+// Solo visible para rol admin. El valor se guarda como una fila más en la
+// tabla configuraciones (misma que horario/tiempo de espera) — sin "valor
+// histórico": cambiarlo actualiza de inmediato el saldo en pesos de TODOS
+// los clientes (lo calcula el backend en tiempo real, ver puntos/service.js).
+// Las ventas ya cerradas NO se tocan — su descuento_puntos quedó fijo para
+// siempre en el momento en que se creó esa venta.
+const VALOR_PUNTO_RANGO_USUAL = [10, 25]; // fuera de esto, se pide confirmar antes de guardar
+const VALOR_PUNTO_MAX         = 100;      // tope absoluto -- evita un error de tecleo tipo "99999"
+
+function AdminValorPuntoConfig({ valorPunto, onActualizado }) {
+  const [editando,  setEditando]  = useState(false);
+  const [valor,     setValor]     = useState(String(valorPunto));
+  const [error,     setError]     = useState('');
+  const [exito,     setExito]     = useState('');
+  const [guardando, setGuardando] = useState(false);
+  const [confirmarFueraDeRango, setConfirmarFueraDeRango] = useState(null); // guarda el número pendiente de confirmar
+
+  const abrirEdicion = () => {
+    setValor(String(valorPunto));
+    setError('');
+    setExito('');
+    setEditando(true);
+  };
+
+  const validar = (num) => {
+    if (isNaN(num)) return 'Ingresa un número válido';
+    if (num <= 0) return 'El valor debe ser mayor a 0';
+    if (num > VALOR_PUNTO_MAX) return `El valor no puede superar $${VALOR_PUNTO_MAX} por punto`;
+    if (Number(num.toFixed(2)) !== num) return 'Máximo 2 decimales';
+    return '';
+  };
+
+  const guardar = async (numConfirmado) => {
+    const num = numConfirmado ?? Number(valor.replace(',', '.'));
+    const msgError = validar(num);
+    if (msgError) { setError(msgError); return; }
+
+    // Fuera del rango habitual pero dentro del tope absoluto: confirmar antes
+    // de guardar, en vez de bloquear -- puede ser una decisión real del
+    // negocio (ej. una promoción), no siempre un error de tecleo.
+    if (!numConfirmado && (num < VALOR_PUNTO_RANGO_USUAL[0] || num > VALOR_PUNTO_RANGO_USUAL[1])) {
+      setConfirmarFueraDeRango(num);
+      return;
+    }
+
+    setError(''); setGuardando(true);
+    try {
+      await api.setValorPunto(num);
+      onActualizado(num);
+      setExito('¡Valor actualizado! El saldo en pesos de todos los clientes ya refleja el cambio.');
+      setEditando(false);
+      setConfirmarFueraDeRango(null);
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Error al guardar el valor');
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  return (
+    <div className="perfil-card" style={{ margin: '0 0 24px', padding: '18px 20px', background: '#fff', borderRadius: 16, border: '1px solid #f0f0f0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 }}>
+            Solo administradores
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: '#1a1a1a' }}>
+            Valor del punto de fidelidad: <span style={{ color: '#CA0B0B' }}>${valorPunto.toLocaleString('es-CO', { maximumFractionDigits: 2 })} por punto</span>
+          </div>
+        </div>
+        {!editando && (
+          <button className="perfil-btn-sec" onClick={abrirEdicion}>Editar</button>
+        )}
+      </div>
+
+      {editando && (
+        <div style={{ marginTop: 14 }}>
+          <div className="perfil-form-fila">
+            <div className="perfil-campo">
+              <label className="perfil-label">Nuevo valor (pesos por punto)</label>
+              <input
+                className="perfil-input"
+                type="text"
+                inputMode="decimal"
+                value={valor}
+                onChange={(e) => { setValor(e.target.value); setError(''); }}
+                placeholder="Ej: 12.5"
+              />
+            </div>
+          </div>
+          {error && <div className="perfil-alerta-err">{error}</div>}
+          {exito && <div style={{ marginTop: 10, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700 }}>{exito}</div>}
+          <div className="perfil-form-botones" style={{ marginTop: 14 }}>
+            <button className="perfil-btn-sec" onClick={() => setEditando(false)} disabled={guardando}>Cancelar</button>
+            <button className="perfil-btn-pri" onClick={() => guardar()} disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar'}</button>
+          </div>
+        </div>
+      )}
+
+      {!editando && exito && <div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, fontSize: 13, color: '#166534', fontWeight: 700 }}>{exito}</div>}
+
+      {confirmarFueraDeRango !== null && (
+        <div onClick={() => setConfirmarFueraDeRango(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 380, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+            <div style={{ fontSize: 32, marginBottom: 10 }}>⚠️</div>
+            <p style={{ fontSize: 14, color: '#333', lineHeight: 1.5, marginBottom: 18 }}>
+              <strong>${confirmarFueraDeRango.toLocaleString('es-CO', { maximumFractionDigits: 2 })}</strong> por punto está fuera del rango habitual (${VALOR_PUNTO_RANGO_USUAL[0]}–${VALOR_PUNTO_RANGO_USUAL[1]}).
+              Este cambio afecta de inmediato el saldo en pesos de <strong>todos</strong> los clientes. ¿Confirmas que quieres guardar este valor?
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button className="perfil-btn-sec" onClick={() => setConfirmarFueraDeRango(null)}>Cancelar</button>
+              <button className="perfil-btn-pri" style={{ background: '#CA0B0B' }} onClick={() => guardar(confirmarFueraDeRango)}>Sí, guardar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Perfil() {
   const [seccionActiva, setSeccionActiva] = useState('datos');
   const [puntos,        setPuntos]        = useState({ puntos: 0, saldo_pesos: 0, movimientos: [] });
+  const [valorPunto,    setValorPunto]    = useState(12.5);
   const { usuario }     = useAuth();
 
   const puedeVerPuntos = ['cliente', 'domiciliario', 'admin'].includes(usuario?.rol);
+  const esAdmin        = usuario?.rol === 'admin';
 
   useEffect(() => {
     if (!puedeVerPuntos) return;
     api.getMisPuntos().then(setPuntos).catch(() => {});
   }, [puedeVerPuntos]);
+
+  useEffect(() => {
+    api.getValorPunto().then(setValorPunto).catch(() => {});
+  }, []);
 
   const menu = [
     { id: 'datos',       label: 'Datos personales',  icono: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
@@ -643,7 +772,7 @@ export default function Perfil() {
                 <div style={{ width: 1, background: 'rgba(255,255,255,0.3)', alignSelf: 'stretch' }} />
                 <div>
                   <div style={{ fontSize: 36, fontWeight: 900, lineHeight: 1 }}>
-                    ${((puntos?.puntos || 0) * 12.5).toLocaleString('es-CO')}
+                    ${(puntos?.saldo_pesos || 0).toLocaleString('es-CO')}
                   </div>
                   <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>
                     saldo disponible
@@ -651,11 +780,24 @@ export default function Perfil() {
                 </div>
               </div>
               <div style={{ fontSize: 11, opacity: 0.6, marginTop: 12 }}>
-                1 punto = $12.50 · Se acumulan con cada compra
+                1 punto = ${valorPunto.toLocaleString('es-CO', { maximumFractionDigits: 2 })} · Se acumulan con cada compra
               </div>
             </div>
           )}
         </div>
+
+        {esAdmin && (
+          <AdminValorPuntoConfig
+            valorPunto={valorPunto}
+            onActualizado={(v) => {
+              setValorPunto(v);
+              // El admin puede estar viendo su propia tarjeta de puntos en esta
+              // misma pantalla -- refrescarla evita que se quede mostrando el
+              // saldo con el valor viejo hasta el próximo reload.
+              if (puedeVerPuntos) api.getMisPuntos().then(setPuntos).catch(() => {});
+            }}
+          />
+        )}
 
         <div className="perfil-layout">
           <aside className="perfil-sidebar perfil-tabs">

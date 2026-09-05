@@ -6,6 +6,7 @@ import Navbar from '../../../components/layout/Navbar/Navbar';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
+import { useValorPunto } from '../../../hooks/useValorPunto';
 import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
 import { formatHora12 } from '../../../utils/formatHora';
 import * as api from '../../../services/api';
@@ -579,6 +580,7 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
   const [puntosDisponibles, setPuntosDisponibles] = useState({ puntos: 0, saldo_pesos: 0 });
   const [puntosAUsar,       setPuntosAUsar]       = useState(0);
   const [usarPuntos,        setUsarPuntos]        = useState(false);
+  const valorPunto = useValorPunto();
   const { usuario } = useAuth();
 
   useEffect(() => {
@@ -591,8 +593,8 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
   }, [carrito]);
 
   const subtotalProductos = carrito.reduce((s, i) => s + Number(i.subtotal || 0), 0);
-  const maxPuntosUsables  = redondearPuntos(Math.min(puntosDisponibles.puntos, Math.floor(subtotalProductos / 12.5)));
-  const descuentoPuntos   = usarPuntos ? puntosAUsar * 12.5 : 0;
+  const maxPuntosUsables  = redondearPuntos(Math.min(puntosDisponibles.puntos, Math.floor(subtotalProductos / valorPunto)));
+  const descuentoPuntos   = usarPuntos ? puntosAUsar * valorPunto : 0;
   const totalConDescuento = Math.max(0, subtotalProductos - descuentoPuntos);
 
   if (carrito.length === 0) {

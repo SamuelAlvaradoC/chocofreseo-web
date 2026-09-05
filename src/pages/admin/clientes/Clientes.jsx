@@ -124,7 +124,7 @@ function ModalEliminar({ open, onClose, onConfirmar, nombre, procesando = false 
   );
 }
 
-function ModalDetalle({ clienteDetalle, onClose }) {
+function ModalDetalle({ clienteDetalle, onClose, valorPunto }) {
   if (!clienteDetalle) return null;
 
   const cargando = !!clienteDetalle.cargando;
@@ -171,7 +171,7 @@ function ModalDetalle({ clienteDetalle, onClose }) {
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#999', letterSpacing: 1, marginBottom: 10 }}>PUNTOS CHOCOFRESEO</div>
                   <div style={{ fontSize: 28, fontWeight: 900, color: '#CA0B0B', lineHeight: 1 }}>{puntos}</div>
                   <div style={{ fontSize: 11, color: '#888', marginBottom: 10 }}>puntos</div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: '#16a34a', lineHeight: 1 }}>${(puntos * 12.5).toLocaleString('es-CO')}</div>
+                  <div style={{ fontSize: 20, fontWeight: 900, color: '#16a34a', lineHeight: 1 }}>${(puntos * valorPunto).toLocaleString('es-CO')}</div>
                   <div style={{ fontSize: 11, color: '#888' }}>saldo disponible</div>
                 </div>
               </div>
@@ -249,11 +249,13 @@ export default function Clientes() {
   const [eliminando,   setEliminando]   = useState(null);
   const [clienteDetalle, setClienteDetalle] = useState(null);
   const [procesando,   setProcesando]   = useState(false);
+  const [valorPunto,   setValorPunto]   = useState(12.5);
 
   const cargar = () => api.listarClientes()
     .then((data) => setLista(data.map((c) => ({ ...c, nombre: c.usuario?.nombre || c.nombre }))))
     .catch((err) => console.error('Error cargando clientes:', err));
   useEffect(() => { cargar(); }, []);
+  useEffect(() => { api.getValorPunto().then(setValorPunto); }, []);
 
   useEffect(() => { setPagina(1); }, [busqueda, filtroEstado]);
 
@@ -432,7 +434,7 @@ export default function Clientes() {
         <ModalEliminar open={true} onClose={() => setEliminando(null)} onConfirmar={eliminar} nombre={eliminando?.nombre} procesando={procesando} />
       )}
       {clienteDetalle && (
-        <ModalDetalle clienteDetalle={clienteDetalle} onClose={() => setClienteDetalle(null)} />
+        <ModalDetalle clienteDetalle={clienteDetalle} onClose={() => setClienteDetalle(null)} valorPunto={valorPunto} />
       )}
     </AdminLayout>
   );
