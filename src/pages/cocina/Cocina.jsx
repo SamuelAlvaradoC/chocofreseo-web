@@ -45,6 +45,52 @@ const mapPedido = (v) => ({
 const chipTopping = { background: '#1a1a1a', color: '#fff',      fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600, display: 'inline-block' };
 const chipAdicion = { background: '#d97706', color: '#fff',      fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600, display: 'inline-block' };
 
+const COLOR_CATEGORIA = { Cobertura: '#1e3a5f', Salsas: COLOR_SALSAS, Toppings: '#1a1a1a', Adiciones: '#d97706' };
+
+function BloqueCategoria({ label, children }) {
+  return (
+    <div style={{ marginBottom: 6 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: COLOR_CATEGORIA[label] || '#666', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 }}>
+        {label}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function PersonalizacionProducto({ p }) {
+  const tienePersonalizacion = p.chocolate || p.salsas?.length > 0 || p.toppings.length > 0 || p.adiciones.length > 0;
+  if (!tienePersonalizacion) return null;
+  return (
+    <div style={{ marginTop: 6 }}>
+      {p.chocolate && (
+        <BloqueCategoria label="Cobertura">
+          <span style={{ background: p.chocolate === 'Negro' ? '#1e3a5f' : '#f0f0f0', color: p.chocolate === 'Negro' ? '#fff' : '#555', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600, display: 'inline-block' }}>
+            {p.chocolate === 'Negro' ? '🍫' : '⬜'} Chocolate {p.chocolate}
+          </span>
+        </BloqueCategoria>
+      )}
+      {p.salsas?.length > 0 && (
+        <BloqueCategoria label="Salsas">
+          {p.salsas.map((s, j) => <span key={j} style={{ fontSize: 11, color: COLOR_SALSAS, background: '#fff7ed', border: `1px solid ${COLOR_SALSAS}`, padding: '3px 10px', borderRadius: 20, fontWeight: 600, display: 'inline-block' }}>{nombreSalsa(s)}</span>)}
+        </BloqueCategoria>
+      )}
+      {p.toppings.length > 0 && (
+        <BloqueCategoria label="Toppings">
+          {p.toppings.map((t, j) => <span key={j} style={chipTopping}>{t}</span>)}
+        </BloqueCategoria>
+      )}
+      {p.adiciones.length > 0 && (
+        <BloqueCategoria label="Adiciones">
+          {p.adiciones.map((a, j) => <span key={j} style={chipAdicion}>{a}</span>)}
+        </BloqueCategoria>
+      )}
+    </div>
+  );
+}
+
 function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
   if (!pedido) return null;
   return (
@@ -100,13 +146,8 @@ function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
           <div style={{ fontSize: 11, fontWeight: 700, color: '#999', letterSpacing: 1, marginBottom: 10 }}>PRODUCTOS</div>
           {pedido.productos.map((p, i) => (
             <div key={i} style={{ marginBottom: 14, paddingBottom: 14, borderBottom: i < pedido.productos.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1a1a', marginBottom: 6 }}>{p.cantidad}× {p.nombre}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                {p.chocolate && <span style={{ background: p.chocolate==='Negro' ? '#1e3a5f' : '#f0f0f0', color: p.chocolate==='Negro' ? '#fff' : '#555', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 600, display: 'inline-block' }}>Chocolate {p.chocolate}</span>}
-                {p.salsas?.length > 0 && p.salsas.map((s, j) => <span key={`s${j}`} style={{ fontSize: 10, color: COLOR_SALSAS, background: '#fff7ed', border: `1px solid ${COLOR_SALSAS}`, padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>{nombreSalsa(s)}</span>)}
-                {p.toppings.map((t, j) => <span key={j} style={chipTopping}>{t}</span>)}
-                {p.adiciones.map((a, j) => <span key={j} style={chipAdicion}>{a}</span>)}
-              </div>
+              <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1a1a' }}>{p.cantidad}× {p.nombre}</div>
+              <PersonalizacionProducto p={p} />
             </div>
           ))}
 
@@ -167,25 +208,10 @@ function PedidoCard({ pedido, onConfirmar, onVerDetalle }) {
         <div style={{ fontSize: 11, fontWeight: 700, color: '#999', letterSpacing: 1, marginBottom: 8, marginTop: pedido.observaciones ? 10 : 0 }}>PRODUCTOS</div>
         {pedido.productos.map((p, i) => (
           <div key={i} style={{ marginBottom: 12 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: '#1a1a1a', marginBottom: 4 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#1a1a1a' }}>
               {p.cantidad}× {p.nombre}
             </div>
-            {p.chocolate && (
-              <span style={{ background: '#1e3a5f', color: '#fff', fontSize: 11, padding: '2px 9px', borderRadius: 20, fontWeight: 600, display: 'inline-block', marginBottom: 4 }}>
-                {p.chocolate==='Negro' ? '🍫' : '⬜'} Chocolate {p.chocolate}
-              </span>
-            )}
-            {p.salsas?.length > 0 && (
-              <div style={{ display:'flex', flexWrap:'wrap', gap:3, marginBottom:4 }}>
-                {p.salsas.map((s,j) => <span key={j} style={{ fontSize:10, color:COLOR_SALSAS, background:'#fff7ed', border:`1px solid ${COLOR_SALSAS}`, padding:'1px 6px', borderRadius:20, fontWeight:600 }}>{nombreSalsa(s)}</span>)}
-              </div>
-            )}
-            {(p.toppings.length > 0 || p.adiciones.length > 0) && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                {p.toppings.map((t, j) => <span key={`t${j}`} style={chipTopping}>{t}</span>)}
-                {p.adiciones.map((a, j) => <span key={`a${j}`} style={chipAdicion}>{a}</span>)}
-              </div>
-            )}
+            <PersonalizacionProducto p={p} />
           </div>
         ))}
       </div>
