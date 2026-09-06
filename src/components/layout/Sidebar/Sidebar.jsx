@@ -83,7 +83,7 @@ const menu = [
     label: 'Reseñas',
     path: '/admin/resenas',
     hijos: [],
-    permiso: 'ver_reportes',
+    permiso: 'ver_resenas',
   },
 ];
 
