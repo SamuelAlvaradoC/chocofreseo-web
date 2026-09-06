@@ -5,6 +5,13 @@ const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/
 
 const fetchPublic = (url) => fetch(url).then((r) => r.json()).then((d) => d.data || []).catch(() => []);
 
+// Quita tildes/diacríticos y pasa a minúsculas, solo para COMPARAR al
+// buscar -- el nombre real del barrio (con su tilde) nunca se toca, ni al
+// guardarlo ni al mostrarlo. Sin esto, escribir "Paris" no encontraba
+// "París" -- muchos usuarios escriben sin tildes en el celular.
+const normalizarTexto = (s) =>
+  (s || '').normalize('NFD').replace(/\p{Mn}/gu, '').toLowerCase();
+
 const TIPOS_VIA = [
   'Calle',
   'Carrera',
@@ -26,7 +33,7 @@ function SearchableBarrio({ barrios, value, onChange, disabled, inputCls, error 
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const filtrados = barrios.filter((b) => b.nombre.toLowerCase().includes(texto.toLowerCase()));
+  const filtrados = barrios.filter((b) => normalizarTexto(b.nombre).includes(normalizarTexto(texto)));
 
   const seleccionar = (b) => {
     setTexto(b.nombre);
