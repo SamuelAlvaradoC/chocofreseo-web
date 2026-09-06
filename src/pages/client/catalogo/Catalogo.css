@@ -14,7 +14,13 @@
 .catalogo-page {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 28px 32px 0;
+  /* padding-bottom propio (no solo el del wrapper): la barra fija del
+     carrito mide hasta 60px (.carrito-barra) -- en ventanas bajas (~600-
+     650px de alto) el primer renglón de productos podía terminar justo
+     ahí, tapado por la barra, sin espacio de sobra para hacer scroll y
+     despejarlo. 100px cubre la barra más margen, sin importar la altura
+     de la ventana. */
+  padding: 28px 32px 100px;
   width: 100%;
   flex: 1;
 }
