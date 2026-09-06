@@ -575,7 +575,7 @@ function ModalLoginRequerido({ open, onClose }) {
 const redondearPuntos = (puntos) => Math.floor(puntos / 8) * 8;
 
 /* ─── Carrito flotante ─── */
-function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQuitar, onIrCheckout, abierto }) {
+function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrCheckout, abierto }) {
   const [expandido,         setExpandido]         = useState(false);
   const [puntosDisponibles, setPuntosDisponibles] = useState({ puntos: 0, saldo_pesos: 0 });
   const [puntosAUsar,       setPuntosAUsar]       = useState(0);
@@ -770,7 +770,11 @@ function CarritoBottom({ carrito, subtotal, totalItems, onCambiarCantidad, onQui
             </svg>
           </div>
           <div className="carrito-barra-der">
-            <span className="carrito-barra-subtotal">${subtotal.toLocaleString('es-CO')}</span>
+            {/* Antes usaba el prop `subtotal` (sin descuento de puntos) --
+                distinto del total que muestra el panel expandido justo
+                arriba, así que al activar puntos quedaban desincronizados.
+                Usa la misma fuente de verdad: totalConDescuento. */}
+            <span className="carrito-barra-subtotal">${totalConDescuento.toLocaleString('es-CO')}</span>
             <button className="carrito-barra-btn-checkout" onClick={(e) => { e.stopPropagation(); onIrCheckout(puntosAUsar, descuentoPuntos); }}>
               Hacer pedido
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -909,7 +913,7 @@ function CardProducto({ p, onAgregar, destacado }) {
 
 /* ─── Página principal Catálogo ─── */
 export default function Catalogo() {
-  const { carrito, agregarItem, quitarItem, cambiarCantidad, subtotal, totalItems } = useCart();
+  const { carrito, agregarItem, quitarItem, cambiarCantidad, totalItems } = useCart();
   const { usuario } = useAuth();
   const navigate      = useNavigate();
   const tiempoEspera  = useTiempoEspera();
@@ -1065,7 +1069,6 @@ export default function Catalogo() {
 
       <CarritoBottom
         carrito={carrito}
-        subtotal={subtotal}
         totalItems={totalItems}
         onCambiarCantidad={cambiarCantidad}
         onQuitar={quitarItem}
