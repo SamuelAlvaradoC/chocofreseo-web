@@ -96,7 +96,7 @@ function ModalDetalle({ open, onClose, venta }) {
   const tel      = (venta.telefono_cliente || '').replace(/\D/g, '');
   const telConPrefijo = tel ? (tel.startsWith('57') ? tel : `57${tel}`) : '';
   const wppMsg   = encodeURIComponent(`Hola ${venta.cliente}, tu pedido #${venta.id_venta} de ChocoFreseo ya está confirmado y en preparación 🍫🍦`);
-  const wpp      = tel ? `https://web.whatsapp.com/send?phone=${telConPrefijo}&text=${wppMsg}` : null;
+  const wpp      = tel ? `whatsapp://send?phone=${telConPrefijo}&text=${wppMsg}` : null;
   const subtotalProductos = (venta.detalleVentas || []).reduce((a, d) => {
     return a + calcularDesglose(d).totalItem;
   }, 0);
@@ -272,7 +272,7 @@ function ModalDetalle({ open, onClose, venta }) {
 
           <div className="modal-pie" style={{ marginTop: 16, display: 'flex', gap: 10 }}>
             {wpp && (
-              <a href={wpp} target="_blank" rel="noopener noreferrer"
+              <a href={wpp}
                 style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px', background: '#25D366', color: '#fff', borderRadius: 8, fontWeight: 700, fontSize: 14, textDecoration: 'none', fontFamily: 'inherit' }}>
                 <LogoWhatsApp size={16} color="white"/> WhatsApp
               </a>
