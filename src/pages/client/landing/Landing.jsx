@@ -34,6 +34,20 @@ export default function Landing() {
     document.title = 'ChocoFreseo | Chocolates, Fresas y Postres en Medellín';
   }, []);
 
+  // El navegador intenta hacer scroll al #hash de la URL al cargar la
+  // página, pero esta es una SPA: el elemento todavía no existe en el DOM
+  // (o el layout todavía no terminó de acomodarse por el video/imágenes)
+  // en el momento en que el navegador lo intenta, así que ese scroll
+  // automático nativo no aplica -- hay que hacerlo manualmente.
+  useEffect(() => {
+    if (!window.location.hash) return;
+    const id = window.location.hash.slice(1);
+    const el = document.getElementById(id);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    }
+  }, []);
+
   // Fullscreen pedido al DIV contenedor, no al <video> mismo -- así no se
   // fuerza landscape (comportamiento especial de Chrome solo para cuando
   // el <video> ES el elemento en fullscreen), confirmado en dispositivo
