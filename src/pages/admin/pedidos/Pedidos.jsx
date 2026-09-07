@@ -1746,11 +1746,11 @@ export default function Pedidos() {
 
   useEffect(() => {
     cargar();
-    api.listarClientes().then((d) => setClientesData(d.map((c) => ({ ...c, nombre: c.usuario?.nombre || '—', telefono: c.telefono || c.usuario?.email || '—', direcciones: c.direcciones || [] })))).catch(() => {});
-    api.listarProductos().then(setProductosData).catch(() => {});
-    api.listarToppings().then(setToppingsData).catch(() => {});
-    api.listarAdiciones().then(setAdicionesData).catch(() => {});
-    api.listarCategorias().then(setCategoriasData).catch(() => {});
+    api.listarClientes().then((d) => setClientesData(d.map((c) => ({ ...c, nombre: c.usuario?.nombre || '—', telefono: c.telefono || c.usuario?.email || '—', direcciones: c.direcciones || [] })))).catch(() => toast.error('No se pudieron cargar los clientes'));
+    api.listarProductos().then(setProductosData).catch(() => toast.error('No se pudieron cargar los productos'));
+    api.listarToppings().then(setToppingsData).catch(() => toast.error('No se pudieron cargar los toppings'));
+    api.listarAdiciones().then(setAdicionesData).catch(() => toast.error('No se pudieron cargar las adiciones'));
+    api.listarCategorias().then(setCategoriasData).catch(() => toast.error('No se pudieron cargar las categorías'));
     api.getValorPunto().then(setValorPunto);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
