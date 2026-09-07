@@ -19,6 +19,7 @@ const mapVentaDomi = (v) => ({
   direccion:    v.direccion_linea || '—',
   barrio:       v.barrio  || '—',
   ciudad:       v.ciudad  || '—',
+  referencia:   v.referencia_direccion || '',
   total:           Number(v.total || 0),
   subtotal:        Number(v.subtotal || 0),
   costo_domicilio: Number(v.costo_domicilio ?? 3000),
@@ -162,6 +163,12 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
               <span className="detalle-label">Dirección</span>
               <span className="detalle-valor">{pedido.direccion}</span>
             </div>
+            {pedido.referencia && (
+              <div className="revision-item revision-full">
+                <span className="detalle-label">Referencia</span>
+                <span className="detalle-valor">{pedido.referencia}</span>
+              </div>
+            )}
             {pedido.observaciones && (
               <div className="revision-item revision-full">
                 <span className="detalle-label">Observaciones</span>

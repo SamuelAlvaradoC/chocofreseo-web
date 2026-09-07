@@ -26,6 +26,7 @@ const mapPedido = (v) => ({
   barrio:             v.barrio || null,
   ciudad:             v.ciudad || null,
   direccion_completa: v.direccion_linea || null,
+  referencia:         v.referencia_direccion || null,
   productos:          (v.detalleVentas || []).map((d) => ({
     nombre:    d.producto?.nombre || '—',
     cantidad:  d.cantidad || 1,
@@ -125,6 +126,11 @@ function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
                   {pedido.barrio ? `, ${pedido.barrio}` : ''}
                   {pedido.ciudad ? `, ${pedido.ciudad}` : ''}
                 </span>
+              </div>
+            )}
+            {pedido.referencia && (
+              <div style={{ color: '#888', fontSize: 12, marginTop: 2 }}>
+                Ref: {pedido.referencia}
               </div>
             )}
           </div>

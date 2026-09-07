@@ -22,6 +22,7 @@ const mapVentaPedido = (v, facturado = false) => {
     telefono:        v.telefono_cliente || v.cliente?.telefono        || '—',
     direccion:       v.direccion_linea || '—',
     barrio:          v.barrio         || '',
+    referencia:      v.referencia_direccion || '',
     ciudad:          v.ciudad         || '',
     forma_pago,
     monto_efectivo:      Number(v.monto_efectivo      || detallesPago.find(d => d.metodoPago?.nombre === 'efectivo')?.monto      || 0),
@@ -158,6 +159,12 @@ function ModalDetalle({ pedido, onClose }) {
               {[pedido.direccion, pedido.barrio, pedido.ciudad].filter(Boolean).join(', ')}
             </span>
           </div>
+          {pedido.referencia && (
+            <div className="pd-modal-item pd-modal-full">
+              <span className="pd-modal-label">Referencia</span>
+              <span className="pd-modal-valor">{pedido.referencia}</span>
+            </div>
+          )}
           <div className="pd-modal-item">
             <span className="pd-modal-label">Teléfono</span>
             <span className="pd-modal-valor">{pedido.telefono}</span>

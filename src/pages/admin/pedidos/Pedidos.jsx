@@ -49,6 +49,7 @@ const mapVenta = (v) => ({
   direccion:        v.direccion_linea || v.direccion || '—',
   barrio:           v.barrio  || '',
   ciudad:           v.ciudad  || '',
+  referencia:       v.referencia_direccion || '',
   fecha:            v.fecha ? new Date(v.fecha).toLocaleString('es-CO') : '—',
   metodo_pago:      getMetodoPago(v),
   monto_efectivo:   getMontoPorMetodo(v, 'efectivo'),
@@ -1083,6 +1084,12 @@ function ModalDetalle({ open, onClose, venta }) {
               <span className="detalle-label">Dirección</span>
               <span className="detalle-valor">{venta.direccion}</span>
             </div>
+            {venta.referencia && (
+              <div className="detalle-item detalle-full">
+                <span className="detalle-label">Referencia</span>
+                <span className="detalle-valor">{venta.referencia}</span>
+              </div>
+            )}
             {venta.nombreDomiciliario && (
               <div className="detalle-item">
                 <span className="detalle-label">Domiciliario</span>
