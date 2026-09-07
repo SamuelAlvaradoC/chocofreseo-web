@@ -66,7 +66,7 @@ export default function CtaFinal() {
   };
 
   return (
-    <section id="resenas" style={{ padding: '70px 20px', background: '#f7f8fd' }}>
+    <section id="reseñas" style={{ padding: '70px 20px', background: '#f7f8fd' }}>
       <div style={{ maxWidth: 960, margin: '0 auto' }}>
 
         {/* Header sección */}

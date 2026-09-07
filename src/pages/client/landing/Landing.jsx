@@ -41,7 +41,10 @@ export default function Landing() {
   // automático nativo no aplica -- hay que hacerlo manualmente.
   useEffect(() => {
     if (!window.location.hash) return;
-    const id = window.location.hash.slice(1);
+    // El navegador guarda el hash porcentaje-codificado cuando tiene
+    // caracteres no-ASCII (ej. "reseñas" -> "rese%C3%B1as") -- hay que
+    // decodificarlo antes de buscar el id real en el DOM.
+    const id = decodeURIComponent(window.location.hash.slice(1));
     const el = document.getElementById(id);
     if (el) {
       setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
