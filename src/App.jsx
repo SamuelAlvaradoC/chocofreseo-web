@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { useAuth } from './context/AuthContext';
 
 // ── Admin ──────────────────────────────────────────────────────
@@ -132,6 +133,7 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
+      <Analytics />
     </BrowserRouter>
   );
 }
