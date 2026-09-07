@@ -7,13 +7,19 @@ import * as api from '../../../services/api';
 
 
 
-function Toggle({ activo, onChange }) {
+const ROL_ADMIN_ID = 1;
+
+function Toggle({ activo, onChange, disabled, title }) {
   return (
     <div
       className="toggle-wrap"
-      style={{ background: activo ? '#22c55e' : '#CA0B0B' }}
-      onClick={onChange}
-      title={activo ? 'Activo' : 'Inactivo'}
+      style={{
+        background: activo ? '#22c55e' : '#CA0B0B',
+        opacity: disabled ? 0.5 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+      }}
+      onClick={disabled ? undefined : onChange}
+      title={title || (activo ? 'Activo' : 'Inactivo')}
     >
       <div className="toggle-circulo" style={{ left: activo ? 23 : 3 }} />
     </div>
@@ -31,7 +37,8 @@ function ModalFormulario({ open, onClose, onGuardar, rolEditar }) {
   const guardar = async () => {
     if (!nombre.trim()) { setErrores({ nombre: 'El nombre es requerido' }); return; }
     try {
-      await onGuardar({ nombre: nombre.trim(), descripcion, estado: rolEditar ? estado : 1 });
+      const estadoFinal = rolEditar?.id_rol === ROL_ADMIN_ID ? 1 : (rolEditar ? estado : 1);
+      await onGuardar({ nombre: nombre.trim(), descripcion, estado: estadoFinal });
     } catch (err) {
       const msg = err?.response?.data?.message || 'Error al guardar. Inténtalo de nuevo.';
       if (msg.toLowerCase().includes('nombre')) setErrores((p) => ({ ...p, nombre: msg }));
@@ -57,10 +64,18 @@ function ModalFormulario({ open, onClose, onGuardar, rolEditar }) {
         {rolEditar && (
           <div className="form-grupo">
             <div className="form-estado">
-              <Toggle activo={estado === 1} onChange={() => setEstado(estado === 1 ? 0 : 1)} />
+              <Toggle
+                activo={estado === 1}
+                onChange={() => setEstado(estado === 1 ? 0 : 1)}
+                disabled={rolEditar.id_rol === ROL_ADMIN_ID}
+                title={rolEditar.id_rol === ROL_ADMIN_ID ? 'El rol Admin no se puede desactivar' : undefined}
+              />
               <span className="form-estado-texto" style={{ color: estado ? '#22c55e' : '#CA0B0B' }}>
                 {estado ? 'Activo' : 'Inactivo'}
               </span>
+              {rolEditar.id_rol === ROL_ADMIN_ID && (
+                <span style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>(protegido)</span>
+              )}
             </div>
           </div>
         )}
@@ -311,6 +326,11 @@ export default function Roles() {
   };
 
   const eliminar = async () => {
+    if (eliminando?.id_rol === ROL_ADMIN_ID) {
+      setEliminando(null);
+      toast.error('El rol Admin no se puede eliminar');
+      return;
+    }
     try {
       await api.eliminarRol(eliminando.id_rol);
       setLista((p) => p.filter((r) => r.id_rol !== eliminando.id_rol));
@@ -322,6 +342,10 @@ export default function Roles() {
   };
 
   const toggle = async (id) => {
+    if (id === ROL_ADMIN_ID) {
+      toast.error('El rol Admin no se puede desactivar');
+      return;
+    }
     const rol = lista.find((r) => r.id_rol === id);
     const nuevoEstado = rol.estado ? 0 : 1;
     try {
@@ -391,7 +415,14 @@ export default function Roles() {
                       {r.permisos.length} permisos
                     </span>
                   </td>
-                  <td><Toggle activo={r.estado === 1} onChange={() => toggle(r.id_rol)} /></td>
+                  <td>
+                    <Toggle
+                      activo={r.estado === 1}
+                      onChange={() => toggle(r.id_rol)}
+                      disabled={r.id_rol === ROL_ADMIN_ID}
+                      title={r.id_rol === ROL_ADMIN_ID ? 'El rol Admin no se puede desactivar' : undefined}
+                    />
+                  </td>
                   <td>
                     <div className="acciones">
                       <button className="btn-accion ver"      onClick={() => setDetalle({ ...r })}    title="Ver detalle">
@@ -403,9 +434,11 @@ export default function Roles() {
                       <button className="btn-accion editar"   onClick={() => setEditando({ ...r })}   title="Editar">
                         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       </button>
-                      <button className="btn-accion eliminar" onClick={() => setEliminando({ ...r })} title="Eliminar">
-                        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                      </button>
+                      {r.id_rol !== ROL_ADMIN_ID && (
+                        <button className="btn-accion eliminar" onClick={() => setEliminando({ ...r })} title="Eliminar">
+                          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
