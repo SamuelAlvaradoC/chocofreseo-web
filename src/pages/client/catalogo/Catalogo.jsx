@@ -572,7 +572,13 @@ function ModalLoginRequerido({ open, onClose }) {
   );
 }
 
-const redondearPuntos = (puntos) => Math.floor(puntos / 8) * 8;
+// El cliente solo puede usar puntos en incrementos de $1000 de descuento
+// (antes eran incrementos fijos de 8 puntos = $100 con valorPunto=$12.5).
+// El paso en PUNTOS se recalcula según el valor del punto vigente -- si el
+// admin lo cambia, el incremento sigue valiendo $1000 exactos.
+const INCREMENTO_PUNTOS_PESOS = 1000;
+const calcularPasoPuntos = (valorPunto) => Math.round(INCREMENTO_PUNTOS_PESOS / valorPunto);
+const redondearPuntos = (puntos, paso) => Math.floor(puntos / paso) * paso;
 
 /* ─── Carrito flotante ─── */
 function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrCheckout, abierto }) {
@@ -593,7 +599,8 @@ function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrC
   }, [carrito]);
 
   const subtotalProductos = carrito.reduce((s, i) => s + Number(i.subtotal || 0), 0);
-  const maxPuntosUsables  = redondearPuntos(Math.min(puntosDisponibles.puntos, Math.floor(subtotalProductos / valorPunto)));
+  const pasoPuntos        = calcularPasoPuntos(valorPunto);
+  const maxPuntosUsables  = redondearPuntos(Math.min(puntosDisponibles.puntos, Math.floor(subtotalProductos / valorPunto)), pasoPuntos);
   const descuentoPuntos   = usarPuntos ? puntosAUsar * valorPunto : 0;
   const totalConDescuento = Math.max(0, subtotalProductos - descuentoPuntos);
 
@@ -709,7 +716,7 @@ function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrC
                   </div>
                   {usarPuntos && (
                     <div>
-                      <input type="range" min={0} max={maxPuntosUsables} step={8} value={puntosAUsar}
+                      <input type="range" min={0} max={maxPuntosUsables} step={pasoPuntos} value={puntosAUsar}
                         onChange={e => setPuntosAUsar(Number(e.target.value))}
                         style={{ width:'100%', accentColor:'#CA0B0B', marginBottom:6 }} />
                       <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, color:'#166534', fontWeight:700, background:'#f0fdf4', padding:'6px 8px', borderRadius:6 }}>

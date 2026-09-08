@@ -96,7 +96,12 @@ const calcularDesglose = (d) => {
 const MAX_SALSAS_GRATIS  = 2;
 const PRECIO_SALSA_EXTRA = 5000;
 const COLOR_SALSAS       = '#ea580c';
-const redondearPuntos = (puntos) => Math.floor(puntos / 8) * 8;
+// El incremento de puntos aplicables equivale a $1000 de descuento (antes
+// eran 8 puntos fijos = $100 con valorPunto=$12.5) -- ver mismo cambio en
+// Catalogo.jsx del cliente.
+const INCREMENTO_PUNTOS_PESOS = 1000;
+const calcularPasoPuntos = (valorPunto) => Math.round(INCREMENTO_PUNTOS_PESOS / valorPunto);
+const redondearPuntos = (puntos, paso) => Math.floor(puntos / paso) * paso;
 const SALSAS_DISPONIBLES = [
   { id: 'arequipe',         nombre: 'Arequipe',          img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742573/patatas_arequipe_vhgewf.png' },
   { id: 'chocolate_negro',  nombre: 'Chocolate Negro',   img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742679/patatas_chocolate_negro_oluxzf.png' },
@@ -437,7 +442,8 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   if (!open) return null;
 
   const subtotal              = carrito.reduce((a, i) => a + calcularPrecioItem(i) * i.cantidad, 0);
-  const maxPuntosApl          = puntosCliente > 0 ? redondearPuntos(Math.min(puntosCliente, Math.floor(subtotal / valorPunto))) : 0;
+  const pasoPuntos            = calcularPasoPuntos(valorPunto);
+  const maxPuntosApl          = puntosCliente > 0 ? redondearPuntos(Math.min(puntosCliente, Math.floor(subtotal / valorPunto)), pasoPuntos) : 0;
   const puntosAplicarEfectivo = Math.min(puntosAplicar, maxPuntosApl);
   const descuentoPuntos       = usarPuntos ? puntosAplicarEfectivo * valorPunto : 0;
   const totalConDesc          = Math.max(0, subtotal - descuentoPuntos);
@@ -841,19 +847,23 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                       <span style={{ fontWeight: 700, fontSize: 13, color: '#1d4ed8' }}>🎯 Puntos de fidelidad</span>
                       <span style={{ fontSize: 12, color: '#1d4ed8', fontWeight: 600 }}>{puntosCliente} pts = ${(puntosCliente * valorPunto).toLocaleString('es-CO')}</span>
                     </div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginBottom: 8 }}>
-                      <input type="checkbox" checked={usarPuntos} onChange={(e) => { setUsarPuntos(e.target.checked); if (!e.target.checked) setPuntosAplicar(0); else setPuntosAplicar(maxPuntosApl); }} />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: maxPuntosApl === 0 ? 'not-allowed' : 'pointer', marginBottom: 8, opacity: maxPuntosApl === 0 ? 0.5 : 1 }}>
+                      <input type="checkbox" checked={usarPuntos} disabled={maxPuntosApl === 0}
+                        onChange={(e) => { setUsarPuntos(e.target.checked); if (!e.target.checked) setPuntosAplicar(0); else setPuntosAplicar(maxPuntosApl); }} />
                       <span style={{ fontSize: 12, fontWeight: 600, color: '#1d4ed8' }}>Usar puntos en este pedido</span>
                     </label>
-                    {usarPuntos && (
+                    {maxPuntosApl === 0 && (
+                      <div style={{ fontSize: 11, color: '#aaa', marginBottom: 4 }}>
+                        {carrito.length === 0
+                          ? 'Agrega productos primero para usar puntos'
+                          : `El cliente necesita al menos ${pasoPuntos} puntos (equivalen a $${INCREMENTO_PUNTOS_PESOS.toLocaleString('es-CO')}) para aplicar un descuento`}
+                      </div>
+                    )}
+                    {usarPuntos && maxPuntosApl > 0 && (
                       <>
-                        <input type="range" min={0} max={maxPuntosApl} step={8} value={puntosAplicarEfectivo}
+                        <input type="range" min={0} max={maxPuntosApl} step={pasoPuntos} value={puntosAplicarEfectivo}
                           onChange={(e) => setPuntosAplicar(Number(e.target.value))}
-                          disabled={maxPuntosApl === 0}
                           style={{ width: '100%', marginBottom: 4, accentColor: '#CA0B0B' }} />
-                        {maxPuntosApl === 0 && carrito.length === 0 && (
-                          <div style={{ fontSize: 11, color: '#aaa', marginBottom: 4 }}>Agrega productos primero para usar puntos</div>
-                        )}
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                           <span style={{ color: '#555' }}>Aplicar: {puntosAplicarEfectivo} pts</span>
                           {puntosAplicarEfectivo > 0 && <span style={{ color: '#16a34a', fontWeight: 700 }}>−${(puntosAplicarEfectivo * valorPunto).toLocaleString('es-CO')}</span>}
