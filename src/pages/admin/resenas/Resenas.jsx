@@ -55,7 +55,7 @@ export default function Resenas() {
           <option value="">Todas las sedes</option>
           <option value="Aranjuez">Sede Aranjuez</option>
           <option value="La Milagrosa">Sede La Milagrosa</option>
-          <option value="WhatsApp">Cocina Oculta (WhatsApp)</option>
+          <option value="WhatsApp">Domicilios Propios (WhatsApp)</option>
         </select>
         <input type="date" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)}
           style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13 }} />

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { Eye, RefreshCw, Check, AlertTriangle } from 'lucide-react';
 import { toast } from '../../utils/toast';
 import AdminLayout from '../../components/layout/AdminLayout';
@@ -247,16 +247,53 @@ function PedidoCard({ pedido, onConfirmar, onVerDetalle }) {
   );
 }
 
+// Genera un beep corto con Web Audio API -- no hay ningún archivo de
+// audio en el proyecto, y esto evita agregar un asset solo para esto.
+// Se reutiliza el mismo AudioContext entre pedidos (crearlo de nuevo
+// cada vez puede toparse con límites de contextos simultáneos en
+// algunos navegadores).
+let audioCtxCocina = null;
+const reproducirBeepCocina = () => {
+  try {
+    if (!audioCtxCocina) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      audioCtxCocina = new AC();
+    }
+    if (audioCtxCocina.state === 'suspended') audioCtxCocina.resume();
+    const osc  = audioCtxCocina.createOscillator();
+    const gain = audioCtxCocina.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.25, audioCtxCocina.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtxCocina.currentTime + 0.35);
+    osc.connect(gain);
+    gain.connect(audioCtxCocina.destination);
+    osc.start();
+    osc.stop(audioCtxCocina.currentTime + 0.35);
+  } catch (_) { /* navegador sin Web Audio o audio bloqueado -- no crítico */ }
+};
+
 export default function Cocina() {
   const [pedidos,     setPedidos]     = useState([]);
   const [cargando,    setCargando]    = useState(true);
   const [confirmando, setConfirmando] = useState(null);
   const [marcando,    setMarcando]    = useState(false);
   const [detalleCocina, setDetalleCocina] = useState(null);
+  // null = todavía no ha cargado nunca -- así la carga inicial nunca suena
+  const idsAnterioresRef = useRef(null);
 
   const cargar = useCallback(() => {
     api.listarVentas('en_proceso', hoyISO())
-      .then((data) => setPedidos([...(data || [])].sort((a, b) => a.id_venta - b.id_venta).map(mapPedido)))
+      .then((data) => {
+        const lista = [...(data || [])].sort((a, b) => a.id_venta - b.id_venta).map(mapPedido);
+        const idsNuevos = new Set(lista.map((p) => p.id_venta));
+        if (idsAnterioresRef.current !== null) {
+          const hayPedidoNuevo = [...idsNuevos].some((id) => !idsAnterioresRef.current.has(id));
+          if (hayPedidoNuevo) reproducirBeepCocina();
+        }
+        idsAnterioresRef.current = idsNuevos;
+        setPedidos(lista);
+      })
       .catch(() => {})
       .finally(() => setCargando(false));
   }, []);

@@ -107,7 +107,7 @@ export default function CtaFinal() {
                 {[
                   { v: 'Aranjuez',     l: 'Sede Aranjuez' },
                   { v: 'La Milagrosa', l: 'Sede La Milagrosa' },
-                  { v: 'WhatsApp',     l: 'Cocina Oculta' },
+                  { v: 'WhatsApp',     l: 'Domicilios Propios' },
                 ].map(s => (
                   <button key={s.v} type="button" onClick={() => setSede(s.v)} style={{ padding: '5px 11px', borderRadius: 20, border: sede === s.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb', background: sede === s.v ? '#fff5f5' : '#fafafa', color: sede === s.v ? '#CA0B0B' : '#666', fontWeight: sede === s.v ? 700 : 400, cursor: 'pointer', fontSize: 11, fontFamily: 'inherit', transition: 'all 0.15s' }}>
                     {s.l}
