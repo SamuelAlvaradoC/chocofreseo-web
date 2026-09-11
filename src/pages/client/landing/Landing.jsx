@@ -3,7 +3,7 @@ import ClientLayout from '../../../components/layout/ClientLayout';
 import Hero         from './components/Hero';
 import Conocenos    from './components/Conocenos';
 import CtaFinal     from './components/CtaFinal';
-import { ShoppingBag, MapPin, CreditCard, Truck, Maximize2, Minimize2 } from 'lucide-react';
+import { ShoppingBag, List, CreditCard, Truck, Maximize2, Minimize2 } from 'lucide-react';
 import { LogoInstagram, LogoTikTok, LogoFacebook } from '../../../components/common/LogosApps';
 import './Landing.css';
 
@@ -20,7 +20,7 @@ const PRODUCTOS_ESTRELLA = [
 
 const PASOS = [
   { icono: <ShoppingBag size={28} />, numero: '01', titulo: 'Elige tu antojo',    desc: 'Explora el catálogo, personaliza con toppings, untables y adiciones' },
-  { icono: <MapPin      size={28} />, numero: '02', titulo: 'Marca tu ubicación', desc: 'Pon el pin en el mapa y calculamos el domicilio automáticamente' },
+  { icono: <List        size={28} />, numero: '02', titulo: 'Elige tu barrio', desc: 'Selecciona tu ciudad y barrio, y calculamos el domicilio automáticamente' },
   { icono: <CreditCard  size={28} />, numero: '03', titulo: 'Elige cómo pagar',  desc: 'Efectivo, transferencia o mixto. Sin complicaciones' },
   { icono: <Truck       size={28} />, numero: '04', titulo: 'Recíbelo con freseo', desc: 'Tu pedido llega directo a tu puerta, fresquito y delicioso' },
 ];
@@ -93,11 +93,15 @@ export default function Landing() {
       .catch(() => {});
   }, []);
 
+  // Sin acentos + minúsculas, para que "frappe" matchee "Frappé" sin
+  // depender de que el keyword copie la tilde exacta del nombre en BD.
+  const normalizar = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
   const getImgProducto = (keywords) => {
     if (!productosDB.length) return null;
     const prod = productosDB.find(p =>
       p.estado === 1 &&
-      keywords.some(k => p.nombre.toLowerCase().includes(k.toLowerCase()))
+      keywords.some(k => normalizar(p.nombre).includes(normalizar(k)))
     );
     return prod?.img || null;
   };
