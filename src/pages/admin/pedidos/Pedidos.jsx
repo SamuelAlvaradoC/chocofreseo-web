@@ -1289,7 +1289,11 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
         cantidad: d.cantidad,
         toppings: (d.detalleToppings || []).map((t) => ({ id_topping: t.id_topping, nombre: t.topping?.nombre || '', cantidad: t.cantidad || 1 })),
         adiciones: (d.detalleAdiciones || []).map((a) => ({ id_adicion: a.id_adicion, nombre: a.adicion?.nombre || '', precio: Number(a.precio_unitario || 0), cantidad: a.cantidad || 1 })),
-        salsas: permiteSal ? parsearSalsas(d.salsas) : [],
+        // En Bowls, "salsas" guarda la cobertura (obligatoria), no la
+        // feature opcional de untables que permite_salsas protege -- por
+        // eso los Bowl siempre tienen permite_salsas=false en BD (ver
+        // Productos.jsx) y el gate normal los dejaría sin cobertura.
+        salsas: (d.producto?.es_bowl || permiteSal) ? parsearSalsas(d.salsas) : [],
         chocolate: permiteChoc ? (d.chocolate || null) : null,
       };
     }));
