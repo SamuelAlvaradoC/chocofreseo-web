@@ -23,6 +23,7 @@ const mapVentaPedido = (v, facturado = false) => {
     direccion:       v.direccion_linea || '—',
     barrio:          v.barrio         || '',
     referencia:      v.referencia_direccion || '',
+    observaciones:   v.observaciones   || '',
     ciudad:          v.ciudad         || '',
     forma_pago,
     monto_efectivo:      Number(v.monto_efectivo      || detallesPago.find(d => d.metodoPago?.nombre === 'efectivo')?.monto      || 0),
@@ -153,18 +154,26 @@ function ModalDetalle({ pedido, onClose }) {
             <span className="pd-modal-label">Hora</span>
             <span className="pd-modal-valor">{pedido.hora}</span>
           </div>
-          <div className="pd-modal-item pd-modal-full">
-            <span className="pd-modal-label">Dirección</span>
-            <span className="pd-modal-valor">
-              {[pedido.direccion, pedido.barrio, pedido.ciudad].filter(Boolean).join(', ')}
-            </span>
-          </div>
-          {pedido.referencia && (
-            <div className="pd-modal-item pd-modal-full">
-              <span className="pd-modal-label">Referencia</span>
-              <span className="pd-modal-valor">{pedido.referencia}</span>
+          <div className="pd-modal-item pd-modal-full pd-modal-bloque-ubicacion">
+            <div className="pd-modal-bloque-fila">
+              <span className="pd-modal-label">Dirección</span>
+              <span className="pd-modal-valor">
+                {[pedido.direccion, pedido.barrio, pedido.ciudad].filter(Boolean).join(', ')}
+              </span>
             </div>
-          )}
+            {pedido.referencia && (
+              <div className="pd-modal-bloque-fila">
+                <span className="pd-modal-label">Referencia</span>
+                <span className="pd-modal-valor">{pedido.referencia}</span>
+              </div>
+            )}
+            {pedido.observaciones && (
+              <div className="pd-modal-bloque-fila">
+                <span className="pd-modal-label">Observación</span>
+                <span className="pd-modal-valor" style={{ fontStyle: 'italic' }}>{pedido.observaciones}</span>
+              </div>
+            )}
+          </div>
           <div className="pd-modal-item">
             <span className="pd-modal-label">Teléfono</span>
             <span className="pd-modal-valor">{pedido.telefono}</span>

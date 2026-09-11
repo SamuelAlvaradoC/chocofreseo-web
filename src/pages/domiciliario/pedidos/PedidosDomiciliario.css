@@ -282,6 +282,10 @@
 .pd-modal-label { font-size: 10px; font-weight: 800; color: #bbb; text-transform: uppercase; letter-spacing: .04em; }
 .pd-modal-valor { font-size: 13px; font-weight: 700; color: #1a1a1a; }
 
+.pd-modal-bloque-ubicacion { gap: 8px; }
+.pd-modal-bloque-fila { display: flex; flex-direction: column; gap: 3px; }
+.pd-modal-bloque-fila + .pd-modal-bloque-fila { padding-top: 8px; border-top: 1px dashed #e5e7eb; }
+
 .pd-modal-sec {
   font-size: 11px; font-weight: 800; color: #bbb;
   text-transform: uppercase; letter-spacing: .04em;

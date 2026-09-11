@@ -1090,20 +1090,20 @@ function ModalDetalle({ open, onClose, venta }) {
             </div>
             {venta.barrio && <div className="detalle-item"><span className="detalle-label">Barrio</span><span className="detalle-valor">{venta.barrio}</span></div>}
             {venta.ciudad && <div className="detalle-item"><span className="detalle-label">Ciudad</span><span className="detalle-valor">{venta.ciudad}</span></div>}
-            <div className={`detalle-item${venta.nombreDomiciliario ? '' : ' detalle-full'}`}>
+            <div className="detalle-item">
               <span className="detalle-label">Dirección</span>
               <span className="detalle-valor">{venta.direccion}</span>
             </div>
-            {venta.referencia && (
-              <div className="detalle-item detalle-full">
-                <span className="detalle-label">Referencia</span>
-                <span className="detalle-valor">{venta.referencia}</span>
-              </div>
-            )}
             {venta.nombreDomiciliario && (
               <div className="detalle-item">
                 <span className="detalle-label">Domiciliario</span>
                 <span className="detalle-valor">{venta.nombreDomiciliario}</span>
+              </div>
+            )}
+            {venta.referencia && (
+              <div className="detalle-item detalle-full">
+                <span className="detalle-label">Referencia</span>
+                <span className="detalle-valor">{venta.referencia}</span>
               </div>
             )}
             {venta.observaciones && (
