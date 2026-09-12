@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin, RefreshCw, ThumbsUp, Star, Clock, MessageSquare, Send, AlertTriangle } from 'lucide-react';
+import { MapPin, RefreshCw, ThumbsUp, Star, Clock, MessageSquare, Send, AlertTriangle, Laptop } from 'lucide-react';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../../../utils/validarSinHtml';
 import './CtaFinal.css';
 
@@ -10,7 +10,7 @@ export default function CtaFinal() {
   const [frecuencia,      setFrecuencia]      = useState('');
   const [califAtencion,   setCalifAtencion]   = useState(0);
   const [califProducto,   setCalifProducto]   = useState(0);
-  const [califFacilidad,  setCalifFacilidad]  = useState(0);
+  const [facilidadPedido, setFacilidadPedido] = useState('');
   const [recomendaria,    setRecomendaria]    = useState('');
   const [tiempoAdecuado,  setTiempoAdecuado]  = useState('');
   const [loQueGusto,      setLoQueGusto]      = useState('');
@@ -22,7 +22,7 @@ export default function CtaFinal() {
   const [errorResena,     setErrorResena]     = useState('');
 
   const handleEnviarResena = async () => {
-    if (!sede || !frecuencia || !califAtencion || !califProducto || !califFacilidad || !recomendaria || !tiempoAdecuado) {
+    if (!sede || !frecuencia || !califAtencion || !califProducto || !facilidadPedido || !recomendaria || !tiempoAdecuado) {
       setErrorResena('Completa todos los campos obligatorios: sede, frecuencia, calificaciones, recomendación y tiempo de entrega.');
       return;
     }
@@ -40,7 +40,7 @@ export default function CtaFinal() {
           sede, frecuencia,
           calificacion_atencion: califAtencion,
           calificacion_producto: califProducto,
-          calificacion_facilidad_pedido: califFacilidad,
+          calificacion_facilidad_pedido: facilidadPedido,
           recomendaria,
           tiempo_adecuado:  tiempoAdecuado,
           lo_que_gusto:     loQueGusto,
@@ -60,7 +60,7 @@ export default function CtaFinal() {
         return;
       }
       setEnviado(true);
-      setSede(''); setFrecuencia(''); setCalifAtencion(0); setCalifProducto(0); setCalifFacilidad(0);
+      setSede(''); setFrecuencia(''); setCalifAtencion(0); setCalifProducto(0); setFacilidadPedido('');
       setRecomendaria(''); setTiempoAdecuado('');
       setLoQueGusto(''); setProductoDeseado(''); setMejora(''); setComentarioWeb('');
       setTimeout(() => setEnviado(false), 5000);
@@ -174,7 +174,6 @@ export default function CtaFinal() {
                 {[
                   { label: 'Atención', val: califAtencion, set: setCalifAtencion },
                   { label: 'Producto', val: califProducto, set: setCalifProducto },
-                  { label: 'Facilidad pedido', val: califFacilidad, set: setCalifFacilidad },
                 ].map(cal => (
                   <div key={cal.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: 12, color: '#555', minWidth: 70 }}>{cal.label}</span>
@@ -213,6 +212,27 @@ export default function CtaFinal() {
 
           {/* ══ COLUMNA DERECHA ══ */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderLeft: '1px solid #f0f0f0', paddingLeft: 16 }}>
+
+            {/* Facilidad del pedido en la web */}
+            <div style={{ marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <div style={{ width: 26, height: 26, borderRadius: 6, background: '#fff5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Laptop size={13} color="#CA0B0B" />
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#1a1a1a' }}>¿Qué tan fácil fue hacer tu pedido desde nuestra web?</span>
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[
+                  { v: 'muy_facil',    l: 'Muy fácil' },
+                  { v: 'algo_confuso', l: 'Algo confuso' },
+                  { v: 'dificil',      l: 'Difícil' },
+                ].map(fp => (
+                  <button key={fp.v} type="button" onClick={() => setFacilidadPedido(fp.v)} style={{ flex: 1, padding: '6px 4px', borderRadius: 10, border: facilidadPedido === fp.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb', background: facilidadPedido === fp.v ? '#fff5f5' : '#fafafa', color: facilidadPedido === fp.v ? '#CA0B0B' : '#666', fontWeight: facilidadPedido === fp.v ? 700 : 400, cursor: 'pointer', fontSize: 11, fontFamily: 'inherit', transition: 'all 0.15s' }}>
+                    {fp.l}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Header comentarios */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
