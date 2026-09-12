@@ -7,6 +7,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
+import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import './Ventas.css';
 
 const ESTADO_LABELS = {
@@ -446,6 +447,8 @@ export default function Ventas() {
   useEffect(() => {
     cargar();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useRefetchOnFocus(() => cargar());
 
   useEffect(() => { setPagina(1); }, [busqueda, filtroMetodo, filtroFecha]);
 

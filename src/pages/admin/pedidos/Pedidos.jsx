@@ -10,6 +10,7 @@ import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
+import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import '../ventas/Ventas.css';
 
 const ESTADO_LABELS = {
@@ -1774,6 +1775,8 @@ export default function Pedidos() {
     api.listarCategorias().then(setCategoriasData).catch(() => toast.error('No se pudieron cargar las categorías'));
     api.getValorPunto().then(setValorPunto);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useRefetchOnFocus(() => cargar());
 
   useEffect(() => { setPagina(1); }, [busqueda, filtroEstado, filtroMetodo, filtroFecha]);
 

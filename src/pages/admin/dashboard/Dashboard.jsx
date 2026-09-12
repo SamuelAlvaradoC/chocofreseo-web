@@ -7,6 +7,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
+import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import './Dashboard.css';
 
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
@@ -320,6 +321,8 @@ export default function Dashboard() {
     api.getTiempoEspera().then((min) => { setTiempoEspera(min); setNuevoTiempo(min); }).catch(() => {});
     api.getHorario().then((h) => { setHorario(h); setNuevoHorario({ hora_apertura: h.hora_apertura, hora_cierre: h.hora_cierre }); }).catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useRefetchOnFocus(() => { cargar(); cargarCierre(); });
 
   return (
     <AdminLayout>

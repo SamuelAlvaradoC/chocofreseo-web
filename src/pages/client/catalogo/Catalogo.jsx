@@ -8,6 +8,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { useValorPunto } from '../../../hooks/useValorPunto';
 import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
+import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import { formatHora12 } from '../../../utils/formatHora';
 import * as api from '../../../services/api';
 import './Catalogo.css';
@@ -968,6 +969,7 @@ export default function Catalogo() {
     api.catalogoMasPedidos().then((prods) => setMasPedidos(prods || [])).catch(console.error);
   };
   useEffect(() => { cargar(); }, []);
+  useRefetchOnFocus(() => cargar());
 
   // Ranking de "más pedidos": Map id_producto -> posición (0 = el más
   // pedido). Se usa tanto para decidir la insignia como para reordenar.
