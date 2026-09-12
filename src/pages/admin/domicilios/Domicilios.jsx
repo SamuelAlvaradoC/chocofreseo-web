@@ -320,7 +320,7 @@ export default function Domicilios() {
   const urlWpp = (telefono, idVenta, nombre) => {
     const digits = String(telefono || '').replace(/\D/g, '');
     const numero = digits.startsWith('57') ? digits : `57${digits}`;
-    const msg = encodeURIComponent(`Hola ${nombre || ''}, tu pedido #${idVenta} de ChocoFreseo ya está confirmado y en preparación, en breves minutos será despachado hacia tu ubicación, por favor esté pendiente.\n\nCuando recibas tus productos, te invitamos a llenar este pequeño formulario, tu opinión es muy importante para nosotros:\nchocofreseo.com/#resenas`);
+    const msg = encodeURIComponent(`Hola ${nombre || ''} 👋, tu pedido #${idVenta} de ChocoFreseo ya está confirmado y en preparación 🍫, en pocos minutos será despachado hacia tu ubicación 🛵, te agradecemos estar atento/a para recibirlo.\n\nCuando recibas tus productos, te invitamos a llenar este pequeño formulario, tu opinión es muy importante para nosotros ⭐:\nchocofreseo.com/landing#reseñas`);
     return `whatsapp://send?phone=${numero}&text=${msg}`;
   };
 
