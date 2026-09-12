@@ -10,21 +10,23 @@ export default function CtaFinal() {
   const [frecuencia,      setFrecuencia]      = useState('');
   const [califAtencion,   setCalifAtencion]   = useState(0);
   const [califProducto,   setCalifProducto]   = useState(0);
+  const [califFacilidad,  setCalifFacilidad]  = useState(0);
   const [recomendaria,    setRecomendaria]    = useState('');
   const [tiempoAdecuado,  setTiempoAdecuado]  = useState('');
   const [loQueGusto,      setLoQueGusto]      = useState('');
   const [productoDeseado, setProductoDeseado] = useState('');
   const [mejora,          setMejora]          = useState('');
+  const [comentarioWeb,   setComentarioWeb]   = useState('');
   const [enviandoResena,  setEnviandoResena]  = useState(false);
   const [enviado,         setEnviado]         = useState(false);
   const [errorResena,     setErrorResena]     = useState('');
 
   const handleEnviarResena = async () => {
-    if (!sede || !frecuencia || !califAtencion || !califProducto || !recomendaria || !tiempoAdecuado) {
+    if (!sede || !frecuencia || !califAtencion || !califProducto || !califFacilidad || !recomendaria || !tiempoAdecuado) {
       setErrorResena('Completa todos los campos obligatorios: sede, frecuencia, calificaciones, recomendación y tiempo de entrega.');
       return;
     }
-    if (contieneEtiquetaHtml(loQueGusto) || contieneEtiquetaHtml(productoDeseado) || contieneEtiquetaHtml(mejora)) {
+    if (contieneEtiquetaHtml(loQueGusto) || contieneEtiquetaHtml(productoDeseado) || contieneEtiquetaHtml(mejora) || contieneEtiquetaHtml(comentarioWeb)) {
       setErrorResena(MSG_HTML);
       return;
     }
@@ -38,11 +40,13 @@ export default function CtaFinal() {
           sede, frecuencia,
           calificacion_atencion: califAtencion,
           calificacion_producto: califProducto,
+          calificacion_facilidad_pedido: califFacilidad,
           recomendaria,
           tiempo_adecuado:  tiempoAdecuado,
           lo_que_gusto:     loQueGusto,
           producto_deseado: productoDeseado,
           mejora,
+          comentario_experiencia_web: comentarioWeb,
         }),
       });
       // fetch() solo rechaza (catch) por fallos de red -- un 429 (límite
@@ -56,9 +60,9 @@ export default function CtaFinal() {
         return;
       }
       setEnviado(true);
-      setSede(''); setFrecuencia(''); setCalifAtencion(0); setCalifProducto(0);
+      setSede(''); setFrecuencia(''); setCalifAtencion(0); setCalifProducto(0); setCalifFacilidad(0);
       setRecomendaria(''); setTiempoAdecuado('');
-      setLoQueGusto(''); setProductoDeseado(''); setMejora('');
+      setLoQueGusto(''); setProductoDeseado(''); setMejora(''); setComentarioWeb('');
       setTimeout(() => setEnviado(false), 5000);
     } catch (e) {
       setErrorResena('Sin conexión. Inténtalo de nuevo.');
@@ -170,6 +174,7 @@ export default function CtaFinal() {
                 {[
                   { label: 'Atención', val: califAtencion, set: setCalifAtencion },
                   { label: 'Producto', val: califProducto, set: setCalifProducto },
+                  { label: 'Facilidad pedido', val: califFacilidad, set: setCalifFacilidad },
                 ].map(cal => (
                   <div key={cal.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: 12, color: '#555', minWidth: 70 }}>{cal.label}</span>
@@ -222,6 +227,7 @@ export default function CtaFinal() {
               { label: '¿Qué fue lo que más te gustó?',          val: loQueGusto,      set: setLoQueGusto,      placeholder: 'El sabor, la atención, la presentación...' },
               { label: '¿Qué postre quisieras ver próximamente?', val: productoDeseado, set: setProductoDeseado, placeholder: 'Dinos qué antojo nos falta...' },
               { label: '¿En qué podríamos mejorar?',              val: mejora,          set: setMejora,          placeholder: 'Tu opinión nos ayuda a crecer...' },
+              { label: 'Déjanos un comentario sobre tu experiencia en nuestra página web', val: comentarioWeb, set: setComentarioWeb, placeholder: 'Cuéntanos cómo fue navegar en nuestra web...' },
             ].map(t => (
               <div key={t.label}>
                 <label style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: 0.5, display: 'block', marginBottom: 4 }}>
