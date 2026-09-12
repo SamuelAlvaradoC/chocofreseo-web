@@ -317,10 +317,11 @@ export default function Domicilios() {
     setProcesando(false); cargar(); setRevisando(null); setRechazandoRapido(null);
   };
 
-  const urlWpp = (telefono, idVenta) => {
+  const urlWpp = (telefono, idVenta, nombre) => {
     const digits = String(telefono || '').replace(/\D/g, '');
     const numero = digits.startsWith('57') ? digits : `57${digits}`;
-    return `whatsapp://send?phone=${numero}&text=Hola,%20confirmamos%20tu%20pedido%20%23${idVenta}%20de%20ChocoFreseo`;
+    const msg = encodeURIComponent(`Hola ${nombre || ''}, tu pedido #${idVenta} de ChocoFreseo ya está confirmado y en preparación, en breves minutos será despachado hacia tu ubicación, por favor esté pendiente.\n\nCuando recibas tus productos, te invitamos a llenar este pequeño formulario, tu opinión es muy importante para nosotros:\nhttps://chocofreseo.com/#resenas`);
+    return `whatsapp://send?phone=${numero}&text=${msg}`;
   };
 
   return (
@@ -388,7 +389,7 @@ export default function Domicilios() {
                 <div className="domi-card-footer">
                   <span className="domi-card-total">${d.total.toLocaleString('es-CO')}</span>
                   <div className="domi-card-acciones">
-                    <a href={urlWpp(d.telefono?.replace(/\D/g,''), d.id_venta)} title="Contactar por WhatsApp"
+                    <a href={urlWpp(d.telefono?.replace(/\D/g,''), d.id_venta, d.cliente)} title="Contactar por WhatsApp"
                       style={{ width:34, height:34, borderRadius:8, background:'#25D366', border:'none', display:'flex', alignItems:'center', justifyContent:'center', textDecoration:'none', flexShrink:0 }}>
                       <LogoWhatsApp size={18} color="white"/>
                     </a>
