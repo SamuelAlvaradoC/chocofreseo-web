@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { handleAuthError } from './authEvents';
+
+export { SESSION_EXPIRED_EVENT } from './authEvents';
 
 const BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
 
@@ -9,6 +12,8 @@ http.interceptors.request.use((cfg) => {
   if (token) cfg.headers.Authorization = `Bearer ${token}`;
   return cfg;
 });
+
+http.interceptors.response.use((r) => r, handleAuthError);
 
 const unwrap  = (r) => r.data.data;
 const handleErr = (e) => { console.error('[API Error]', e?.response?.status, e?.response?.data?.message || e?.message); throw e; };

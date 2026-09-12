@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { useAuth } from './context/AuthContext';
+import SessionExpiredListener from './components/SessionExpiredListener';
 
 // ── Admin ──────────────────────────────────────────────────────
 import DashboardPage  from './pages/admin/dashboard';
@@ -88,6 +89,7 @@ function RutaPublica({ children }) {
 function App() {
   return (
     <BrowserRouter>
+      <SessionExpiredListener />
       <Routes>
         {/* Raíz */}
         <Route path="/" element={<Navigate to="/landing" replace />} />
