@@ -428,9 +428,9 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
                 <LogoNequi size={32} />
               </div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#1a1a1a', letterSpacing: 3, marginBottom: 4 }}>009181338</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#1a1a1a', letterSpacing: 3, marginBottom: 4 }}>0091813388</div>
               <div style={{ fontSize: 11, color: '#888', marginBottom: 12 }}>Llave Nequi</div>
-              <button onClick={() => navigator.clipboard.writeText('009181338').then(() => toast.success('Llave copiada al portapapeles'))}
+              <button onClick={() => navigator.clipboard.writeText('0091813388').then(() => toast.success('Llave copiada al portapapeles'))}
                 style={{ width: '100%', padding: '8px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#f9f9f9', color: '#555', fontWeight: 700, cursor: 'pointer', fontSize: 12, fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 Copiar llave
               </button>
