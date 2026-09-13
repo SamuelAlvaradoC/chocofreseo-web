@@ -446,17 +446,6 @@ export default function Productos() {
         {busqueda.trim() && ` con "${busqueda}"`}
       </div>
 
-      {/* Paginación arriba también -- ya se acerca a varias páginas y solo
-          va a crecer, no tiene sentido bajar hasta el final para cambiar. */}
-      {filtrados.length > 0 && (
-        <div className="tabla-wrap" style={{ marginBottom: 16 }}>
-          <Paginacion
-            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
-            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
-          />
-        </div>
-      )}
-
       <div className="tabla-wrap">
         <table>
           <thead>

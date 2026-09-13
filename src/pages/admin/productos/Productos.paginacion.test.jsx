@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Productos from './Productos';
 import * as api from '../../../services/api';
@@ -44,14 +44,17 @@ function mockApiDefaults() {
 }
 
 const filasProducto = () => screen.getAllByText((_, el) => el.tagName === 'TD' && /^Producto \d+$/.test(el.textContent.trim()));
-// El control de paginación está duplicado (arriba y abajo) -- las
-// interacciones se hacen contra el de ARRIBA (primero en el DOM), scopeadas
-// con within() porque los mismos textos ("10", "3", etc.) existen dos veces.
-const arriba = () => within(document.querySelectorAll('.paginacion')[0]);
-const abajo  = () => within(document.querySelectorAll('.paginacion')[1]);
 
 describe('Productos admin — selector "Mostrar" y paginación', () => {
   beforeEach(() => jest.clearAllMocks());
+
+  test('el bloque de paginación duplicado de arriba se quitó -- solo queda uno, después de la tabla', async () => {
+    mockApiDefaults();
+    render(<Productos />);
+
+    await screen.findByText('Producto 1');
+    expect(document.querySelectorAll('.paginacion')).toHaveLength(1);
+  });
 
   test('por defecto muestra 10 por página, seleccionado en el dropdown', async () => {
     mockApiDefaults();
@@ -59,7 +62,7 @@ describe('Productos admin — selector "Mostrar" y paginación', () => {
 
     await screen.findByText('Producto 1');
     expect(filasProducto()).toHaveLength(10);
-    expect(arriba().getByDisplayValue('10')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('10')).toBeInTheDocument();
   });
 
   test('"Todos" desactiva la paginación y muestra el listado completo', async () => {
@@ -67,7 +70,7 @@ describe('Productos admin — selector "Mostrar" y paginación', () => {
     render(<Productos />);
 
     await screen.findByText('Producto 1');
-    fireEvent.change(arriba().getByDisplayValue('10'), { target: { value: 'todos' } });
+    fireEvent.change(screen.getByDisplayValue('10'), { target: { value: 'todos' } });
 
     expect(await screen.findAllByText((_, el) => el.tagName === 'TD' && /^Producto \d+$/.test(el.textContent.trim()))).toHaveLength(25);
     expect(screen.queryByText('2')).not.toBeInTheDocument();
@@ -79,28 +82,16 @@ describe('Productos admin — selector "Mostrar" y paginación', () => {
 
     await screen.findByText('Producto 1');
     // Con 10/página y 25 productos hay 3 páginas -- ir a la página 3.
-    fireEvent.click(arriba().getByText('3'));
+    fireEvent.click(screen.getByText('3'));
     await screen.findByText('Producto 21');
 
     // Cambiar a 100/página: con 25 productos ahora hay 1 sola página. No debe
     // quedar "atascado" en la página 3 (que ya no existiría) viendo una tabla
     // vacía -- debe recortarse sola a una página válida con datos.
-    fireEvent.change(arriba().getByDisplayValue('10'), { target: { value: '100' } });
+    fireEvent.change(screen.getByDisplayValue('10'), { target: { value: '100' } });
 
     await screen.findByText('Producto 1');
     expect(screen.queryByText('No se encontraron productos')).not.toBeInTheDocument();
     expect(filasProducto()).toHaveLength(25);
-  });
-
-  test('el control de paginación aparece arriba Y abajo, sincronizados', async () => {
-    mockApiDefaults();
-    render(<Productos />);
-
-    await screen.findByText('Producto 1');
-    expect(document.querySelectorAll('.paginacion')).toHaveLength(2);
-
-    fireEvent.click(arriba().getByText('3'));
-
-    expect(abajo().getByText('3')).toHaveClass('activo');
   });
 });
