@@ -3,38 +3,80 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import * as api from '../../../../services/api';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../../utils/validarSinHtml';
+import useDebounce from '../../../../hooks/useDebounce';
 import './Registro.css';
+
+// Mismas reglas que registerSchema en el backend (auth/schema.js) -- el
+// frontend nunca debe decir "válido" para algo que el backend rechazaría.
+const validarNombre = (v) => {
+  if (!v.trim()) return 'El nombre es obligatorio';
+  if (v.trim().length < 2) return 'El nombre debe tener al menos 2 caracteres';
+  if (contieneEtiquetaHtml(v)) return MSG_HTML;
+  return '';
+};
+const validarEmail = (v) => {
+  if (!v.trim()) return 'El correo electrónico es obligatorio';
+  if (!/\S+@\S+\.\S+/.test(v)) return 'Ingresa un correo electrónico válido';
+  return '';
+};
+const validarContrasena = (v) => {
+  if (!v.trim()) return 'La contraseña es obligatoria';
+  if (v.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+  return '';
+};
+// Regla exclusiva de frontend -- el backend nunca recibe "confirmar".
+const validarConfirmar = (v, contrasenaVal) => {
+  if (!v.trim()) return 'Confirma tu contraseña';
+  if (v !== contrasenaVal) return 'Las contraseñas no coinciden';
+  return '';
+};
 
 export default function Registro() {
   const [nombre,     setNombre]     = useState('');
   const [email,      setEmail]      = useState('');
   const [contrasena, setContrasena] = useState('');
   const [confirmar,  setConfirmar]  = useState('');
-  const [error,      setError]      = useState('');
+  const [errores,    setErrores]    = useState({});
   const [cargando,   setCargando]   = useState(false);
   const navigate        = useNavigate();
   const { loginConAPI } = useAuth();
 
+  // Un debounce por campo -- cada uno valida 400ms después de que el
+  // usuario deja de escribir EN ESE campo. Al validar contraseña, si
+  // confirmar ya tiene texto, se revisa de nuevo contra el valor nuevo
+  // (evita que quede marcada "coincide" con una contraseña que ya cambió).
+  const debounceNombre     = useDebounce((v) => setErrores((p) => ({ ...p, nombre: validarNombre(v) })), 400);
+  const debounceEmail      = useDebounce((v) => setErrores((p) => ({ ...p, email: validarEmail(v) })), 400);
+  const debounceContrasena = useDebounce((v) => setErrores((p) => ({
+    ...p,
+    contrasena: validarContrasena(v),
+    ...(confirmar ? { confirmar: validarConfirmar(confirmar, v) } : {}),
+  })), 400);
+  const debounceConfirmar  = useDebounce((v) => setErrores((p) => ({ ...p, confirmar: validarConfirmar(v, contrasena) })), 400);
+
   const handleRegistro = async (e) => {
     e.preventDefault();
-    if (!nombre.trim())    { setError('El nombre es obligatorio'); return; }
-    if (nombre.trim().length < 2) { setError('El nombre debe tener al menos 2 caracteres'); return; }
-    if (contieneEtiquetaHtml(nombre)) { setError(MSG_HTML); return; }
-    if (!email.trim())     { setError('El correo electrónico es obligatorio'); return; }
-    if (!/\S+@\S+\.\S+/.test(email)) { setError('Ingresa un correo electrónico válido'); return; }
-    if (!contrasena.trim()) { setError('La contraseña es obligatoria'); return; }
-    if (contrasena.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
-    if (!confirmar.trim()) { setError('Confirma tu contraseña'); return; }
-    if (contrasena !== confirmar) { setError('Las contraseñas no coinciden'); return; }
+    const errs = {
+      nombre:     validarNombre(nombre),
+      email:      validarEmail(email),
+      contrasena: validarContrasena(contrasena),
+      confirmar:  validarConfirmar(confirmar, contrasena),
+    };
+    if (Object.values(errs).some(Boolean)) { setErrores(errs); return; }
 
     setCargando(true);
-    setError('');
+    setErrores({});
     try {
       await api.register({ nombre: nombre.trim(), email: email.trim().toLowerCase(), contrasena, id_rol: 4 });
       await loginConAPI(email.trim().toLowerCase(), contrasena);
       navigate('/landing');
     } catch (err) {
-      setError(err?.response?.data?.message || 'Error al crear la cuenta. Inténtalo de nuevo.');
+      const msg = err?.response?.data?.message || 'Error al crear la cuenta. Inténtalo de nuevo.';
+      if (msg.toLowerCase().includes('correo') || msg.toLowerCase().includes('email')) {
+        setErrores((p) => ({ ...p, email: msg }));
+      } else {
+        setErrores((p) => ({ ...p, _general: msg }));
+      }
     } finally {
       setCargando(false);
     }
@@ -66,21 +108,49 @@ export default function Registro() {
           <form onSubmit={handleRegistro} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Nombre completo</label>
-              <input className="lf-input" type="text" placeholder="Ej: Ana Gómez" value={nombre} onChange={(e) => { setNombre(e.target.value); setError(''); }} />
+              <input
+                className={`lf-input${errores.nombre ? ' input-error' : ''}`}
+                type="text" placeholder="Ej: Ana Gómez" value={nombre}
+                onChange={(e) => { const v = e.target.value; setNombre(v); setErrores((p) => ({ ...p, nombre: '' })); debounceNombre(v); }}
+                onBlur={() => setErrores((p) => ({ ...p, nombre: validarNombre(nombre) }))}
+              />
+              {errores.nombre && <span className="form-error">{errores.nombre}</span>}
             </div>
             <div className="lf-grupo">
               <label className="lf-label">Correo electrónico</label>
-              <input className="lf-input" type="email" placeholder="correo@ejemplo.com" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} />
+              <input
+                className={`lf-input${errores.email ? ' input-error' : ''}`}
+                type="email" placeholder="correo@ejemplo.com" value={email}
+                onChange={(e) => { const v = e.target.value; setEmail(v); setErrores((p) => ({ ...p, email: '' })); debounceEmail(v); }}
+                onBlur={() => setErrores((p) => ({ ...p, email: validarEmail(email) }))}
+              />
+              {errores.email && <span className="form-error">{errores.email}</span>}
             </div>
             <div className="lf-grupo">
               <label className="lf-label">Contraseña</label>
-              <input className="lf-input" type="password" placeholder="Mínimo 8 caracteres" value={contrasena} onChange={(e) => { setContrasena(e.target.value); setError(''); }} />
+              <input
+                className={`lf-input${errores.contrasena ? ' input-error' : ''}`}
+                type="password" placeholder="Mínimo 8 caracteres" value={contrasena}
+                onChange={(e) => { const v = e.target.value; setContrasena(v); setErrores((p) => ({ ...p, contrasena: '' })); debounceContrasena(v); }}
+                onBlur={() => setErrores((p) => ({
+                  ...p,
+                  contrasena: validarContrasena(contrasena),
+                  ...(confirmar ? { confirmar: validarConfirmar(confirmar, contrasena) } : {}),
+                }))}
+              />
+              {errores.contrasena && <span className="form-error">{errores.contrasena}</span>}
             </div>
             <div className="lf-grupo">
               <label className="lf-label">Confirmar contraseña</label>
-              <input className="lf-input" type="password" placeholder="Repite tu contraseña" value={confirmar} onChange={(e) => { setConfirmar(e.target.value); setError(''); }} />
+              <input
+                className={`lf-input${errores.confirmar ? ' input-error' : ''}`}
+                type="password" placeholder="Repite tu contraseña" value={confirmar}
+                onChange={(e) => { const v = e.target.value; setConfirmar(v); setErrores((p) => ({ ...p, confirmar: '' })); debounceConfirmar(v); }}
+                onBlur={() => setErrores((p) => ({ ...p, confirmar: validarConfirmar(confirmar, contrasena) }))}
+              />
+              {errores.confirmar && <span className="form-error">{errores.confirmar}</span>}
             </div>
-            {error && <div className="lf-error">{error}</div>}
+            {errores._general && <p className="error-general">{errores._general}</p>}
             <button className="lf-btn-primario" type="submit" disabled={cargando}>
               {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
