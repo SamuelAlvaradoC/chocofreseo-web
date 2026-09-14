@@ -49,6 +49,13 @@ describe('Login — validación en tiempo real', () => {
     expect(screen.getByText('La contraseña es obligatoria')).toBeInTheDocument();
   });
 
+  it('un dominio con una sola letra (ej. samuel@M.gamil.com) sigue siendo válido', () => {
+    render(<Login />);
+    escribirYEsperarDebounce(emailInput(), 'samuel@M.gamil.com');
+    expect(screen.queryByText('Ingresa un correo electrónico válido')).not.toBeInTheDocument();
+    expect(emailInput()).not.toHaveClass('input-error');
+  });
+
   it('corregir el correo hace desaparecer el error solo', () => {
     render(<Login />);
     escribirYEsperarDebounce(emailInput(), 'correoinvalido');

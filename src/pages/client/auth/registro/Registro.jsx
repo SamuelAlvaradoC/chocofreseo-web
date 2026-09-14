@@ -2,21 +2,30 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import * as api from '../../../../services/api';
-import { contieneEtiquetaHtml, MSG_HTML } from '../../../../utils/validarSinHtml';
 import useDebounce from '../../../../hooks/useDebounce';
 import './Registro.css';
 
-// Mismas reglas que registerSchema en el backend (auth/schema.js) -- el
-// frontend nunca debe decir "válido" para algo que el backend rechazaría.
+// Reglas de frontend más estrictas que registerSchema en el backend
+// (auth/schema.js exige solo min(2) + sin HTML) -- una cadena que solo
+// tenga letras/espacios/tildes nunca puede contener una etiqueta HTML, así
+// que ese chequeo queda cubierto por esta regla, no hace falta repetirlo.
 const validarNombre = (v) => {
-  if (!v.trim()) return 'El nombre es obligatorio';
-  if (v.trim().length < 2) return 'El nombre debe tener al menos 2 caracteres';
-  if (contieneEtiquetaHtml(v)) return MSG_HTML;
+  const t = v.trim();
+  if (!t) return 'El nombre es obligatorio';
+  if (t.length < 3) return 'El nombre debe tener al menos 3 caracteres';
+  if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(t)) return 'El nombre solo puede contener letras y espacios';
   return '';
 };
+// Mismo regex estándar (WHATWG/HTML5) en las 4 pantallas de auth (React y
+// Flutter) -- más estricto que \S+@\S+\.\S+ (que aceptaba casi cualquier
+// cosa con un @ y un punto), pero sigue aceptando dominios con una
+// etiqueta de 1 caracter (ej. samuel@M.gamil.com) por ser sintácticamente
+// válidos -- no hay forma de detectar ese typo sin una lista de dominios
+// conocidos, y no es lo que se pidió aquí.
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const validarEmail = (v) => {
   if (!v.trim()) return 'El correo electrónico es obligatorio';
-  if (!/\S+@\S+\.\S+/.test(v)) return 'Ingresa un correo electrónico válido';
+  if (!EMAIL_REGEX.test(v.trim())) return 'Ingresa un correo electrónico válido';
   return '';
 };
 const validarContrasena = (v) => {

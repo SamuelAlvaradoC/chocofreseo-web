@@ -37,7 +37,7 @@ describe('Registro — validación en tiempo real', () => {
     render(<Registro />);
     escribirYEsperarDebounce(nombreInput(), 'A');
 
-    expect(screen.getByText('El nombre debe tener al menos 2 caracteres')).toBeInTheDocument();
+    expect(screen.getByText('El nombre debe tener al menos 3 caracteres')).toBeInTheDocument();
     expect(nombreInput()).toHaveClass('input-error');
   });
 
@@ -47,6 +47,29 @@ describe('Registro — validación en tiempo real', () => {
 
     expect(screen.getByText('Ingresa un correo electrónico válido')).toBeInTheDocument();
     expect(emailInput()).toHaveClass('input-error');
+  });
+
+  it('nombre con números o comillas se rechaza (solo letras y espacios)', () => {
+    render(<Registro />);
+    escribirYEsperarDebounce(nombreInput(), 'Ana123');
+    expect(screen.getByText('El nombre solo puede contener letras y espacios')).toBeInTheDocument();
+
+    escribirYEsperarDebounce(nombreInput(), 'Ana "Gómez"');
+    expect(screen.getByText('El nombre solo puede contener letras y espacios')).toBeInTheDocument();
+  });
+
+  it('nombre con espacio entre palabras y tildes/ñ SÍ es válido', () => {
+    render(<Registro />);
+    escribirYEsperarDebounce(nombreInput(), 'José Muñoz');
+    expect(screen.queryByText(/solo puede contener letras|al menos 3 caracteres/)).not.toBeInTheDocument();
+    expect(nombreInput()).not.toHaveClass('input-error');
+  });
+
+  it('un dominio con una sola letra (ej. samuel@M.gamil.com) sigue siendo válido -- es sintácticamente correcto, no se puede detectar el typo sin lista de dominios', () => {
+    render(<Registro />);
+    escribirYEsperarDebounce(emailInput(), 'samuel@M.gamil.com');
+    expect(screen.queryByText('Ingresa un correo electrónico válido')).not.toBeInTheDocument();
+    expect(emailInput()).not.toHaveClass('input-error');
   });
 
   it('contraseña de 5 caracteres marca error tras el debounce', () => {
@@ -71,7 +94,7 @@ describe('Registro — validación en tiempo real', () => {
     escribirYEsperarDebounce(passInput(), '12345');
     escribirYEsperarDebounce(confirmInput(), 'otra');
 
-    expect(screen.getByText('El nombre debe tener al menos 2 caracteres')).toBeInTheDocument();
+    expect(screen.getByText('El nombre debe tener al menos 3 caracteres')).toBeInTheDocument();
     expect(screen.getByText('Ingresa un correo electrónico válido')).toBeInTheDocument();
     expect(screen.getByText('La contraseña debe tener al menos 8 caracteres')).toBeInTheDocument();
     expect(screen.getByText('Las contraseñas no coinciden')).toBeInTheDocument();
@@ -81,7 +104,7 @@ describe('Registro — validación en tiempo real', () => {
     escribirYEsperarDebounce(passInput(), 'Contraseña123');
     escribirYEsperarDebounce(confirmInput(), 'Contraseña123');
 
-    expect(screen.queryByText('El nombre debe tener al menos 2 caracteres')).not.toBeInTheDocument();
+    expect(screen.queryByText('El nombre debe tener al menos 3 caracteres')).not.toBeInTheDocument();
     expect(screen.queryByText('Ingresa un correo electrónico válido')).not.toBeInTheDocument();
     expect(screen.queryByText('La contraseña debe tener al menos 8 caracteres')).not.toBeInTheDocument();
     expect(screen.queryByText('Las contraseñas no coinciden')).not.toBeInTheDocument();

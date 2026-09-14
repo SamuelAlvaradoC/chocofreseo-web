@@ -7,9 +7,12 @@ import './Login.css';
 // El backend (loginSchema) solo exige formato de email válido y contraseña
 // no vacía (mínimo 6, pero eso no es algo que valga la pena exigir en
 // tiempo real -- el login no es donde se exige fortaleza de contraseña).
+// Mismo regex estándar (WHATWG/HTML5) que Registro.jsx -- ver el comentario
+// ahí sobre por qué sigue aceptando dominios de 1 caracter.
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const validarEmail = (v) => {
   if (!v.trim()) return 'El correo electrónico es obligatorio';
-  if (!/\S+@\S+\.\S+/.test(v)) return 'Ingresa un correo electrónico válido';
+  if (!EMAIL_REGEX.test(v.trim())) return 'Ingresa un correo electrónico válido';
   return '';
 };
 const validarContrasena = (v) => {
