@@ -39,7 +39,7 @@ export default function Login() {
     setCargando(true);
     setErrores({});
     try {
-      const usuario = await loginConAPI(email, contrasena);
+      const usuario = await loginConAPI(email.trim().toLowerCase(), contrasena);
       if (usuario.rol === 'admin' || usuario.rol === 'Administrador') {
         navigate('/admin/dashboard');
       } else if (usuario.rol === 'domiciliario' || usuario.rol === 'Domiciliario') {
