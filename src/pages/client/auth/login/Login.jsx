@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 import useDebounce from '../../../../hooks/useDebounce';
 import './Login.css';
@@ -25,6 +26,7 @@ export default function Login() {
   const [contrasena, setContrasena] = useState('');
   const [errores,    setErrores]    = useState({});
   const [cargando,   setCargando]   = useState(false);
+  const [verContrasena, setVerContrasena] = useState(false);
   const navigate        = useNavigate();
   const { loginConAPI } = useAuth();
 
@@ -102,14 +104,25 @@ export default function Login() {
                 <label className="lf-label">Contraseña</label>
                 <Link to="/recuperar" className="lf-link">¿Olvidaste tu contraseña?</Link>
               </div>
-              <input
-                className={`lf-input${errores.contrasena ? ' input-error' : ''}`}
-                type="password"
-                placeholder="••••••••"
-                value={contrasena}
-                onChange={(e) => { const v = e.target.value; setContrasena(v); setErrores((p) => ({ ...p, contrasena: '' })); debounceContrasena(v); }}
-                onBlur={() => setErrores((p) => ({ ...p, contrasena: validarContrasena(contrasena) }))}
-              />
+              <div className="lf-input-wrap">
+                <input
+                  className={`lf-input${errores.contrasena ? ' input-error' : ''}`}
+                  type={verContrasena ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={contrasena}
+                  onChange={(e) => { const v = e.target.value; setContrasena(v); setErrores((p) => ({ ...p, contrasena: '' })); debounceContrasena(v); }}
+                  onBlur={() => setErrores((p) => ({ ...p, contrasena: validarContrasena(contrasena) }))}
+                />
+                <button
+                  type="button"
+                  className="lf-toggle-pass"
+                  onClick={() => setVerContrasena((v) => !v)}
+                  aria-label={verContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  tabIndex={-1}
+                >
+                  {verContrasena ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errores.contrasena && <span className="form-error">{errores.contrasena}</span>}
             </div>
             {errores._general && <p className="error-general">{errores._general}</p>}

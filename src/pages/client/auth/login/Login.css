@@ -192,6 +192,26 @@
 
 .lf-input::placeholder { color: #ccc; }
 
+.lf-input-wrap { position: relative; }
+.lf-input-wrap .lf-input { padding-right: 44px; }
+
+.lf-toggle-pass {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  cursor: pointer;
+  line-height: 0;
+}
+.lf-toggle-pass:hover { color: #CA0B0B; }
+
 .lf-link {
   font-size: 12px;
   font-weight: 700;

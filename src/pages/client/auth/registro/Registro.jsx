@@ -1,5 +1,6 @@
 ﻿import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 import * as api from '../../../../services/api';
 import useDebounce from '../../../../hooks/useDebounce';
@@ -47,6 +48,8 @@ export default function Registro() {
   const [confirmar,  setConfirmar]  = useState('');
   const [errores,    setErrores]    = useState({});
   const [cargando,   setCargando]   = useState(false);
+  const [verContrasena, setVerContrasena] = useState(false);
+  const [verConfirmar,  setVerConfirmar]  = useState(false);
   const navigate        = useNavigate();
   const { loginConAPI } = useAuth();
 
@@ -137,26 +140,48 @@ export default function Registro() {
             </div>
             <div className="lf-grupo">
               <label className="lf-label">Contraseña</label>
-              <input
-                className={`lf-input${errores.contrasena ? ' input-error' : ''}`}
-                type="password" placeholder="Mínimo 8 caracteres" value={contrasena}
-                onChange={(e) => { const v = e.target.value; setContrasena(v); setErrores((p) => ({ ...p, contrasena: '' })); debounceContrasena(v); }}
-                onBlur={() => setErrores((p) => ({
-                  ...p,
-                  contrasena: validarContrasena(contrasena),
-                  ...(confirmar ? { confirmar: validarConfirmar(confirmar, contrasena) } : {}),
-                }))}
-              />
+              <div className="lf-input-wrap">
+                <input
+                  className={`lf-input${errores.contrasena ? ' input-error' : ''}`}
+                  type={verContrasena ? 'text' : 'password'} placeholder="Mínimo 8 caracteres" value={contrasena}
+                  onChange={(e) => { const v = e.target.value; setContrasena(v); setErrores((p) => ({ ...p, contrasena: '' })); debounceContrasena(v); }}
+                  onBlur={() => setErrores((p) => ({
+                    ...p,
+                    contrasena: validarContrasena(contrasena),
+                    ...(confirmar ? { confirmar: validarConfirmar(confirmar, contrasena) } : {}),
+                  }))}
+                />
+                <button
+                  type="button"
+                  className="lf-toggle-pass"
+                  onClick={() => setVerContrasena((v) => !v)}
+                  aria-label={verContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  tabIndex={-1}
+                >
+                  {verContrasena ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errores.contrasena && <span className="form-error">{errores.contrasena}</span>}
             </div>
             <div className="lf-grupo">
               <label className="lf-label">Confirmar contraseña</label>
-              <input
-                className={`lf-input${errores.confirmar ? ' input-error' : ''}`}
-                type="password" placeholder="Repite tu contraseña" value={confirmar}
-                onChange={(e) => { const v = e.target.value; setConfirmar(v); setErrores((p) => ({ ...p, confirmar: '' })); debounceConfirmar(v); }}
-                onBlur={() => setErrores((p) => ({ ...p, confirmar: validarConfirmar(confirmar, contrasena) }))}
-              />
+              <div className="lf-input-wrap">
+                <input
+                  className={`lf-input${errores.confirmar ? ' input-error' : ''}`}
+                  type={verConfirmar ? 'text' : 'password'} placeholder="Repite tu contraseña" value={confirmar}
+                  onChange={(e) => { const v = e.target.value; setConfirmar(v); setErrores((p) => ({ ...p, confirmar: '' })); debounceConfirmar(v); }}
+                  onBlur={() => setErrores((p) => ({ ...p, confirmar: validarConfirmar(confirmar, contrasena) }))}
+                />
+                <button
+                  type="button"
+                  className="lf-toggle-pass"
+                  onClick={() => setVerConfirmar((v) => !v)}
+                  aria-label={verConfirmar ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  tabIndex={-1}
+                >
+                  {verConfirmar ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errores.confirmar && <span className="form-error">{errores.confirmar}</span>}
             </div>
             {errores._general && <p className="error-general">{errores._general}</p>}
