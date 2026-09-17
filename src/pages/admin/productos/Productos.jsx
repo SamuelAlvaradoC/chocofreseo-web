@@ -8,11 +8,17 @@ import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
 import './Productos.css';
 
+// Máximo 20 caracteres -- columna `tamano` es VARCHAR(20) en la BD
+// (prisma/schema.prisma) y el schema de validación del backend replica ese
+// mismo límite (productos/schema.js). "Extra pequeño"/"Extra grande" no
+// caben (21 caracteres), por eso Mini/Familiar en su lugar.
 const TAMANOS = [
-  { value: '',               label: '(Sin tamaño)' },
-  { value: 'Pequeño (9oz)',  label: 'Pequeño (9oz)' },
-  { value: 'Mediano (12oz)', label: 'Mediano (12oz)' },
-  { value: 'Grande (16oz)',  label: 'Grande (16oz)' },
+  { value: '',                 label: '(Sin tamaño)' },
+  { value: 'Mini (6 Onz)',     label: 'Mini (6 Onz)' },
+  { value: 'Pequeño (9 Onz)',  label: 'Pequeño (9 Onz)' },
+  { value: 'Mediano (12 Onz)', label: 'Mediano (12 Onz)' },
+  { value: 'Grande (16 Onz)',  label: 'Grande (16 Onz)' },
+  { value: 'Familiar (25 Onz)',label: 'Familiar (25 Onz)' },
 ];
 
 const formatPrecio = (v) =>
