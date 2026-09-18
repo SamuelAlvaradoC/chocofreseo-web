@@ -1,5 +1,8 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka+One&display=swap');
+/* Google Fonts se carga con <link> + preconnect en public/index.html (no
+   @import aquí) -- un @import dentro del CSS solo se descubre después de
+   que el navegador ya bajó y parseó este archivo, agregando un salto de
+   red extra antes de siquiera empezar a pedir la fuente. */
 
 /* Leaflet z-index — evitar que tape el header/navbar */
 .leaflet-container { z-index: 1 !important; }

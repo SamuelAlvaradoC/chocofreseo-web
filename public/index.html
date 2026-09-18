@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#CA0B0B" />
 
+    <!-- Rendimiento: preconnect a orígenes externos usados desde el primer
+         pintado (fuente + API) -- adelanta DNS/TLS antes de que el CSS/JS
+         los pida explícitamente. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://mi-api-qpjo.onrender.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka+One&display=swap" />
+
     <!-- SEO Principal -->
     <title>ChocoFreseo | Chocolates, Fresas y Postres en Medellín</title>
     <meta name="description" content="ChocoFreseo - Los mejores chocolates, fresas con crema, fondues y postres artesanales en Medellín. Domicilios a todo el Valle de Aburrá. Pide online ahora." />
@@ -94,9 +102,6 @@
       ]
     }
     </script>
-
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/dnoxlv5kn/image/upload/w_32,h_32,c_pad,b_transparent/v1778822634/logo_sin_fondo_remove_uuu8tt.png" />
