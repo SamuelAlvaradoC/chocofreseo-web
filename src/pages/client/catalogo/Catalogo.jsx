@@ -1040,7 +1040,7 @@ function CardProducto({ p, onAgregar, destacado }) {
     // que sí lo tiene para recortar la imagen) -- así la estrella puede
     // sobresalir de verdad más allá del borde de la tarjeta en vez de
     // quedar recortada por el mismo contenedor que redondea la imagen.
-    <div className="producto-card-envoltorio" style={{ position: 'relative', height: '100%' }}>
+    <div className="producto-card-envoltorio" style={{ position: 'relative' }}>
       {destacado && <BadgeMasPedido />}
       <div className="producto-card">
         <div style={{ position: 'relative' }}>

@@ -111,7 +111,16 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* NO height:100% -- con .productos-grid en align-items:start, esto
+     forzaría a la tarjeta a igualar la altura de la fila (heredada del
+     grid item), que es justo lo que "Ver más" necesita evitar: si una
+     tarjeta se expande y la fila crece, height:100% arrastraria a las
+     vecinas con ella pese a align-items:start (confirmado midiendo en
+     vivo: con height:100% las 4 tarjetas de una fila crecian juntas al
+     expandir solo la primera). Cada tarjeta mide lo que su contenido
+     necesita, punto -- por eso ahora en la version colapsada tarjetas con
+     descripcion corta pueden verse un poco mas bajas que las de al lado;
+     es el trade-off real de que cada una sea independiente. */
 }
 .producto-card:hover {
   transform: translateY(-4px);
