@@ -701,6 +701,15 @@
   /* Carrito item — precio total menos ancho mínimo */
   .carrito-item-precio-total { min-width: 60px; font-size: 13px; }
   .carrito-item { gap: 10px; padding: 12px 12px; }
+
+  /* Thumb + nombre + chips no siempre caben en la misma línea que los
+     controles de cantidad, el precio y el botón de quitar (nombres largos,
+     chips de topping/adición, "Chocolate Negro"...) -- sin flex-wrap, ese
+     sobrante simplemente se salía de la tarjeta hacia la derecha en vez de
+     acomodarse en una segunda línea. min-width evita que la info se
+     achique tanto que ya no alcance a mostrar nada antes de forzar el wrap. */
+  .carrito-item { flex-wrap: wrap; row-gap: 8px; }
+  .carrito-item-info { flex: 1 1 150px; min-width: 150px; }
 }
 
 @media (max-width: 390px) {

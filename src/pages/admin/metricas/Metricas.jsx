@@ -128,7 +128,7 @@ export default function Metricas() {
         <div className="tabla-vacia">Cargando métricas...</div>
       ) : (
         <>
-          <div className="stats-grid">
+          <div className="stats-grid metricas-stats-grid">
             <TarjetaStat icono={<Wallet size={20} />}      color="#059669" titulo={`Ventas netas — ${resumen?.mes_label}`}     valor={fmt(resumen?.ventas_netas_mes)} />
             <TarjetaStat icono={<ShoppingBag size={20} />} color="#0891b2" titulo={`Ventas — ${resumen?.mes_label}`}           valor={resumen?.numero_ventas_mes ?? 0} />
             <TarjetaStat icono={<Users size={20} />}       color="#2563eb" titulo="Clientes registrados (total)"               valor={resumen?.clientes_registrados ?? 0} />

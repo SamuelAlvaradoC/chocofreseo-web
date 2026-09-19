@@ -29,3 +29,12 @@
 @media (max-width: 768px) {
   .metricas-fila-resumen { grid-template-columns: 1fr; }
 }
+
+/* Los valores de Métricas (montos en pesos, ej. "$9.462.000") y sus
+   títulos (con el mes agregado, ej. "Ventas netas — Septiembre") son mucho
+   más largos que los de Dashboard ("$566.000", "Ingresos hoy") -- en 2
+   columnas de .stats-grid no les alcanza el ancho en móvil y el número se
+   desborda de la tarjeta. Acá se les da la fila completa. */
+@media (max-width: 480px) {
+  .metricas-stats-grid { grid-template-columns: 1fr; }
+}
