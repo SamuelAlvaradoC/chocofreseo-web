@@ -19,6 +19,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* overflow-x:hidden en body sí clipea su propio contenido, pero el frame
+   que en realidad queda scrolleable en varios navegadores es <html> -- por
+   eso un elemento que se pasa de ancho (ver .perfil-puntos-card) generaba
+   scroll horizontal de toda la página con espacio en blanco a la derecha,
+   aun con el overflow-x:hidden de abajo puesto solo en body. */
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Nunito', sans-serif;
   background: #f5f5f5;

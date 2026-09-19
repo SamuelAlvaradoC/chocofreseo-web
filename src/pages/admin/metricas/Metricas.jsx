@@ -153,7 +153,7 @@ export default function Metricas() {
             ))}
           </div>
 
-          <div className="dash-card--full" style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: 16 }}>
+          <div className="dash-card--full metricas-fila-resumen">
             <div className="dash-card">
               <div className="dash-card-header" style={{ marginBottom: 10 }}>
                 <span className="dash-card-titulo">Promedio mensual</span>
@@ -202,7 +202,7 @@ export default function Metricas() {
       <div className="dash-card dash-card--full">
         <div className="dash-card-header">
           <span className="dash-card-titulo">Clientes registrados en el tiempo</span>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[{ v: 'dia', l: `Por día (${MESES[mes - 1]})` }, { v: 'mes', l: `Por mes (${now.getFullYear()})` }].map((op) => (
               <button
                 key={op.v}

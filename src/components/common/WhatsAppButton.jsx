@@ -33,7 +33,12 @@ export default function WhatsAppButton() {
         alignItems: 'center',
         justifyContent: 'center',
         boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-        zIndex: 999,
+        // Debajo del backdrop/panel del carrito (Catalogo.css: backdrop
+        // z-index 98, carrito-bottom 99) y de cualquier modal (z-index
+        // 99999+) -- así el botón queda tapado automáticamente por lo que
+        // sea que esté abierto encima, en vez de flotar sobre el total o
+        // el botón "Hacer pedido" cuando el carrito está expandido.
+        zIndex: 40,
       }}
     >
       <LogoWhatsApp size={30} color="#fff" />

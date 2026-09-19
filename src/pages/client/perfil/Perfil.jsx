@@ -857,11 +857,7 @@ export default function Perfil() {
             <p className="perfil-hero-email">{usuario?.email || ''}</p>
           </div>
           {puedeVerPuntos && (
-            <div style={{
-              background: 'linear-gradient(135deg, #CA0B0B, #8B0000)',
-              borderRadius: 16, padding: '20px 24px',
-              color: 'white', flexShrink: 0
-            }}>
+            <div className="perfil-puntos-card">
               <div style={{
                 fontSize: 12, fontWeight: 700,
                 textTransform: 'uppercase', letterSpacing: 1,

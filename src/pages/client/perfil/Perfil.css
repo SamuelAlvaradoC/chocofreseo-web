@@ -64,6 +64,16 @@
 .perfil-hero-catalogo:hover { background: #333; }
 .perfil-hero-catalogo svg   { stroke: #fff; }
 
+.perfil-puntos-card {
+  background: linear-gradient(135deg, #CA0B0B, #8B0000);
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: white;
+  flex-shrink: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 /* ── Layout ── */
 .perfil-layout {
   display: grid;
@@ -448,6 +458,12 @@
   .perfil-form-fila    { flex-direction: column; }
   .perfil-hero         { flex-wrap: wrap; gap: 12px; padding: 16px 20px; }
   .perfil-hero-catalogo { margin-left: 0; }
+  /* Sin esto, la tarjeta se dimensiona al ancho de su contenido (shrink-to-
+     fit) -- el renglon "1 punto = $X · ... · Editar en Configuracion" es
+     una sola linea larga que la empuja mas ancha que la pantalla y genera
+     scroll horizontal en toda la pagina. Al forzar 100% del ancho ya
+     acotado por .perfil-hero, ese texto vuelve a hacer wrap normal. */
+  .perfil-puntos-card  { width: 100%; }
 }
 @media (max-width: 480px) {
   .perfil-hero-nombre  { font-size: 18px; }
