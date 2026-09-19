@@ -14,7 +14,13 @@ export function contieneEtiquetaHtml(texto) {
   // Si el parser encontró algún elemento real (no solo texto suelto), es
   // que había un tag válido -- "a < b" o "5>3" no forman tags y quedan
   // como texto plano, sin generar elementos.
-  return doc.body.children.length > 0;
+  // OJO: <script>, <style>, <title>, <base>, <meta>, <link> son "metadata
+  // content" válido en <head> -- el algoritmo de parseo HTML5 los reubica
+  // ahí en vez de <body> cuando aparecen sueltos, así que un payload como
+  // "<script>alert(1)</script>" pasaba con children.length===0 en body
+  // (bug real encontrado en vivo probando el campo de observación por
+  // producto) -- hay que revisar head Y body.
+  return doc.head.children.length > 0 || doc.body.children.length > 0;
 }
 
 export const MSG_HTML = 'El texto no puede contener etiquetas HTML o código';

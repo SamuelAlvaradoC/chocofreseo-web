@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Settings, Users, ShoppingBag,
   ClipboardList, Receipt, CheckCircle, ChefHat, MessageSquare,
-  ChevronRight, ChevronDown, MapPin,
+  ChevronRight, ChevronDown, MapPin, BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import './Sidebar.css';
@@ -84,6 +84,13 @@ const menu = [
     path: '/admin/resenas',
     hijos: [],
     permiso: 'ver_resenas',
+  },
+  {
+    icon: <BarChart3 size={18} />,
+    label: 'Métricas',
+    path: '/admin/metricas',
+    hijos: [],
+    permiso: 'ver_metricas',
   },
 ];
 

@@ -19,7 +19,10 @@ const getCarritoKey = () => {
   return 'carrito_anon';
 };
 
-// ID único: producto + chocolate + salsas + toppings + adiciones
+// ID único: producto + chocolate + salsas + toppings + adiciones + observación
+// (la observación entra en la clave para que dos unidades del mismo producto
+// con notas de preparación distintas queden en líneas separadas del carrito
+// en vez de fusionarse en una sola cantidad, perdiendo una de las dos notas)
 function generarLineaId(item) {
   const toppingStr = [...(item.toppings ?? [])]
     .sort((a, b) => a.id_topping - b.id_topping)
@@ -29,7 +32,9 @@ function generarLineaId(item) {
     .map((a) => `${a.id_adicion}x${a.cantidad || 1}`).join(',');
   const salsaStr   = parsearSalsas(item.salsas).map(s => typeof s === 'object' ? (s.id || s.nombre || '') : s).sort().join(',');
   const choco      = item.chocolate || '';
-  return `${item.id_producto}__c${choco}__s${salsaStr}__t${toppingStr}__a${adicionStr}`;
+  const frutas     = item.frutas || '';
+  const obs        = item.observacion || '';
+  return `${item.id_producto}__c${choco}__f${frutas}__s${salsaStr}__t${toppingStr}__a${adicionStr}__o${obs}`;
 }
 
 function precioUnitario(item) {

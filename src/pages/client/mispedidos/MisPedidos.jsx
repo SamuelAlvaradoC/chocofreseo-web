@@ -4,6 +4,7 @@ import Navbar from '../../../components/layout/Navbar/Navbar';
 import Footer from '../../../components/layout/Footer/Footer';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import * as api from '../../../services/api';
+import { nombreConFrutas } from '../../../utils/nombreProducto';
 import '../perfil/Perfil.css';
 
 const COLOR_SALSAS       = '#ea580c';
@@ -130,7 +131,7 @@ export default function MisPedidos() {
                               {(v.detalleVentas || []).map((d, i) => (
                                 <div key={i} style={{ background: '#fafafa', borderRadius: 8, padding: '10px 12px', border: '1px solid #f0f0f0' }}>
                                   <div style={{ display:'flex', justifyContent:'space-between', marginBottom: 4 }}>
-                                    <span style={{ fontWeight: 700, fontSize: 13 }}>{d.cantidad}× {d.producto?.nombre || '—'}</span>
+                                    <span style={{ fontWeight: 700, fontSize: 13 }}>{d.cantidad}× {d.producto?.nombre ? nombreConFrutas(d.producto.nombre, d.frutas) : '—'}</span>
                                     <span style={{ fontSize: 12, fontWeight: 700, color: '#CA0B0B' }}>${calcularSubtotalDetalle(d).toLocaleString('es-CO')}</span>
                                   </div>
                                   {d.chocolate && (
@@ -151,6 +152,11 @@ export default function MisPedidos() {
                                           +{a.adicion?.nombre}{(a.cantidad || 1) > 1 ? ` ×${a.cantidad}` : ''}
                                         </span>
                                       ))}
+                                    </div>
+                                  )}
+                                  {d.observacion && (
+                                    <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginTop: 4 }}>
+                                      "{d.observacion}"
                                     </div>
                                   )}
                                 </div>

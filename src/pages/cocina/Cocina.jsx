@@ -3,6 +3,7 @@ import { Eye, RefreshCw, Check, AlertTriangle } from 'lucide-react';
 import { toast } from '../../utils/toast';
 import AdminLayout from '../../components/layout/AdminLayout';
 import * as api from '../../services/api';
+import { nombreConFrutas } from '../../utils/nombreProducto';
 
 const hoyISO = () => new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
@@ -17,6 +18,7 @@ const mapPedido = (v) => ({
   cliente:            v.cliente?.usuario?.nombre || '—',
   telefono:           v.cliente?.telefono || null,
   observaciones:      v.observaciones || null,
+  agua_cortesia:      !!v.agua_cortesia,
   estado:             v.estado?.nombre_estado || '—',
   total:              Number(v.total || 0),
   subtotal:           Number(v.subtotal || 0),
@@ -32,6 +34,8 @@ const mapPedido = (v) => ({
     cantidad:  d.cantidad || 1,
     esBowl:    !!d.producto?.es_bowl,
     chocolate: d.chocolate || null,
+    frutas:    d.frutas || null,
+    observacion: d.observacion || null,
     salsas:    parsearSalsas(d.salsas),
     toppings:  (d.detalleToppings  || []).map((t) => {
       const n = t.topping?.nombre || '';
@@ -55,7 +59,7 @@ const chipAdicion = { background: '#d97706', color: '#fff',      fontSize: 11, p
 // (`salsas: producto.es_bowl ? [...cobertura] : salsasElegidas`).
 // Cada etiqueta lleva un puntito del mismo color que tenían los chips
 // originales, como apoyo visual sin volver a las píldoras grandes.
-const COLOR_CATEGORIA = { Cobertura: '#1e3a5f', 'Elección de chocolate': '#1e3a5f', Toppings: '#1a1a1a', Adiciones: '#d97706', Untables: COLOR_SALSAS };
+const COLOR_CATEGORIA = { Cobertura: '#1e3a5f', 'Elección de chocolate': '#1e3a5f', Toppings: '#1a1a1a', Adiciones: '#d97706', Untables: COLOR_SALSAS, Nota: '#CA0B0B' };
 
 function LineaCompacta({ label, valor }) {
   if (!valor) return null;
@@ -73,8 +77,9 @@ function PersonalizacionCompacta({ p }) {
   const chocolate = p.chocolate || null;
   const toppings  = p.toppings.length > 0 ? p.toppings.join(', ') : null;
   const adiciones = p.adiciones.length > 0 ? p.adiciones.join(', ') : null;
+  const nota      = p.observacion || null;
 
-  if (!cobertura && !chocolate && !toppings && !adiciones && !untables) return null;
+  if (!cobertura && !chocolate && !toppings && !adiciones && !untables && !nota) return null;
 
   return (
     <div style={{ marginTop: 4 }}>
@@ -83,6 +88,7 @@ function PersonalizacionCompacta({ p }) {
       <LineaCompacta label="Toppings" valor={toppings} />
       <LineaCompacta label="Adiciones" valor={adiciones} />
       <LineaCompacta label="Untables" valor={untables} />
+      <LineaCompacta label="Nota" valor={nota} />
     </div>
   );
 }
@@ -136,6 +142,11 @@ function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
           </div>
 
           {/* Observaciones */}
+          {pedido.agua_cortesia && (
+            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '10px 14px', marginBottom: 14, fontSize: 13, color: '#1d4ed8', fontWeight: 700 }}>
+              💧 Incluir agua de cortesía
+            </div>
+          )}
           {pedido.observaciones && (
             <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 10, padding: '10px 14px', marginBottom: 14, fontSize: 13, color: '#92400e' }}>
               <div style={{ fontWeight: 700, fontSize: 11, marginBottom: 4, color: '#b45309' }}>⚠️ Observación</div>
@@ -147,7 +158,7 @@ function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
           <div style={{ fontSize: 11, fontWeight: 700, color: '#999', letterSpacing: 1, marginBottom: 10 }}>PRODUCTOS</div>
           {pedido.productos.map((p, i) => (
             <div key={i} style={{ marginBottom: 14, paddingBottom: 14, borderBottom: i < pedido.productos.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1a1a' }}>{p.cantidad}× {p.nombre}</div>
+              <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1a1a' }}>{p.cantidad}× {nombreConFrutas(p.nombre, p.frutas)}</div>
               <PersonalizacionCompacta p={p} />
             </div>
           ))}
@@ -200,17 +211,22 @@ function PedidoCard({ pedido, onConfirmar, onVerDetalle }) {
 
       {/* Cuerpo */}
       <div style={{ padding: 16, flex: 1 }}>
+        {pedido.agua_cortesia && (
+          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 12px', marginTop: 8, fontSize: 13, color: '#1d4ed8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+            💧 Incluir agua de cortesía
+          </div>
+        )}
         {pedido.observaciones && (
           <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', marginTop: 8, fontSize: 13, color: '#92400e' }}>
             <div style={{ fontWeight: 700, fontSize: 11, marginBottom: 3, color: '#b45309' }}>⚠️ Observación</div>
             <span>{pedido.observaciones}</span>
           </div>
         )}
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#999', letterSpacing: 1, marginBottom: 8, marginTop: pedido.observaciones ? 10 : 0 }}>PRODUCTOS</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#999', letterSpacing: 1, marginBottom: 8, marginTop: (pedido.observaciones || pedido.agua_cortesia) ? 10 : 0 }}>PRODUCTOS</div>
         {pedido.productos.map((p, i) => (
           <div key={i} style={{ marginBottom: 12 }}>
             <div style={{ fontWeight: 700, fontSize: 14, color: '#1a1a1a', marginBottom: 4 }}>
-              {p.cantidad}× {p.nombre}
+              {p.cantidad}× {nombreConFrutas(p.nombre, p.frutas)}
             </div>
             {p.chocolate && (
               <span style={{ background: '#1e3a5f', color: '#fff', fontSize: 11, padding: '2px 9px', borderRadius: 20, fontWeight: 600, display: 'inline-block', marginBottom: 4 }}>
@@ -226,6 +242,11 @@ function PedidoCard({ pedido, onConfirmar, onVerDetalle }) {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                 {p.toppings.map((t, j) => <span key={`t${j}`} style={chipTopping}>{t}</span>)}
                 {p.adiciones.map((a, j) => <span key={`a${j}`} style={chipAdicion}>{a}</span>)}
+              </div>
+            )}
+            {p.observacion && (
+              <div style={{ fontSize: 12, color: '#CA0B0B', fontWeight: 700, marginTop: 4 }}>
+                📝 {p.observacion}
               </div>
             )}
           </div>

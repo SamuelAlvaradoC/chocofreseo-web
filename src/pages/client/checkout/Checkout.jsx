@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Check, AlertTriangle, Bike, User } from 'lucide-react';
+import { Check, AlertTriangle, Bike, User, CreditCard } from 'lucide-react';
 import { LogoBancolombia, LogoNequi, LogoEfectivo } from '../../../components/common/LogosApps';
 import { toast } from '../../../utils/toast';
 import Navbar from '../../../components/layout/Navbar/Navbar';
@@ -11,6 +11,7 @@ import { useValorPunto } from '../../../hooks/useValorPunto';
 import * as api from '../../../services/api';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
+import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Checkout.css';
 
 const COSTO_DOMICILIO_DEFAULT = 5500;
@@ -200,6 +201,16 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
   const [observaciones,  setObservaciones]  = useState('');
   const [error,          setError]          = useState('');
   const [verQR,          setVerQR]          = useState(false);
+  const [datafonoHabilitado, setDatafonoHabilitado] = useState(false);
+  // null = todavía no responde -- a propósito, sin default: cuando aplica,
+  // es obligatorio elegir Sí o No antes de poder confirmar el pedido.
+  const [aguaCortesia,   setAguaCortesia]   = useState(null);
+
+  // El agua de cortesía no aplica a un pedido que es SOLO Choco Frappé (ya es
+  // una bebida) -- se pregunta solo si hay al menos un producto que no lo sea.
+  const mostrarPreguntaAgua = carrito.some((item) => !/frapp/i.test(item.nombre || ''));
+
+  useEffect(() => { api.getDatafono().then(setDatafonoHabilitado); }, []);
 
   const valorPunto        = useValorPunto();
   const costoDomicilio    = direccion?.costo_domicilio || COSTO_DOMICILIO_DEFAULT;
@@ -235,6 +246,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
     if (m === 'efectivo')      { setPagoEfectivo(String(total)); setPagoTransfer(''); }
     if (m === 'transferencia') { setPagoTransfer(String(total)); setPagoEfectivo(''); }
     if (m === 'mixto')         { setPagoEfectivo(''); setPagoTransfer(''); }
+    if (m === 'datafono')      { setPagoEfectivo(''); setPagoTransfer(''); }
     setComprobante(null);
     setComprobanteErr('');
   };
@@ -248,17 +260,19 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
     setError('');
   };
 
-  const pagoCompleto = metodoPago === 'efectivo' || metodoPago === 'transferencia' || (efNum > 0 && efNum <= total);
+  const pagoCompleto = metodoPago === 'efectivo' || metodoPago === 'transferencia' || metodoPago === 'datafono' || (efNum > 0 && efNum <= total);
+  const aguaRespondida = !mostrarPreguntaAgua || aguaCortesia !== null;
 
   const handleConfirmar = () => {
     if (!pagoCompleto) { setError(`Falta $${(total - totalPagado).toLocaleString('es-CO')} por cubrir`); return; }
+    if (!aguaRespondida) { setError('Indica si deseas agua de cortesía para continuar'); return; }
     if ((metodoPago === 'transferencia' || metodoPago === 'mixto') && !comprobante) {
       setComprobanteErr('Debes subir el comprobante de pago para continuar');
       return;
     }
     const ef = metodoPago === 'efectivo' ? total : metodoPago === 'mixto' ? efNum : 0;
     const tr = metodoPago === 'transferencia' ? total : metodoPago === 'mixto' ? Math.max(0, total - efNum) : 0;
-    onConfirmar({ metodoPago, pagoEfectivo: String(ef), pagoTransfer: String(tr), comprobante, observaciones, puntosAUsar });
+    onConfirmar({ metodoPago, pagoEfectivo: String(ef), pagoTransfer: String(tr), comprobante, observaciones, puntosAUsar, aguaCortesia: mostrarPreguntaAgua ? aguaCortesia : false });
   };
 
   return (
@@ -273,7 +287,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
           <div key={item.lineaId || item.id_producto || i} style={{ padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
-                <span style={{ fontWeight: 700, fontSize: 13 }}>{item.cantidad}x {item.nombre}</span>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{item.cantidad}x {nombreConFrutas(item.nombre, item.frutas)}</span>
                 {item.chocolate && (
                   <span style={{
                     fontSize: 10, marginLeft: 6,
@@ -318,6 +332,11 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
                     ))}
                   </div>
                 )}
+                {item.observacion && (
+                  <div style={{ marginTop: 3, fontSize: 11, color: '#666', fontStyle: 'italic' }}>
+                    "{item.observacion}"
+                  </div>
+                )}
               </div>
               <span style={{ fontWeight: 700, fontSize: 13, marginLeft: 12, whiteSpace: 'nowrap' }}>
                 ${Number(item.subtotal || 0).toLocaleString('es-CO')}
@@ -340,8 +359,8 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-        {[
+      {(() => {
+        const opciones = [
           {
             v: 'efectivo',
             logo: <LogoEfectivo size={24} />,
@@ -368,22 +387,35 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
             ),
             label: 'Ef. + Transfer.',
           },
-        ].map((m) => (
-          <button key={m.v} type="button" onClick={() => cambiarMetodo(m.v)}
-            style={{
-              flex: 1, padding: '14px 8px', borderRadius: 12, cursor: 'pointer',
-              border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
-              background: metodoPago === m.v ? '#fff5f5' : 'white',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-              transition: 'all 0.15s', fontFamily: 'inherit',
-            }}>
-            {m.logo}
-            <span style={{ fontSize: 12, fontWeight: 700, color: metodoPago === m.v ? '#CA0B0B' : '#555' }}>
-              {m.label}
-            </span>
-          </button>
-        ))}
-      </div>
+          ...(datafonoHabilitado ? [{
+            v: 'datafono',
+            logo: <CreditCard size={22} />,
+            label: 'Datafono',
+          }] : []),
+        ];
+        // 3 opciones (datafono desactivado) van en una sola fila. Al
+        // activarse datafono (4 opciones) pasa a grilla 2x2.
+        const columnas = opciones.length >= 4 ? '1fr 1fr' : `repeat(${opciones.length}, 1fr)`;
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: columnas, gap: 10, marginBottom: 16 }}>
+            {opciones.map((m) => (
+              <button key={m.v} type="button" onClick={() => cambiarMetodo(m.v)}
+                style={{
+                  padding: '14px 8px', borderRadius: 12, cursor: 'pointer',
+                  border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
+                  background: metodoPago === m.v ? '#fff5f5' : 'white',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                  transition: 'all 0.15s', fontFamily: 'inherit',
+                }}>
+                {m.logo}
+                <span style={{ fontSize: 12, fontWeight: 700, color: metodoPago === m.v ? '#CA0B0B' : '#555' }}>
+                  {m.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Info bancaria en 3 columnas + lightbox */}
       {verQR && (
@@ -442,6 +474,16 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
       {metodoPago === 'efectivo' && (
         <div className="checkout-campo" style={{ marginTop: 16 }}>
           <label className="checkout-label">Monto en efectivo (total pre-llenado)</label>
+          <div className="checkout-precio-wrap">
+            <span className="checkout-precio-simbolo">$</span>
+            <input className="checkout-input checkout-input-precio input-monto" type="text" value={total.toLocaleString('es-CO')} readOnly style={{ background: '#f9fafb', cursor: 'not-allowed' }} />
+          </div>
+        </div>
+      )}
+
+      {metodoPago === 'datafono' && (
+        <div className="checkout-campo" style={{ marginTop: 16 }}>
+          <label className="checkout-label">Monto con datafono (total pre-llenado)</label>
           <div className="checkout-precio-wrap">
             <span className="checkout-precio-simbolo">$</span>
             <input className="checkout-input checkout-input-precio input-monto" type="text" value={total.toLocaleString('es-CO')} readOnly style={{ background: '#f9fafb', cursor: 'not-allowed' }} />
@@ -522,6 +564,25 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
         </>
       )}
 
+      {mostrarPreguntaAgua && (
+        <div className="checkout-campo" style={{ marginTop: 16 }}>
+          <label className="checkout-label">¿Deseas agua de cortesía?</label>
+          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+            {[{ v: true, label: 'Sí' }, { v: false, label: 'No' }].map((op) => (
+              <button key={String(op.v)} type="button" onClick={() => setAguaCortesia(op.v)}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 13,
+                  border: aguaCortesia === op.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
+                  background: aguaCortesia === op.v ? '#fff5f5' : '#fff',
+                  color: aguaCortesia === op.v ? '#CA0B0B' : '#555',
+                }}>
+                {op.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="checkout-campo" style={{ marginTop: 16 }}>
         <label className="checkout-label">Observaciones (opcional)</label>
         <textarea
@@ -538,7 +599,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
 
       <div className="checkout-botones">
         <button className="checkout-btn-sec" onClick={onBack}>← Atrás</button>
-        <button className="checkout-btn-confirmar" onClick={handleConfirmar} disabled={!pagoCompleto || procesando} style={{ opacity: procesando ? 0.7 : 1, cursor: procesando ? 'not-allowed' : 'pointer' }}>
+        <button className="checkout-btn-confirmar" onClick={handleConfirmar} disabled={!pagoCompleto || !aguaRespondida || procesando} style={{ opacity: procesando ? 0.7 : 1, cursor: procesando ? 'not-allowed' : 'pointer' }}>
           {procesando ? 'Enviando pedido...' : 'Confirmar pedido'}
           {!procesando && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
         </button>
@@ -656,6 +717,8 @@ export default function Checkout() {
         adiciones:    (item.adiciones || []).map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad || 1 })),
         salsas:       (item.salsas || []).map(s => typeof s === 'object' ? (s.id || s.nombre) : s),
         chocolate:    item.chocolate || null,
+        frutas:       item.frutas || null,
+        observacion:  item.observacion || null,
       }));
 
       // Armar payload
@@ -667,6 +730,7 @@ export default function Checkout() {
         monto_transferencia: Number(pagoInfo?.pagoTransfer)  || 0,
         items,
         puntos_a_usar: pagoInfo?.puntosAUsar || 0,
+        agua_cortesia: !!pagoInfo?.aguaCortesia,
         ...(comprobanteUrl ? { comprobante_url: comprobanteUrl } : {}),
       };
 

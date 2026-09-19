@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import ClientLayout from '../../../components/layout/ClientLayout';
 import Hero         from './components/Hero';
 import Conocenos    from './components/Conocenos';
@@ -29,6 +30,7 @@ export default function Landing() {
   const [productosDB, setProductosDB] = useState([]);
   const [videoFullscreen, setVideoFullscreen] = useState(false);
   const videoWrapRef = useRef(null);
+  const location = useLocation();
 
   useEffect(() => {
     document.title = 'ChocoFreseo | Chocolates, Fresas y Postres en Medellín';
@@ -38,18 +40,21 @@ export default function Landing() {
   // página, pero esta es una SPA: el elemento todavía no existe en el DOM
   // (o el layout todavía no terminó de acomodarse por el video/imágenes)
   // en el momento en que el navegador lo intenta, así que ese scroll
-  // automático nativo no aplica -- hay que hacerlo manualmente.
+  // automático nativo no aplica -- hay que hacerlo manualmente. Depende de
+  // location.hash (no solo corre al montar) porque ResenaBanner puede
+  // navegar acá con un hash nuevo estando YA en /landing -- mismo path,
+  // sin remount, así que un efecto con [] nunca se volvía a disparar.
   useEffect(() => {
-    if (!window.location.hash) return;
+    if (!location.hash) return;
     // El navegador guarda el hash porcentaje-codificado cuando tiene
     // caracteres no-ASCII (ej. "reseñas" -> "rese%C3%B1as") -- hay que
     // decodificarlo antes de buscar el id real en el DOM.
-    const id = decodeURIComponent(window.location.hash.slice(1));
+    const id = decodeURIComponent(location.hash.slice(1));
     const el = document.getElementById(id);
     if (el) {
       setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
     }
-  }, []);
+  }, [location.hash]);
 
   // Fullscreen pedido al DIV contenedor, no al <video> mismo -- así no se
   // fuerza landscape (comportamiento especial de Chrome solo para cuando

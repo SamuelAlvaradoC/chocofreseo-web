@@ -63,6 +63,13 @@ export const dashVentasPorSemana    = ()       => get('/dashboard/ventas-por-sem
 export const dashVentasPorMes       = ()       => get('/dashboard/ventas-por-mes');
 export const dashProductosMasVendidos= ()      => get('/dashboard/productos-mas-vendidos');
 export const dashRecaudoPedidos     = ()       => get('/dashboard/recaudo-pedidos');
+
+// ── Métricas (admin, permiso exclusivo ver_metricas) ────────────
+export const metricasResumen            = (mes) => get('/metricas/resumen', mes ? { mes } : undefined);
+export const metricasMesesDisponibles   = ()    => get('/metricas/meses-disponibles');
+export const metricasRegistros          = (granularidad, mes) => get('/metricas/registros', { granularidad, ...(mes ? { mes } : {}) });
+export const metricasClientesFrecuencia = ({ q, page, pageSize } = {}) =>
+  get('/metricas/clientes-frecuencia', { q, page, pageSize });
 export const pedidosRecientes       = (n, fecha) => get('/dashboard/pedidos-recientes', { ...(n ? { limite: n } : {}), ...(fecha ? { fecha } : {}) });
 export const getDomiciliariosDia    = (fecha) => get('/dashboard/domiciliarios-dia', fecha ? { fecha } : undefined);
 
@@ -222,5 +229,10 @@ export const getPuntosCliente   = (id)  => get(`/puntos/cliente/${id}`).catch(()
 // llegar al componente para mostrarlo (valor <=0, >100, o con más de 2 decimales).
 export const getValorPunto      = ()   => get('/configuracion/valor-punto').then((d) => Number(d?.valor_punto_pesos) || 12.5).catch(() => 12.5);
 export const setValorPunto      = (v)  => patch('/configuracion/valor-punto', { valor_punto_pesos: v });
+
+// getDatafono cae a false (deshabilitado) si el endpoint falla -- más seguro
+// que asumir habilitado por defecto.
+export const getDatafono        = ()     => get('/configuracion/datafono').then((d) => !!d?.habilitado).catch(() => false);
+export const setDatafono        = (habilitado) => patch('/configuracion/datafono', { habilitado });
 
 export default http;

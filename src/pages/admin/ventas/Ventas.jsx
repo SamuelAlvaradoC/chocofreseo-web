@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { Eye, Edit, Check, X, FileText, AlertTriangle, Search, RotateCcw } from 'lucide-react';
+import { Eye, Edit, Check, X, FileText, AlertTriangle, Search, RotateCcw, CreditCard } from 'lucide-react';
 import { LogoBancolombia, LogoNequi, LogoEfectivo, LogoWhatsApp } from '../../../components/common/LogosApps';
 import { toast } from '../../../utils/toast';
 import AdminLayout from '../../../components/layout/AdminLayout';
@@ -8,6 +8,7 @@ import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
+import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Ventas.css';
 
 const ESTADO_LABELS = {
@@ -63,6 +64,7 @@ const METODO_BADGE = {
   efectivo:      { bg: '#f0fdf4', color: '#16a34a', label: 'Efectivo',      Icon: ({size}) => <LogoEfectivo size={size}/>                                },
   transferencia: { bg: '#eff6ff', color: '#3b82f6', label: 'Transferencia', Icon: ({size}) => <><LogoBancolombia size={size}/><LogoNequi size={size}/></> },
   mixto:         { bg: '#f5f3ff', color: '#7c3aed', label: 'Mixto',         Icon: ({size}) => <><LogoEfectivo size={size}/><LogoBancolombia size={size}/></> },
+  datafono:      { bg: '#fff7ed', color: '#c2410c', label: 'Datafono',      Icon: ({size}) => <CreditCard size={size}/>                                  },
 };
 
 // Helper para calcular y desglosar el subtotal de un detalleVenta (ver detalle)
@@ -158,6 +160,12 @@ function ModalDetalle({ open, onClose, venta }) {
                 <span className="detalle-valor" style={{ fontStyle: 'italic', color: '#666' }}>{venta.observaciones}</span>
               </div>
             )}
+            {venta.agua_cortesia && (
+              <div className="detalle-item detalle-full">
+                <span className="detalle-label">Agua de cortesía</span>
+                <span className="detalle-valor" style={{ color: '#1d4ed8', fontWeight: 700 }}>💧 Sí, incluir</span>
+              </div>
+            )}
             {venta.estado === 'anulado' && venta.motivo_anulacion && (
               <div className="detalle-item detalle-full">
                 <span className="detalle-label">Motivo de anulación</span>
@@ -175,7 +183,7 @@ function ModalDetalle({ open, onClose, venta }) {
                   return (
                   <div key={i} style={{ background: '#fafafa', borderRadius: 8, padding: '10px 12px', border: '1px solid #f0f0f0' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <span style={{ fontWeight: 700, fontSize: 13 }}>{cantidad}× {d.producto?.nombre || '—'}</span>
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>{cantidad}× {d.producto?.nombre ? nombreConFrutas(d.producto.nombre, d.frutas) : '—'}</span>
                       <span style={{ fontWeight: 700, color: '#16a34a', fontSize: 13 }}>${totalItem.toLocaleString('es-CO')}</span>
                     </div>
                     <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>
@@ -204,6 +212,11 @@ function ModalDetalle({ open, onClose, venta }) {
                             {a.cantidad > 1 ? ` =$${(Number(a.precio_unitario || 0) * a.cantidad).toLocaleString('es-CO')}` : ''}
                           </span>
                         ))}
+                      </div>
+                    )}
+                    {d.observacion && (
+                      <div style={{ fontSize: 12, color: '#666', fontStyle: 'italic', marginTop: 5 }}>
+                        "{d.observacion}"
                       </div>
                     )}
                   </div>
@@ -323,11 +336,46 @@ function ModalDevolver({ open, onClose, onConfirmar, venta }) {
 // tiene una rama dedicada para esto quo ignora items/costo_domicilio cuando
 // el estado es 'entregado', así que este modal solo pide metodo_pago y,
 // si aplica, el desglose efectivo/transferencia.
+// Mismo componente que MetodoPagoGrid en Pedidos.jsx -- grilla 2x2 cuando
+// datafono está habilitado (4 opciones), o 3 opciones con Mixto centrado.
+function MetodoPagoGrid({ metodoPago, onCambiar, datafonoHabilitado }) {
+  const opciones = [
+    { v: 'efectivo',      label: 'Efectivo',      logo: <LogoEfectivo size={20} /> },
+    { v: 'transferencia', label: 'Transferencia', logo: <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}><LogoBancolombia size={20} /><LogoNequi size={16} /></div> },
+    { v: 'mixto',         label: 'Mixto',         logo: <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center' }}><LogoEfectivo size={16} /><span style={{ fontSize: 9, color: '#ccc' }}>+</span><LogoBancolombia size={16} /></div> },
+    ...(datafonoHabilitado ? [{ v: 'datafono', label: 'Datafono', logo: <CreditCard size={20} /> }] : []),
+  ];
+  // 3 opciones (datafono desactivado) van en una sola fila. Al activarse
+  // datafono (4 opciones) pasa a grilla 2x2 -- mismo criterio que el
+  // checkout del cliente.
+  const columnas = opciones.length >= 4 ? '1fr 1fr' : `repeat(${opciones.length}, 1fr)`;
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: columnas, gap: 8 }}>
+      {opciones.map((m) => (
+        <button key={m.v} type="button" onClick={() => onCambiar(m.v)}
+          style={{
+            padding: '14px 8px', borderRadius: 12, cursor: 'pointer', fontFamily: 'inherit',
+            border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
+            background: metodoPago === m.v ? '#fff5f5' : 'white',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+            transition: 'all 0.15s',
+          }}>
+          {m.logo}
+          <span style={{ fontSize: 12, fontWeight: 700, color: metodoPago === m.v ? '#CA0B0B' : '#555' }}>{m.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ModalCambiarMetodoPago({ open, onClose, onGuardar, venta }) {
   const [procesando, setProcesando] = useState(false);
   const [metodoPago, setMetodoPago] = useState('efectivo');
   const [efDisplay, setEfDisplay]   = useState('');
   const [intentoGuardar, setIntentoGuardar] = useState(false);
+  const [datafonoHabilitado, setDatafonoHabilitado] = useState(false);
+
+  useEffect(() => { api.getDatafono().then(setDatafonoHabilitado); }, []);
 
   useEffect(() => {
     if (!open || !venta) return;
@@ -356,29 +404,10 @@ function ModalCambiarMetodoPago({ open, onClose, onGuardar, venta }) {
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontWeight: 700, fontSize: 13, color: '#555', marginBottom: 8, display: 'block' }}>Método de pago</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[
-              { v: 'efectivo',      logo: <LogoEfectivo size={20}/>, label: 'Efectivo' },
-              { v: 'transferencia', logo: <div style={{display:'flex',alignItems:'center',gap:4}}><LogoBancolombia size={20}/><LogoNequi size={32}/></div>, label: 'Transferencia' },
-              { v: 'mixto',         logo: <div style={{display:'flex',alignItems:'center',gap:4}}><LogoEfectivo size={18}/><span style={{fontSize:10,color:'#ccc'}}>+</span><LogoBancolombia size={18}/></div>, label: 'Mixto' },
-            ].map((m) => (
-              <button key={m.v} type="button" onClick={() => {
-                setMetodoPago(m.v); setIntentoGuardar(false);
-                setEfDisplay('');
-              }} style={{
-                flex: 1, padding: '14px 8px', borderRadius: 12, cursor: 'pointer',
-                border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
-                background: metodoPago === m.v ? '#fff5f5' : 'white',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                fontFamily: 'inherit', transition: 'all 0.15s',
-              }}>
-                {m.logo}
-                <span style={{ fontSize: 12, fontWeight: 700, color: metodoPago === m.v ? '#CA0B0B' : '#555' }}>
-                  {m.label}
-                </span>
-              </button>
-            ))}
-          </div>
+          <MetodoPagoGrid metodoPago={metodoPago} datafonoHabilitado={datafonoHabilitado} onCambiar={(v) => {
+            setMetodoPago(v); setIntentoGuardar(false);
+            setEfDisplay('');
+          }} />
           {metodoPago === 'mixto' && (() => {
             const ok = montoEfectivo > 0 && montoTransfer > 0;
             return (
@@ -651,6 +680,7 @@ export default function Ventas() {
               <option value="efectivo">Efectivo</option>
               <option value="transferencia">Transferencia</option>
               <option value="mixto">Mixto</option>
+              <option value="datafono">Datafono</option>
             </select>
 
             {/* Limpiar */}

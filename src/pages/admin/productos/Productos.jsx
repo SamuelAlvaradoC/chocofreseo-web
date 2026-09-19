@@ -100,6 +100,7 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
   const [maxToppings,       setMaxToppings]       = useState([1, 2].includes(productoEditar?.max_toppings) ? productoEditar.max_toppings : 1);
   const [permiteChocolate,  setPermiteChocolate]  = useState(productoEditar?.permite_chocolate ? 1 : 0);
   const [permiteSalsas,     setPermiteSalsas]     = useState(Boolean(productoEditar?.permite_salsas));
+  const [permiteFrutas,     setPermiteFrutas]     = useState(Boolean(productoEditar?.permite_frutas));
   const [esBowl,            setEsBowl]            = useState(Boolean(productoEditar?.es_bowl));
   const [estado,            setEstado]            = useState(productoEditar?.estado           ?? 1);
   const [img,               setImg]               = useState(productoEditar?.img              || '');
@@ -128,6 +129,7 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
         max_toppings: permiteToppings ? Number(maxToppings) : 0,
         permite_chocolate: esBowl ? false : permiteChocolate === 1,
         permite_salsas:    esBowl ? false : permiteSalsas,
+        permite_frutas:    permiteFrutas,
         es_bowl:           esBowl,
         estado: productoEditar ? estado : 1,
       });
@@ -212,6 +214,15 @@ function ModalFormulario({ open, onClose, onGuardar, productoEditar, categoriasL
             </button>
             <span style={{ fontSize: 13, fontWeight: 600, color: permiteSalsas ? '#CA0B0B' : '#888' }}>
               {permiteSalsas ? '🍫 Con untables' : 'Sin untables'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button type="button" onClick={() => setPermiteFrutas(p => !p)}
+              style={{ width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', background: permiteFrutas ? '#CA0B0B' : '#e5e7eb', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+              <span style={{ position: 'absolute', top: 2, left: permiteFrutas ? '22px' : '2px', width: 20, height: 20, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+            </button>
+            <span style={{ fontSize: 13, fontWeight: 600, color: permiteFrutas ? '#CA0B0B' : '#888' }}>
+              {permiteFrutas ? '🍓 Con combinación de frutas' : 'Sin frutas'}
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -347,6 +358,12 @@ function ModalDetalle({ open, onClose, producto, categoriasLista = [], onEditar 
                 <span className="detalle-label">Untables</span>
                 <span className="detalle-badge" style={{ background: producto.permite_salsas ? '#f5f5f5' : '#fafafa', color: producto.permite_salsas ? '#1a1a1a' : '#999' }}>
                   {producto.permite_salsas ? '✓ Sí' : '✗ No'}
+                </span>
+              </div>
+              <div className="detalle-item">
+                <span className="detalle-label">Frutas</span>
+                <span className="detalle-badge" style={{ background: producto.permite_frutas ? '#f5f5f5' : '#fafafa', color: producto.permite_frutas ? '#1a1a1a' : '#999' }}>
+                  {producto.permite_frutas ? '🍓 Sí' : '✗ No'}
                 </span>
               </div>
               <div className="detalle-item">

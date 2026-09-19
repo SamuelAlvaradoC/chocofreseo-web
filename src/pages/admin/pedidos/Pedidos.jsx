@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { Eye, Edit, Check, X, FileText, RotateCcw, AlertTriangle, Search } from 'lucide-react';
+import { Eye, Edit, Check, X, FileText, RotateCcw, AlertTriangle, Search, CreditCard } from 'lucide-react';
 import { LogoBancolombia, LogoNequi, LogoEfectivo, LogoWhatsApp } from '../../../components/common/LogosApps';
 import { toast } from '../../../utils/toast';
 import { imgCl } from '../../../utils/cloudinary';
@@ -11,6 +11,7 @@ import { useAuth } from '../../../context/AuthContext';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
+import { nombreConFrutas, COMBOS_FRUTAS } from '../../../utils/nombreProducto';
 import '../ventas/Ventas.css';
 
 const ESTADO_LABELS = {
@@ -71,7 +72,42 @@ const METODO_BADGE = {
   efectivo:      { bg: '#f0fdf4', color: '#16a34a', label: 'Efectivo',      Icon: ({size}) => <LogoEfectivo size={size}/>                                },
   transferencia: { bg: '#eff6ff', color: '#3b82f6', label: 'Transferencia', Icon: ({size}) => <><LogoBancolombia size={size}/><LogoNequi size={size}/></> },
   mixto:         { bg: '#f5f3ff', color: '#7c3aed', label: 'Mixto',         Icon: ({size}) => <><LogoEfectivo size={size}/><LogoBancolombia size={size}/></> },
+  datafono:      { bg: '#fff7ed', color: '#c2410c', label: 'Datafono',      Icon: ({size}) => <CreditCard size={size}/>                                  },
 };
+
+// Grilla de método de pago compartida por ModalCrearVenta y ModalEditarVenta
+// (3 usos antes duplicados) — 2x2 cuando datafono está habilitado (4
+// opciones), o 3 opciones con la última (Mixto) centrada ocupando el ancho
+// completo para no dejar un hueco vacío en la grilla.
+function MetodoPagoGrid({ metodoPago, onCambiar, datafonoHabilitado }) {
+  const opciones = [
+    { v: 'efectivo',      label: 'Efectivo',      logo: <LogoEfectivo size={20} /> },
+    { v: 'transferencia', label: 'Transferencia', logo: <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}><LogoBancolombia size={20} /><LogoNequi size={16} /></div> },
+    { v: 'mixto',         label: 'Mixto',         logo: <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center' }}><LogoEfectivo size={16} /><span style={{ fontSize: 9, color: '#ccc' }}>+</span><LogoBancolombia size={16} /></div> },
+    ...(datafonoHabilitado ? [{ v: 'datafono', label: 'Datafono', logo: <CreditCard size={20} /> }] : []),
+  ];
+  // 3 opciones (datafono desactivado) van en una sola fila. Al activarse
+  // datafono (4 opciones) pasa a grilla 2x2 -- mismo criterio que el
+  // checkout del cliente.
+  const columnas = opciones.length >= 4 ? '1fr 1fr' : `repeat(${opciones.length}, 1fr)`;
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: columnas, gap: 8, marginBottom: 10 }}>
+      {opciones.map((m) => (
+        <button key={m.v} type="button" onClick={() => onCambiar(m.v)}
+          style={{
+            padding: '10px 6px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
+            border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
+            background: metodoPago === m.v ? '#fff5f5' : '#fff',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+            transition: 'all 0.15s',
+          }}>
+          {m.logo}
+          <span style={{ fontSize: 11, fontWeight: 700, color: metodoPago === m.v ? '#CA0B0B' : '#555' }}>{m.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // Helper para calcular y desglosar el subtotal de un detalleVenta (ver detalle)
 const calcularDesglose = (d) => {
@@ -126,6 +162,7 @@ const calcularPrecioItem = (item) => {
 const calcularPasosConfig = (prod, toppingsActivos = []) => {
   if (!prod) return [];
   const pasos = [];
+  if (prod.permite_frutas    === true) pasos.push('frutas');
   if (prod.es_bowl           === true) pasos.push('bowl');
   if (prod.permite_chocolate === true) pasos.push('chocolate');
   if (prod.permite_salsas    === true) pasos.push('salsas');
@@ -141,6 +178,9 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
   const [toppingsTemp,  setToppingsTemp]  = useState([]);
   const [adicionesTemp, setAdicionesTemp] = useState([]);
   const [chocolateTemp, setChocolateTemp] = useState('');
+  const [frutasTemp,    setFrutasTemp]    = useState('');
+  const [observacionTemp,      setObservacionTemp]      = useState('');
+  const [errorObservacionTemp, setErrorObservacionTemp] = useState('');
 
   if (!producto) return null;
 
@@ -164,8 +204,10 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
 
   const irSiguiente = () => {
     if (pasoActual === 'bowl' && !coberturaTemp) return;
+    if (pasoActual === 'frutas' && !frutasTemp) return;
+    if (esUltimo && contieneEtiquetaHtml(observacionTemp)) { setErrorObservacionTemp(MSG_HTML); return; }
     if (!esUltimo) setPasoIdx(p => p + 1);
-    else onAgregar(toppingsTemp, adicionesTemp, chocolateTemp, prod.es_bowl ? (coberturaTemp ? [{ nombre: coberturaTemp }] : []) : salsasTemp);
+    else onAgregar(toppingsTemp, adicionesTemp, chocolateTemp, prod.es_bowl ? (coberturaTemp ? [{ nombre: coberturaTemp }] : []) : salsasTemp, frutasTemp || null, observacionTemp.trim() || null);
   };
   const irAnterior = () => {
     if (!esPrimero) setPasoIdx(p => p - 1);
@@ -224,7 +266,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
       <div style={{ background: '#fff', borderRadius: 16, width: 'min(460px, calc(100vw - 32px))', maxHeight: '90%', overflowY: 'auto', display: 'flex', flexDirection: 'column', boxShadow: '0 16px 48px rgba(0,0,0,0.3)' }}>
         <div style={{ padding: '16px 18px 12px', borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontWeight: 800, fontSize: 15 }}>{prod.nombre}</div>
+            <div style={{ fontWeight: 800, fontSize: 15 }}>{nombreConFrutas(prod.nombre, frutasTemp)}</div>
             <button onClick={onCancelar} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#888', lineHeight: 1 }}>✕</button>
           </div>
           <div style={{ display: 'flex', gap: 4 }}>
@@ -233,10 +275,31 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
             ))}
           </div>
           <div style={{ fontSize: 11, color: '#888', marginTop: 6, fontWeight: 600 }}>
-            Paso {pasoIdx + 1} de {pasos.length} · {pasoActual === 'bowl' ? 'Cobertura' : pasoActual === 'chocolate' ? 'Tipo de chocolate' : pasoActual === 'salsas' ? 'Untables' : pasoActual === 'toppings' ? 'Toppings' : 'Adiciones'}
+            Paso {pasoIdx + 1} de {pasos.length} · {pasoActual === 'frutas' ? 'Frutas' : pasoActual === 'bowl' ? 'Cobertura' : pasoActual === 'chocolate' ? 'Tipo de chocolate' : pasoActual === 'salsas' ? 'Untables' : pasoActual === 'toppings' ? 'Toppings' : 'Adiciones'}
           </div>
         </div>
         <div style={{ padding: '16px 18px', flex: 1, overflowY: 'auto' }}>
+          {pasoActual === 'frutas' && (
+            <div>
+              <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Elige la combinación de frutas — obligatorio</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                {COMBOS_FRUTAS.map((op) => {
+                  const sel = frutasTemp === op.id;
+                  return (
+                    <button key={op.id} type="button" onClick={() => setFrutasTemp(op.id)}
+                      style={{ padding: 0, borderRadius: 12, border: sel ? '2.5px solid #CA0B0B' : '2px solid transparent', background: '#fff', cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 110,
+                        boxShadow: sel ? '0 4px 16px rgba(202,11,11,0.3)' : '0 2px 8px rgba(0,0,0,0.12)', transition: 'all 0.2s ease' }}>
+                      <img src={op.img} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)', padding: '22px 8px 8px', textAlign: 'center' }}>
+                        <div style={{ fontWeight: 700, fontSize: 10, color: '#fff' }}>{op.etiqueta}</div>
+                        {sel && <div style={{ fontSize: 9, color: '#fca5a5', marginTop: 1, fontWeight: 600 }}>✓</div>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {pasoActual === 'bowl' && (
             <div>
               <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Elige la cobertura — obligatorio</p>
@@ -380,6 +443,23 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
               ) : (
                 <div style={{ textAlign: 'center', color: '#bbb', fontSize: 13, padding: '20px 0' }}>Sin adiciones disponibles</div>
               )}
+              <hr style={{ border: 'none', borderTop: '1px dashed #e5e7eb', margin: '12px 0' }} />
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 6 }}>
+                Nota de preparación <span style={{ color: '#bbb', fontWeight: 400 }}>— Opcional</span>
+              </p>
+              <textarea
+                value={observacionTemp}
+                maxLength={255}
+                onChange={(e) => { setObservacionTemp(e.target.value); setErrorObservacionTemp(''); }}
+                placeholder="Ej: poco arequipe, sin mermelada..."
+                rows={2}
+                style={{
+                  width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 10,
+                  border: `1px solid ${errorObservacionTemp ? '#f87171' : '#e5e7eb'}`, fontFamily: 'inherit',
+                  fontSize: 13, resize: 'none',
+                }}
+              />
+              {errorObservacionTemp && <p style={{ color: '#CA0B0B', fontSize: 11, margin: '4px 0 0' }}>{errorObservacionTemp}</p>}
             </div>
           )}
         </div>
@@ -401,8 +481,8 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
               {esPrimero ? 'Cancelar' : '← Atrás'}
             </button>
             <button onClick={irSiguiente}
-              disabled={pasoActual === 'bowl' && !coberturaTemp}
-              style={{ flex: 2, padding: '10px', borderRadius: 10, border: 'none', background: (pasoActual === 'bowl' && !coberturaTemp) ? '#e5e7eb' : '#CA0B0B', color: (pasoActual === 'bowl' && !coberturaTemp) ? '#aaa' : '#fff', fontWeight: 800, fontSize: 13, cursor: (pasoActual === 'bowl' && !coberturaTemp) ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+              disabled={(pasoActual === 'bowl' && !coberturaTemp) || (pasoActual === 'frutas' && !frutasTemp)}
+              style={{ flex: 2, padding: '10px', borderRadius: 10, border: 'none', background: ((pasoActual === 'bowl' && !coberturaTemp) || (pasoActual === 'frutas' && !frutasTemp)) ? '#e5e7eb' : '#CA0B0B', color: ((pasoActual === 'bowl' && !coberturaTemp) || (pasoActual === 'frutas' && !frutasTemp)) ? '#aaa' : '#fff', fontWeight: 800, fontSize: 13, cursor: ((pasoActual === 'bowl' && !coberturaTemp) || (pasoActual === 'frutas' && !frutasTemp)) ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
               {esUltimo ? '+ Agregar al pedido' : 'Continuar →'}
             </button>
           </div>
@@ -432,9 +512,15 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const [observaciones,      setObservaciones]      = useState('');
   const [procesandoVenta,    setProcesandoVenta]    = useState(false);
   const [productoConfigurar, setProductoConfigurar] = useState(null);
+  const [datafonoHabilitado, setDatafonoHabilitado] = useState(false);
+
+  useEffect(() => { api.getDatafono().then(setDatafonoHabilitado); }, []);
   const [puntosCliente,      setPuntosCliente]      = useState(0);
   const [usarPuntos,         setUsarPuntos]         = useState(false);
   const [puntosAplicar,      setPuntosAplicar]      = useState(0);
+  // null = todavía no responde -- igual que en el checkout del cliente, sin
+  // default: si aplica, es obligatorio elegir Sí o No para poder crear la venta.
+  const [aguaCortesia,       setAguaCortesia]       = useState(null);
 
   // Si cambia la dirección/barrio, el desbloqueo manual no debe seguir aplicando
   // a la nueva selección — se vuelve a pedir explícitamente cada vez.
@@ -451,8 +537,12 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const total                 = totalConDesc + Number(costoEnvio || 0);
   const montoEfectivo   = Number(efDisplay.replace(/\./g, '')) || 0;
   const montoTransfer   = efDisplay !== '' ? Math.max(0, total - montoEfectivo) : 0;
-  const pagoCompleto    = metodoPago === 'efectivo' || metodoPago === 'transferencia'
+  const pagoCompleto    = metodoPago === 'efectivo' || metodoPago === 'transferencia' || metodoPago === 'datafono'
     || (montoEfectivo > 0 && montoTransfer > 0);
+  // No aplica a un carrito que es SOLO Choco Frappé (ya es una bebida) --
+  // mismo criterio que el checkout del cliente.
+  const mostrarPreguntaAgua = carrito.some((item) => !/frapp/i.test(item.nombre || ''));
+  const aguaRespondida      = !mostrarPreguntaAgua || aguaCortesia !== null;
   // Si la dirección tiene barrio del catálogo, el backend fuerza costo_domicilio
   // = Barrio.precio_domicilio sin importar lo que se mande — el campo debe
   // quedar de solo lectura para no mostrarle al admin un número que luego no se guarda.
@@ -515,6 +605,8 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
   const itemsIguales = (a, b) => {
     if (a.id_producto !== b.id_producto) return false;
     if ((a.chocolate || '') !== (b.chocolate || '')) return false;
+    if ((a.frutas || '') !== (b.frutas || '')) return false;
+    if ((a.observacion || '') !== (b.observacion || '')) return false;
     const topsA = [...(a.toppings || [])].map((t) => t.id_topping).sort().join(',');
     const topsB = [...(b.toppings || [])].map((t) => t.id_topping).sort().join(',');
     if (topsA !== topsB) return false;
@@ -527,7 +619,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
     return salsasA === salsasB;
   };
 
-  const agregarAlCarrito = (producto, toppings, adiciones, chocolate, salsas = []) => {
+  const agregarAlCarrito = (producto, toppings, adiciones, chocolate, salsas = [], frutas = null, observacion = null) => {
     const nuevoItem = {
       lineaId:          Date.now() + Math.random(),
       id_producto:      producto.id_producto,
@@ -541,6 +633,8 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
       adiciones,
       salsas:           salsas || [],
       chocolate:        chocolate || null,
+      frutas:           frutas || null,
+      observacion:      observacion || null,
       cantidad: 1,
     };
     setCarrito((prev) => {
@@ -583,6 +677,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
     setMetodoPago('efectivo'); setEfDisplay(''); setObservaciones('');
     setProductoConfigurar(null);
     setPuntosCliente(0); setUsarPuntos(false); setPuntosAplicar(0);
+    setAguaCortesia(null);
   };
 
   const guardar = async () => {
@@ -599,6 +694,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
         observaciones, total, subtotal, costodomicilio: Number(costoEnvio || 0),
         overrideDomicilio,
         puntosAplicar: usarPuntos ? puntosAplicarEfectivo : 0,
+        aguaCortesia: mostrarPreguntaAgua ? aguaCortesia : false,
       });
       reset(); onClose();
     } finally {
@@ -611,7 +707,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
 
   const canNext1 = !calculandoDom && cliente && ((modoDir === 'guardada' && direccion) || (modoDir === 'nueva' && nuevaDireccion.direccion_linea.trim()));
   const canNext2 = carrito.length > 0;
-  const canCreate = canNext1 && canNext2 && pagoCompleto && !procesandoVenta;
+  const canCreate = canNext1 && canNext2 && pagoCompleto && aguaRespondida && !procesandoVenta;
 
   const PASOS = ['Cliente y Dirección', 'Productos', 'Pago y Resumen'];
 
@@ -652,7 +748,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
               producto={productoConfigurar}
               toppingsActivos={toppingsActivos}
               adicionesActivas={adicionesActivas}
-              onAgregar={(tops, adics, choc, sals) => agregarAlCarrito(productoConfigurar, tops, adics, choc, sals)}
+              onAgregar={(tops, adics, choc, sals, frut, obs) => agregarAlCarrito(productoConfigurar, tops, adics, choc, sals, frut, obs)}
               onCancelar={() => setProductoConfigurar(null)}
             />
           )}
@@ -805,7 +901,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                       return (
                         <div key={item.lineaId} style={{ background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 10, padding: '10px 12px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <span style={{ fontWeight: 700, fontSize: 13 }}>{item.nombre}</span>
+                            <span style={{ fontWeight: 700, fontSize: 13 }}>{nombreConFrutas(item.nombre, item.frutas)}</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                               <button style={{ background: '#e5e7eb', border: 'none', borderRadius: 4, width: 24, height: 24, cursor: 'pointer', fontWeight: 800, fontSize: 14 }} onClick={() => cambiarCantidad(item.lineaId, item.cantidad - 1)}>−</button>
                               <span style={{ fontWeight: 800, minWidth: 20, textAlign: 'center', fontSize: 13 }}>{item.cantidad}</span>
@@ -824,6 +920,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                           {!item.es_bowl && parsearSalsas(item.salsas).length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginTop: 3 }}>{parsearSalsas(item.salsas).map((s, si) => <span key={si} style={{ fontSize: 9, color: COLOR_SALSAS, border: `1px solid ${COLOR_SALSAS}`, background: '#fff7ed', padding: '0 5px', borderRadius: 10, fontWeight: 600 }}>{nombreSalsa(s)}</span>)}</div>}
                           {item.toppings?.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 3 }}>{item.toppings.map((t) => <span key={t.id_topping} style={{ background: '#1a1a1a', color: '#fff', fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 20 }}>{t.nombre}{t.cantidad > 1 ? ` ×${t.cantidad}` : ''}</span>)}</div>}
                           {item.adiciones?.length > 0 && <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 3 }}>{item.adiciones.map((a) => <span key={a.id_adicion} style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #d97706', fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 20 }}>+{a.nombre}{a.cantidad > 1 ? ` ×${a.cantidad}` : ''}</span>)}</div>}
+                          {item.observacion && <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginTop: 3 }}>"{item.observacion}"</div>}
                           <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>${precioUnit.toLocaleString('es-CO')} c/u → <strong style={{ color: '#16a34a' }}>${(precioUnit * item.cantidad).toLocaleString('es-CO')}</strong></div>
                         </div>
                       );
@@ -877,42 +974,8 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                 {/* Método de pago */}
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: '#555', display: 'block', marginBottom: 8 }}>Método de pago</label>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                    {[
-                      {
-                        id: 'efectivo',
-                        label: 'Efectivo',
-                        logo: <LogoEfectivo size={20} />,
-                      },
-                      {
-                        id: 'transferencia',
-                        label: 'Transferencia',
-                        logo: (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
-                            <LogoBancolombia size={20} />
-                            <LogoNequi size={16} />
-                          </div>
-                        ),
-                      },
-                      {
-                        id: 'mixto',
-                        label: 'Mixto',
-                        logo: (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
-                            <LogoEfectivo size={16} />
-                            <span style={{ fontSize: 9, color: '#ccc' }}>+</span>
-                            <LogoBancolombia size={16} />
-                          </div>
-                        ),
-                      },
-                    ].map((m) => (
-                      <button key={m.id} type="button" onClick={() => cambiarMetodoPago(m.id)}
-                        style={{ flex: 1, padding: '10px 6px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', border: metodoPago === m.id ? '2px solid #CA0B0B' : '1px solid #e5e7eb', background: metodoPago === m.id ? '#fff5f5' : '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, transition: 'all 0.15s' }}>
-                        {m.logo}
-                        <span style={{ fontSize: 11, fontWeight: 700, color: metodoPago === m.id ? '#CA0B0B' : '#555' }}>{m.label}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <MetodoPagoGrid metodoPago={metodoPago} onCambiar={cambiarMetodoPago} datafonoHabilitado={datafonoHabilitado} />
+                  <div style={{ marginBottom: 10 }} />
                   {metodoPago === 'mixto' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -935,6 +998,26 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                     </div>
                   )}
                 </div>
+
+                {/* Agua de cortesía -- obligatorio responder cuando aplica */}
+                {mostrarPreguntaAgua && (
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: '#555', display: 'block', marginBottom: 8 }}>¿Desea agua de cortesía?</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {[{ v: true, label: 'Sí' }, { v: false, label: 'No' }].map((op) => (
+                        <button key={String(op.v)} type="button" onClick={() => setAguaCortesia(op.v)}
+                          style={{
+                            flex: 1, padding: '10px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 13,
+                            border: aguaCortesia === op.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
+                            background: aguaCortesia === op.v ? '#fff5f5' : '#fff',
+                            color: aguaCortesia === op.v ? '#CA0B0B' : '#555',
+                          }}>
+                          {op.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Observaciones */}
                 <div>
@@ -964,7 +1047,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                     {carrito.map((item) => (
                       <div key={item.lineaId} style={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: 8, padding: '8px 10px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
-                          <span style={{ fontWeight: 700, color: '#222' }}>{item.cantidad}× {item.nombre}</span>
+                          <span style={{ fontWeight: 700, color: '#222' }}>{item.cantidad}× {nombreConFrutas(item.nombre, item.frutas)}</span>
                           <span style={{ fontWeight: 700, color: '#16a34a' }}>${(calcularPrecioItem(item) * item.cantidad).toLocaleString('es-CO')}</span>
                         </div>
                         {item.chocolate && <span style={{ background: item.chocolate === 'Negro' ? '#1e3a5f' : '#f0f0f0', color: item.chocolate === 'Negro' ? '#fff' : '#555', fontSize: 9, fontWeight: 700, padding: '1px 6px', borderRadius: 20, display: 'inline-block', marginBottom: 2 }}>Choc. {item.chocolate}</span>}
@@ -989,6 +1072,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                             ))}
                           </div>
                         )}
+                        {item.observacion && <div style={{ fontSize: 10, color: '#666', fontStyle: 'italic', marginTop: 2 }}>"{item.observacion}"</div>}
                       </div>
                     ))}
                   </div>
@@ -1113,6 +1197,12 @@ function ModalDetalle({ open, onClose, venta }) {
                 <span className="detalle-valor" style={{ fontStyle: 'italic', color: '#666' }}>{venta.observaciones}</span>
               </div>
             )}
+            {venta.agua_cortesia && (
+              <div className="detalle-item detalle-full">
+                <span className="detalle-label">Agua de cortesía</span>
+                <span className="detalle-valor" style={{ color: '#1d4ed8', fontWeight: 700 }}>💧 Sí, incluir</span>
+              </div>
+            )}
             {venta.estado === 'anulado' && venta.motivo_anulacion && (
               <div className="detalle-item detalle-full">
                 <span className="detalle-label">Motivo de anulación</span>
@@ -1130,7 +1220,7 @@ function ModalDetalle({ open, onClose, venta }) {
                   return (
                   <div key={i} style={{ background: '#fafafa', borderRadius: 8, padding: '10px 12px', border: '1px solid #f0f0f0' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <span style={{ fontWeight: 700, fontSize: 13 }}>{cantidad}× {d.producto?.nombre || '—'}</span>
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>{cantidad}× {d.producto?.nombre ? nombreConFrutas(d.producto.nombre, d.frutas) : '—'}</span>
                       <span style={{ fontWeight: 700, color: '#16a34a', fontSize: 13 }}>${totalItem.toLocaleString('es-CO')}</span>
                     </div>
                     <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>
@@ -1159,6 +1249,11 @@ function ModalDetalle({ open, onClose, venta }) {
                             {a.cantidad > 1 ? ` =$${(Number(a.precio_unitario || 0) * a.cantidad).toLocaleString('es-CO')}` : ''}
                           </span>
                         ))}
+                      </div>
+                    )}
+                    {d.observacion && (
+                      <div style={{ fontSize: 12, color: '#666', fontStyle: 'italic', marginTop: 5 }}>
+                        "{d.observacion}"
                       </div>
                     )}
                   </div>
@@ -1261,6 +1356,9 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
   const [busquedaProd, setBusquedaProd] = useState('');
   const [nombreCliente, setNombreCliente] = useState('');
   const [telefonoCliente, setTelefonoCliente] = useState('');
+  const [datafonoHabilitado, setDatafonoHabilitado] = useState(false);
+
+  useEffect(() => { api.getDatafono().then(setDatafonoHabilitado); }, []);
 
   useEffect(() => {
     if (!open || !venta) return;
@@ -1279,6 +1377,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
       const prodActual = productosData.find((p) => p.id_producto === d.id_producto);
       const permiteChoc = prodActual ? !!prodActual.permite_chocolate : true;
       const permiteSal  = prodActual ? !!prodActual.permite_salsas   : true;
+      const permiteFru  = prodActual ? !!prodActual.permite_frutas   : true;
       return {
         lineaId: d.id_detalle_venta,
         id_producto: d.id_producto,
@@ -1296,6 +1395,11 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
         // Productos.jsx) y el gate normal los dejaría sin cobertura.
         salsas: (d.producto?.es_bowl || permiteSal) ? parsearSalsas(d.salsas) : [],
         chocolate: permiteChoc ? (d.chocolate || null) : null,
+        frutas: permiteFru ? (d.frutas || null) : null,
+        // Sin permiso por producto que la gatee (a diferencia de choc/frutas
+        // arriba) -- es texto libre, no depende de la configuración del
+        // producto, así que se precarga siempre tal cual quedó guardada.
+        observacion: d.observacion || null,
       };
     }));
   }, [open, venta]);
@@ -1332,6 +1436,8 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
   const itemsIgualesEdit = (a, b) => {
     if (a.id_producto !== b.id_producto) return false;
     if ((a.chocolate || '') !== (b.chocolate || '')) return false;
+    if ((a.frutas || '') !== (b.frutas || '')) return false;
+    if ((a.observacion || '') !== (b.observacion || '')) return false;
     const topsA = [...(a.toppings || [])].map((t) => t.id_topping).sort().join(',');
     const topsB = [...(b.toppings || [])].map((t) => t.id_topping).sort().join(',');
     if (topsA !== topsB) return false;
@@ -1343,7 +1449,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
     return salsasA === salsasB;
   };
 
-  const agregarAlCarritoEdit = (prod, tops, adics, choc, sals) => {
+  const agregarAlCarritoEdit = (prod, tops, adics, choc, sals, frut, obs) => {
     const totalTop = tops.reduce((s, t) => s + (t.cantidad || 1), 0);
     const toppingExtra = Math.max(0, totalTop - (prod.max_toppings || 0)) * 2000;
     const salsasExtra = Math.max(0, (sals || []).length - MAX_SALSAS_GRATIS) * PRECIO_SALSA_EXTRA;
@@ -1356,6 +1462,8 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
       toppings: tops, adiciones: adics,
       salsas: sals || [],
       chocolate: choc || null,
+      frutas: frut || null,
+      observacion: obs || null,
     };
     setCarrito((prev) => {
       const idx = prev.findIndex((item) => itemsIgualesEdit(item, nuevoItem));
@@ -1391,29 +1499,10 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
           </div>
           <div style={{ marginBottom: 16 }}>
             <label style={{ fontWeight: 700, fontSize: 13, color: '#555', marginBottom: 8, display: 'block' }}>Método de pago</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {[
-                { v: 'efectivo',      logo: <LogoEfectivo size={20}/>, label: 'Efectivo' },
-                { v: 'transferencia', logo: <div style={{display:'flex',alignItems:'center',gap:4}}><LogoBancolombia size={20}/><LogoNequi size={32}/></div>, label: 'Transferencia' },
-                { v: 'mixto',         logo: <div style={{display:'flex',alignItems:'center',gap:4}}><LogoEfectivo size={18}/><span style={{fontSize:10,color:'#ccc'}}>+</span><LogoBancolombia size={18}/></div>, label: 'Mixto' },
-              ].map((m) => (
-                <button key={m.v} type="button" onClick={() => {
-                  setMetodoPago(m.v); setIntentoGuardar(false);
-                  setEfDisplay('');
-                }} style={{
-                  flex: 1, padding: '14px 8px', borderRadius: 12, cursor: 'pointer',
-                  border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
-                  background: metodoPago === m.v ? '#fff5f5' : 'white',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                  fontFamily: 'inherit', transition: 'all 0.15s',
-                }}>
-                  {m.logo}
-                  <span style={{ fontSize: 12, fontWeight: 700, color: metodoPago === m.v ? '#CA0B0B' : '#555' }}>
-                    {m.label}
-                  </span>
-                </button>
-              ))}
-            </div>
+            <MetodoPagoGrid metodoPago={metodoPago} datafonoHabilitado={datafonoHabilitado} onCambiar={(v) => {
+              setMetodoPago(v); setIntentoGuardar(false);
+              setEfDisplay('');
+            }} />
             {metodoPago === 'mixto' && (() => {
               const ok = montoEfectivo > 0 && montoTransfer > 0;
               return (
@@ -1484,7 +1573,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
           {carrito.map((item) => (
             <div key={item.lineaId} style={{ background: '#fafafa', border: '1px solid #f0f0f0', borderRadius: 10, padding: '10px 12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontWeight: 700, fontSize: 13 }}>{item.nombre}</span>
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{nombreConFrutas(item.nombre, item.frutas)}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <button style={{ ...sty.chipB, color: '#555', fontSize: 16 }} onClick={() => cambiarCantidadEdit(item.lineaId, item.cantidad - 1)}>−</button>
                   <span style={{ fontWeight: 800, minWidth: 20, textAlign: 'center' }}>{item.cantidad}</span>
@@ -1506,6 +1595,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
                 {item.toppings?.map((t) => <span key={t.id_topping} style={{ background: '#1a1a1a', color: '#fff', fontSize: 10, padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>{t.nombre}{t.cantidad > 1 ? ` ×${t.cantidad}` : ''}</span>)}
                 {item.adiciones?.map((a) => <span key={a.id_adicion} style={{ background: '#d97706', color: '#fff', fontSize: 10, padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>+{a.nombre}{a.cantidad > 1 ? ` ×${a.cantidad}` : ''}</span>)}
               </div>
+              {item.observacion && <div style={{ fontSize: 11, color: '#666', fontStyle: 'italic', marginTop: 3 }}>"{item.observacion}"</div>}
               <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
                 ${Number(item.precio).toLocaleString('es-CO')} c/u → <strong style={{ color: '#16a34a' }}>${calcItemEdit(item).toLocaleString('es-CO')}</strong>
               </div>
@@ -1521,7 +1611,7 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
               producto={productoConfigurar}
               toppingsActivos={toppingsActivos}
               adicionesActivas={adicionesActivas}
-              onAgregar={(tops, adics, choc, sals) => agregarAlCarritoEdit(productoConfigurar, tops, adics, choc, sals)}
+              onAgregar={(tops, adics, choc, sals, frut, obs) => agregarAlCarritoEdit(productoConfigurar, tops, adics, choc, sals, frut, obs)}
               onCancelar={() => setProductoConfigurar(null)}
             />
           )}
@@ -1578,27 +1668,10 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
         {/* Método de pago */}
         <div style={{ marginBottom: 12 }}>
           <label style={{ fontWeight: 700, fontSize: 13, color: '#555', marginBottom: 8, display: 'block' }}>Método de pago</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[
-              { v: 'efectivo',      contenido: <div style={{ display:'flex', alignItems:'center', gap:6 }}><LogoEfectivo size={16}/> Efectivo</div> },
-              { v: 'transferencia', contenido: <div style={{ display:'flex', alignItems:'center', gap:5 }}><LogoBancolombia size={16}/><LogoNequi size={28}/> Transferencia</div> },
-              { v: 'mixto',         contenido: <div style={{ display:'flex', alignItems:'center', gap:5 }}><LogoEfectivo size={14}/><LogoBancolombia size={14}/> Mixto</div> },
-            ].map((m) => (
-              <button key={m.v} type="button" onClick={() => {
-                setMetodoPago(m.v);
-                setEfDisplay('');
-              }} style={{
-                flex: 1, padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
-                border: metodoPago === m.v ? '2px solid #CA0B0B' : '1px solid #e5e7eb',
-                background: metodoPago === m.v ? '#fff5f5' : 'white',
-                color: metodoPago === m.v ? '#CA0B0B' : '#555',
-                fontWeight: 700, fontSize: 12, fontFamily: 'inherit',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              }}>
-                {m.contenido}
-              </button>
-            ))}
-          </div>
+          <MetodoPagoGrid metodoPago={metodoPago} datafonoHabilitado={datafonoHabilitado} onCambiar={(v) => {
+            setMetodoPago(v);
+            setEfDisplay('');
+          }} />
 
           {metodoPago === 'mixto' && (() => {
             const mixtoOk = montoEfectivo > 0 && montoTransfer > 0;
@@ -1808,6 +1881,8 @@ export default function Pedidos() {
       adiciones:    (item.adiciones || []).map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad || 1 })),
       salsas:       (item.salsas   || []).map(s => typeof s === 'object' ? (s.id || s.nombre) : s),
       chocolate:    item.chocolate || null,
+      frutas:       item.frutas || null,
+      observacion:  item.observacion || null,
     }));
     const metodo   = f.metodoPago || 'efectivo';
     const efectivo = metodo === 'efectivo' ? f.total : metodo === 'mixto' ? (Number(f.pagoEfectivo) || 0) : 0;
@@ -1823,6 +1898,7 @@ export default function Pedidos() {
       ...(efectivo > 0        ? { monto_efectivo:      efectivo        } : {}),
       ...(transfer > 0        ? { monto_transferencia: transfer        } : {}),
       ...(f.puntosAplicar > 0 ? { puntos_usados:       f.puntosAplicar } : {}),
+      agua_cortesia: !!f.aguaCortesia,
     };
 
     if (f.direccion?.esNueva) {
@@ -1851,6 +1927,8 @@ export default function Pedidos() {
       adiciones:    (item.adiciones || []).map((a) => ({ id_adicion: a.id_adicion, cantidad: a.cantidad || 1 })),
       salsas:       (item.salsas  || []).map(s => typeof s === 'object' ? (s.id || s.nombre) : s),
       chocolate:    item.chocolate || null,
+      frutas:       item.frutas || null,
+      observacion:  item.observacion || null,
     }));
     try {
       await api.editarVenta(editandoVenta.id_venta, {
@@ -2052,6 +2130,7 @@ export default function Pedidos() {
               <option value="efectivo">Efectivo</option>
               <option value="transferencia">Transferencia</option>
               <option value="mixto">Mixto</option>
+              <option value="datafono">Datafono</option>
             </select>
 
             {/* Limpiar */}

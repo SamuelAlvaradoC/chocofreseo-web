@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MapPin, RefreshCw, ThumbsUp, Star, Clock, MessageSquare, Send, AlertTriangle, Laptop } from 'lucide-react';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../../../utils/validarSinHtml';
+import { notificarResenaEnviada } from '../../../../../services/resenaEvents';
 import './CtaFinal.css';
 
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
@@ -20,6 +22,11 @@ export default function CtaFinal() {
   const [enviandoResena,  setEnviandoResena]  = useState(false);
   const [enviado,         setEnviado]         = useState(false);
   const [errorResena,     setErrorResena]     = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Presente cuando se llegó acá desde el banner de "reseña pendiente"
+  // (ResenaBanner navega a /landing?pendiente_resena=<id_venta>#reseñas) --
+  // vincula esta reseña puntual a ESE pedido específico.
+  const idVentaPendiente = searchParams.get('pendiente_resena');
 
   const handleEnviarResena = async () => {
     if (!sede || !frecuencia || !califAtencion || !califProducto || !facilidadPedido || !recomendaria || !tiempoAdecuado) {
@@ -47,6 +54,7 @@ export default function CtaFinal() {
           producto_deseado: productoDeseado,
           mejora,
           comentario_experiencia_web: comentarioWeb,
+          ...(idVentaPendiente ? { id_venta: Number(idVentaPendiente) } : {}),
         }),
       });
       // fetch() solo rechaza (catch) por fallos de red -- un 429 (límite
@@ -60,6 +68,14 @@ export default function CtaFinal() {
         return;
       }
       setEnviado(true);
+      if (idVentaPendiente) {
+        notificarResenaEnviada(Number(idVentaPendiente));
+        // Limpia el query param para que un refresh de la página no reintente
+        // vincular la siguiente reseña (si el cliente deja otra distinta) al
+        // mismo pedido ya reseñado.
+        searchParams.delete('pendiente_resena');
+        setSearchParams(searchParams, { replace: true });
+      }
       setSede(''); setFrecuencia(''); setCalifAtencion(0); setCalifProducto(0); setFacilidadPedido('');
       setRecomendaria(''); setTiempoAdecuado('');
       setLoQueGusto(''); setProductoDeseado(''); setMejora(''); setComentarioWeb('');

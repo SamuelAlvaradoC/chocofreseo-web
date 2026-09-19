@@ -11,6 +11,8 @@ import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import { formatHora12 } from '../../../utils/formatHora';
 import * as api from '../../../services/api';
+import { nombreConFrutas, COMBOS_FRUTAS } from '../../../utils/nombreProducto';
+import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import './Catalogo.css';
 
 
@@ -32,25 +34,38 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
   const [pasoIdx,          setPasoIdx]          = useState(0);
   const [chocolateElegido, setChocolateElegido] = useState('');
   const [coberturaElegida, setCoberturaElegida] = useState('');
+  const [frutasElegidas,   setFrutasElegidas]   = useState('');
   const [toppings,         setToppings]         = useState([]);
   const [salsasElegidas,   setSalsasElegidas]   = useState([]);
   const [adiciones,        setAdiciones]        = useState([]);
-  const [observaciones,    setObservaciones]    = useState('');
+  // Nota de preparación por producto (ej: "sin azúcar") -- distinta de
+  // Venta.observaciones (a nivel de todo el pedido, en Checkout). Nombrada
+  // en singular a propósito para no confundirla con esa.
+  const [observacion,      setObservacion]      = useState('');
+  const [errorObservacion, setErrorObservacion] = useState('');
 
   if (!open || !producto) return null;
 
   const tieneChocolate = producto.permite_chocolate === true;
   const tieneToppings  = producto.permite_toppings === 1 && toppingsDisponibles.length > 0;
   const tieneSalsas    = producto.permite_salsas === true;
+  const tieneFrutas    = producto.permite_frutas === true;
   const sinToppings    = !tieneToppings;
+  const nombreActual   = nombreConFrutas(producto.nombre, frutasElegidas);
 
-  // Calcular pasos aplicables
+  // Calcular pasos aplicables — 'frutas' siempre va primero
   const pasos = [];
+  if (tieneFrutas)       pasos.push('frutas');
   if (producto.es_bowl) pasos.push('bowl');
   if (tieneChocolate)   pasos.push('chocolate');
   if (tieneSalsas)      pasos.push('salsas');
   if (tieneToppings)    pasos.push('toppings');
   pasos.push('adiciones');
+  // Nota de preparación como su propio paso final -- antes vivía al fondo
+  // del paso "adiciones" (debajo de toppings/adiciones extra en una lista
+  // scrolleable) y quedaba prácticamente invisible. Ahora es lo último que
+  // se ve, justo antes de agregar al carrito.
+  pasos.push('nota');
 
   const pasoActual   = pasos[pasoIdx] || 'adiciones';
   const esUltimoPaso = pasoIdx === pasos.length - 1;
@@ -80,16 +95,17 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
   const salsasExtra   = Math.max(0, salsasElegidas.length - MAX_SALSAS_GRATIS) * PRECIO_SALSA_EXTRA;
   const total         = base + topExtra + adicionTotal + salsasExtra;
 
-  const puedeAvanzar = (pasoActual !== 'chocolate' || !!chocolateElegido) && (pasoActual !== 'bowl' || !!coberturaElegida);
+  const puedeAvanzar = (pasoActual !== 'chocolate' || !!chocolateElegido) && (pasoActual !== 'bowl' || !!coberturaElegida) && (pasoActual !== 'frutas' || !!frutasElegidas);
 
   const cerrar = () => {
-    setPasoIdx(0); setChocolateElegido(''); setCoberturaElegida(''); setToppings([]); setSalsasElegidas([]); setAdiciones([]); setObservaciones('');
+    setPasoIdx(0); setChocolateElegido(''); setCoberturaElegida(''); setFrutasElegidas(''); setToppings([]); setSalsasElegidas([]); setAdiciones([]); setObservacion(''); setErrorObservacion('');
     onClose();
   };
 
   const avanzar = () => {
     if (!puedeAvanzar) return;
     if (esUltimoPaso) {
+      if (contieneEtiquetaHtml(observacion)) { setErrorObservacion(MSG_HTML); return; }
       onConfirmar({
         ...producto,
         toppings,
@@ -99,9 +115,10 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
         cantidad: 1,
         max_toppings: producto.max_toppings,
         chocolate: tieneChocolate ? chocolateElegido : null,
-        observaciones: observaciones.trim() || null,
+        frutas: tieneFrutas ? frutasElegidas : null,
+        observacion: observacion.trim() || null,
       });
-      setPasoIdx(0); setChocolateElegido(''); setCoberturaElegida(''); setToppings([]); setSalsasElegidas([]); setAdiciones([]); setObservaciones('');
+      setPasoIdx(0); setChocolateElegido(''); setCoberturaElegida(''); setFrutasElegidas(''); setToppings([]); setSalsasElegidas([]); setAdiciones([]); setObservacion(''); setErrorObservacion('');
     } else {
       setPasoIdx((i) => i + 1);
     }
@@ -129,7 +146,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
         <button onClick={cerrar} style={{ position: 'absolute', top: 12, right: 12, background: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, fontWeight: 800, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
       </div>
       <div style={{ padding: '14px 20px 0', flexShrink: 0 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#1a1a1a' }}>{producto.nombre}</h2>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#1a1a1a' }}>{nombreActual}</h2>
         <p style={{ margin: '4px 0 0', fontSize: 17, fontWeight: 800, color: '#CA0B0B' }}>${base.toLocaleString('es-CO')}</p>
       </div>
       <div style={{ flex: 1, padding: '0 20px 16px', overflowY: 'auto' }}>
@@ -185,6 +202,69 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
     </>
   );
 
+  /* PASO: FRUTAS */
+  const renderFrutas = () => (
+    <>
+      <div style={{ position: 'relative', height: 160, flexShrink: 0 }}>
+        {producto.img
+          ? <img src={imgCl(producto.img, 600, 320)} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px 20px 0 0' }} />
+          : <div style={{ height: '100%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, borderRadius: '20px 20px 0 0' }}>🍓</div>
+        }
+        <button onClick={cerrar} style={{ position: 'absolute', top: 12, right: 12, background: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, fontWeight: 800, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+      </div>
+      <div style={{ padding: '14px 20px 0', flexShrink: 0 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#1a1a1a' }}>{nombreActual}</h2>
+        <p style={{ margin: '4px 0 0', fontSize: 17, fontWeight: 800, color: '#CA0B0B' }}>${base.toLocaleString('es-CO')}</p>
+      </div>
+      <div style={{ flex: 1, padding: '0 20px 16px', overflowY: 'auto' }}>
+        <p style={{ ...secLbl }}>¿Qué combinación de frutas prefieres?</p>
+        <div style={{ display: 'flex', gap: 10, margin: '4px 0' }}>
+          {COMBOS_FRUTAS.map((op) => {
+            const sel = frutasElegidas === op.id;
+            return (
+              <button key={op.id} onClick={() => setFrutasElegidas(op.id)} style={{
+                flex: 1, height: 130, borderRadius: 14, cursor: 'pointer', padding: 0,
+                background: '#fff',
+                border: sel ? '3px solid #CA0B0B' : '1px solid #eee',
+                position: 'relative', overflow: 'hidden',
+                boxShadow: sel ? '0 6px 20px rgba(202,11,11,0.35)' : 'none',
+                transition: 'all 0.2s ease',
+              }}>
+                <img src={op.img} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <div style={{
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                  padding: '26px 8px 8px', color: '#fff', fontWeight: 700, fontSize: 11, fontFamily: 'inherit', textAlign: 'center',
+                }}>
+                  {op.etiqueta}
+                </div>
+                {sel && (
+                  <div style={{
+                    position: 'absolute', top: 6, right: 6, zIndex: 3,
+                    width: 20, height: 20, borderRadius: '50%',
+                    background: '#CA0B0B', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.35)',
+                  }}>
+                    <Check size={12} color="#fff" strokeWidth={3} />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div style={{ borderTop: '1px solid #f0f0f0', padding: '12px 20px', flexShrink: 0 }}>
+        <button onClick={avanzar} disabled={!frutasElegidas} style={{
+          width: '100%', padding: 14, background: frutasElegidas ? '#CA0B0B' : '#e5e7eb',
+          color: frutasElegidas ? '#fff' : '#aaa', border: 'none', borderRadius: 12,
+          fontSize: 15, fontWeight: 800, cursor: frutasElegidas ? 'pointer' : 'not-allowed', fontFamily: 'inherit',
+        }}>
+          Continuar →
+        </button>
+      </div>
+    </>
+  );
+
   /* PASO: CHOCOLATE */
   const renderChocolate = () => (
     <>
@@ -197,7 +277,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
         <button onClick={cerrar} style={{ position: 'absolute', top: 12, right: 12, background: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, fontWeight: 800, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
       </div>
       <div style={{ padding: '14px 20px 0', flexShrink: 0 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#1a1a1a' }}>{producto.nombre}</h2>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#1a1a1a' }}>{nombreActual}</h2>
         <p style={{ margin: '4px 0 0', fontSize: 17, fontWeight: 800, color: '#CA0B0B' }}>${base.toLocaleString('es-CO')}</p>
       </div>
       <div style={{ flex: 1, padding: '0 20px 16px', overflowY: 'auto' }}>
@@ -463,6 +543,54 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
             <button onClick={retroceder} style={{ flex: 0, padding: '12px 18px', borderRadius: 12, border: '2px solid #e5e7eb', background: '#fff', color: '#555', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Atrás</button>
           )}
           <button onClick={avanzar} style={{ flex: 1, padding: 13, background: '#CA0B0B', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+            Continuar →
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
+  /* PASO: NOTA DE PREPARACIÓN (siempre el último paso, justo antes de
+     agregar al carrito -- antes vivía enterrada al fondo del paso
+     "adiciones" y quedaba prácticamente invisible). */
+  const renderNota = () => (
+    <>
+      <div style={{ padding: '16px 20px 12px', flexShrink: 0, borderBottom: '1px solid #f0f0f0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 800, color: '#CA0B0B', textTransform: 'uppercase', letterSpacing: 0.8 }}>Último paso</p>
+            <h2 style={{ margin: '4px 0 0', fontSize: 19, fontWeight: 800, color: '#1a1a1a' }}>¿Alguna nota de preparación?</h2>
+          </div>
+          <button onClick={cerrar} style={{ background: '#f5f5f5', border: 'none', borderRadius: '50%', width: 34, height: 34, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+        </div>
+        <p style={{ fontSize: 13, color: '#888', margin: '10px 0 0' }}>
+          Es opcional. Cuéntanos si necesitas algo especial en la preparación de este producto.
+        </p>
+      </div>
+      <div style={{ flex: 1, padding: '16px 20px', overflowY: 'auto' }}>
+        <textarea
+          value={observacion}
+          maxLength={255}
+          autoFocus
+          onChange={(e) => { setObservacion(e.target.value); setErrorObservacion(''); }}
+          placeholder="Ej: poco arequipe, sin mermelada..."
+          rows={4}
+          style={{
+            width: '100%', boxSizing: 'border-box', padding: '14px', borderRadius: 12,
+            border: `1.5px solid ${errorObservacion ? '#f87171' : '#e5e7eb'}`, fontFamily: 'inherit',
+            fontSize: 14, resize: 'none',
+          }}
+        />
+        {errorObservacion && <p style={{ color: '#CA0B0B', fontSize: 11, margin: '6px 0 0' }}>{errorObservacion}</p>}
+      </div>
+      <div style={{ borderTop: '1px solid #f0f0f0', padding: '12px 20px', flexShrink: 0, background: '#fff' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <span style={{ fontWeight: 700, fontSize: 14, color: '#1a1a1a' }}>Total</span>
+          <span style={{ fontWeight: 900, fontSize: 18, color: '#CA0B0B' }}>${total.toLocaleString('es-CO')}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={retroceder} style={{ flex: 0, padding: '12px 18px', borderRadius: 12, border: '2px solid #e5e7eb', background: '#fff', color: '#555', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', fontSize: 14 }}>← Atrás</button>
+          <button onClick={avanzar} style={{ flex: 1, padding: 13, background: '#CA0B0B', color: '#fff', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
             🛒 Agregar al carrito
           </button>
         </div>
@@ -480,7 +608,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
         <div style={{ padding: '16px 20px 12px', flexShrink: 0, borderBottom: '1px solid #f0f0f0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#1a1a1a' }}>{producto.nombre}</h2>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#1a1a1a' }}>{nombreActual}</h2>
               <p style={{ margin: '3px 0 0', fontSize: 16, fontWeight: 800, color: '#CA0B0B' }}>${base.toLocaleString('es-CO')}</p>
             </div>
             <button onClick={cerrar} style={{ background: '#f5f5f5', border: 'none', borderRadius: '50%', width: 34, height: 34, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -542,11 +670,13 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
   return (
     <div className="modal-overlay modal-producto-overlay" onClick={cerrar}>
       <div className="modal-producto-inner" onClick={(e) => e.stopPropagation()}>
+        {pasoActual === 'frutas'     && renderFrutas()}
         {pasoActual === 'bowl'       && renderBowl()}
         {pasoActual === 'chocolate'  && renderChocolate()}
         {pasoActual === 'salsas'     && renderSalsas()}
         {pasoActual === 'toppings'   && renderToppings()}
         {pasoActual === 'adiciones'  && renderAdiciones()}
+        {pasoActual === 'nota'       && renderNota()}
       </div>
     </div>
   );
@@ -641,7 +771,7 @@ function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrC
                     </div>
                     <div className="carrito-item-info">
                       <span className="carrito-item-nombre" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-                        {item.nombre}
+                        {nombreConFrutas(item.nombre, item.frutas)}
                         {item.chocolate && (
                           <span style={{
                             fontSize: 10, background: item.chocolate === 'Negro' ? '#1e3a5f' : '#f0f0f0',
@@ -681,6 +811,11 @@ function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrC
                               +{a.nombre}{a.cantidad > 1 ? ` ×${a.cantidad}` : ''}
                             </span>
                           ))}
+                        </div>
+                      )}
+                      {item.observacion && (
+                        <div style={{ marginTop: 3, fontSize: 11, color: '#666', fontStyle: 'italic' }}>
+                          "{item.observacion}"
                         </div>
                       )}
                       <span className="carrito-item-precio-unit">
@@ -767,7 +902,7 @@ function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrC
             {!expandido && (
               <div className="carrito-barra-resumen">
                 {carrito.slice(0, 2).map((item) => (
-                  <span key={item.lineaId} className="carrito-barra-chip">{item.cantidad}× {item.nombre}</span>
+                  <span key={item.lineaId} className="carrito-barra-chip">{item.cantidad}× {nombreConFrutas(item.nombre, item.frutas)}</span>
                 ))}
                 {carrito.length > 2 && <span className="carrito-barra-chip carrito-barra-chip--mas">+{carrito.length - 2} más</span>}
               </div>
@@ -803,9 +938,10 @@ function BadgeProducto({ p }) {
   const tieneChocolate = p.permite_chocolate === true;
   const tieneToppings  = p.permite_toppings === 1 && (p.max_toppings || 0) > 0;
   const tieneSalsas    = p.permite_salsas === true;
+  const tieneFrutas    = p.permite_frutas === true;
   const maxTop         = p.max_toppings || 0;
 
-  if (!tieneCobertura && !tieneChocolate && !tieneToppings && !tieneSalsas) return null;
+  if (!tieneCobertura && !tieneChocolate && !tieneToppings && !tieneSalsas && !tieneFrutas) return null;
 
   const labelTop = maxTop === 1 ? '1 topping gratis' : `${maxTop} toppings gratis`;
 
@@ -826,6 +962,7 @@ function BadgeProducto({ p }) {
   const dividerStyle = { borderTop: '1px solid rgba(202,11,11,0.35)', margin: '3px 0' };
 
   const lineas = [
+    tieneFrutas    && 'Elige frutas',
     tieneCobertura && 'Elige cobertura',
     tieneChocolate && 'Elige chocolate',
     tieneToppings  && labelTop,

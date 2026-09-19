@@ -6,6 +6,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
+import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Domicilios.css';
 
 const COLOR_SALSAS = '#ea580c';
@@ -31,10 +32,13 @@ const mapVentaDomi = (v) => ({
   comprobante:  v.comprobante_url || v.pagos?.[0]?.detallePagos?.find((d) => d.comprobante)?.comprobante || null,
   fecha:        v.fecha ? new Date(v.fecha).toLocaleString('es-CO') : '—',
   observaciones: v.observaciones || '',
+  agua_cortesia: !!v.agua_cortesia,
   productos:    (v.detalleVentas || []).map((d) => ({
     nombre:    d.producto?.nombre || '—',
     cantidad:  d.cantidad || 1,
     chocolate: d.chocolate || null,
+    frutas:    d.frutas || null,
+    observacion: d.observacion || null,
     salsas:    parsearSalsas(d.salsas),
     toppings:  (d.detalleToppings  || d.toppingDetalles || d.toppings  || []).map((t) => ({
       nombre: t.topping?.nombre || t.nombre || '',
@@ -175,6 +179,12 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
                 <span className="detalle-valor" style={{ color: '#ca8a04', display:'flex', alignItems:'center', gap:5 }}><AlertTriangle size={13}/>{pedido.observaciones}</span>
               </div>
             )}
+            {pedido.agua_cortesia && (
+              <div className="revision-item revision-full">
+                <span className="detalle-label">Agua de cortesía</span>
+                <span className="detalle-valor" style={{ color: '#1d4ed8', fontWeight: 700 }}>💧 Sí, incluir</span>
+              </div>
+            )}
           </div>
 
           <p className="form-seccion-titulo" style={{ marginTop: 16 }}>Productos del pedido</p>
@@ -182,7 +192,7 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
             {pedido.productos.map((p, i) => (
               <div key={i} className="revision-producto-item">
                 <div className="revision-producto-header">
-                  <span className="revision-producto-nombre">{p.cantidad}x {p.nombre}</span>
+                  <span className="revision-producto-nombre">{p.cantidad}x {nombreConFrutas(p.nombre, p.frutas)}</span>
                   <span className="revision-producto-precio">${Number(p.subtotal).toLocaleString('es-CO')}</span>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
@@ -201,6 +211,11 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
                     </span>
                   ))}
                 </div>
+                {p.observacion && (
+                  <div style={{ fontSize: 12, color: '#CA0B0B', fontWeight: 700, marginTop: 5 }}>
+                    📝 {p.observacion}
+                  </div>
+                )}
               </div>
             ))}
             <div className="revision-total">
@@ -378,7 +393,7 @@ export default function Domicilios() {
 
                 <div className="domi-card-productos">
                   {d.productos.map((p, i) => (
-                    <span key={i} className="domi-producto-chip">{p.cantidad}x {p.nombre}</span>
+                    <span key={i} className="domi-producto-chip">{p.cantidad}x {nombreConFrutas(p.nombre, p.frutas)}</span>
                   ))}
                 </div>
 

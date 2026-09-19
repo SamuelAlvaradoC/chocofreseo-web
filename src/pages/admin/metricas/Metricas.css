@@ -1,0 +1,19 @@
+@import '../dashboard/Dashboard.css';
+@import '../clientes/Clientes.css';
+
+.metrica-barra-fila { margin-bottom: 16px; }
+.metrica-barra-fila:last-child { margin-bottom: 0; }
+.metrica-barra-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 6px;
+}
+.metrica-barra-label { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+.metrica-barra-valor { font-size: 12px; font-weight: 700; color: #888; }
+.metrica-barra-wrap {
+  height: 10px; background: #f0f0f0;
+  border-radius: 99px; overflow: hidden;
+}
+.metrica-barra {
+  height: 100%; background: #CA0B0B;
+  border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1);
+}

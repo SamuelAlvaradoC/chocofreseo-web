@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { useAuth } from './context/AuthContext';
 import SessionExpiredListener from './components/SessionExpiredListener';
+import WhatsAppButton from './components/common/WhatsAppButton';
+import ResenaBanner from './components/common/ResenaBanner';
 
 // ── Admin ──────────────────────────────────────────────────────
 import DashboardPage  from './pages/admin/dashboard';
@@ -19,6 +21,7 @@ import DomiciliosPage from './pages/admin/domicilios';
 import CiudadesPage   from './pages/admin/ciudades';
 import BarriosPage    from './pages/admin/barrios';
 import ResenasPage    from './pages/admin/resenas';
+import MetricasPage   from './pages/admin/metricas';
 
 // ── Domiciliario ───────────────────────────────────────────────
 import PedidosDomiciliarioPage from './pages/domiciliario/pedidos';
@@ -124,6 +127,7 @@ function App() {
         <Route path="/admin/ciudades"   element={<RutaAdmin><CiudadesPage /></RutaAdmin>} />
         <Route path="/admin/barrios"    element={<RutaAdmin><BarriosPage /></RutaAdmin>} />
         <Route path="/admin/resenas"   element={<RutaAdmin><ResenasPage /></RutaAdmin>} />
+        <Route path="/admin/metricas"  element={<RutaAdmin><MetricasPage /></RutaAdmin>} />
 
         {/* ── Domiciliario — requiere rol domiciliario ── */}
         <Route path="/domiciliario/pedidos" element={<RutaDomiciliario><PedidosDomiciliarioPage /></RutaDomiciliario>} />
@@ -135,6 +139,8 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
+      <ResenaBanner />
+      <WhatsAppButton />
       <Analytics />
     </BrowserRouter>
   );

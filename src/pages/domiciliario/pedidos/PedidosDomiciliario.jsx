@@ -3,6 +3,7 @@ import { Check, CheckCircle, PackageOpen, Bike } from 'lucide-react';
 import { LogoWhatsApp, LogoBancolombia, LogoNequi, LogoEfectivo } from '../../../components/common/LogosApps';
 import DomiciliarioLayout from '../../../components/layout/DomiciliarioLayout/DomiciliarioLayout';
 import * as api from '../../../services/api';
+import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './PedidosDomiciliario.css';
 
 const COLOR_SALSAS = '#ea580c';
@@ -39,6 +40,7 @@ const mapVentaPedido = (v, facturado = false) => {
       nombre:    d.producto?.nombre || '—',
       cantidad:  d.cantidad || 1,
       chocolate: d.chocolate || null,
+      frutas:    d.frutas || null,
       salsas:    parsearSalsas(d.salsas),
       toppings:  (d.detalleToppings || d.toppingDetalles || d.toppings || []).map((t) => {
         const n = t.topping?.nombre || t.nombre || '';
@@ -201,7 +203,7 @@ function ModalDetalle({ pedido, onClose }) {
           {pedido.productos.map((p, i) => (
             <div key={i} className="pd-modal-prod">
               <div className="pd-modal-prod-row">
-                <span className="pd-modal-prod-nombre">{p.cantidad}× {p.nombre}</span>
+                <span className="pd-modal-prod-nombre">{p.cantidad}× {nombreConFrutas(p.nombre, p.frutas)}</span>
                 <span className="pd-modal-prod-precio">${p.subtotal.toLocaleString('es-CO')}</span>
               </div>
               {(p.chocolate || p.salsas?.length > 0 || p.toppings.length > 0 || p.adiciones.length > 0) && (
