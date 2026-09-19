@@ -93,11 +93,10 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
-  /* Por defecto los items de grid se estiran (align-items:stretch) al alto
-     de la fila más alta -- con "Ver más" una tarjeta puede crecer mucho más
-     que sus vecinas, y sin esto todas las de esa fila se estirarían con
-     ella (fondo blanco de más, botón "+ Agregar" corrido hacia abajo). */
-  align-items: start;
+  /* align-items por defecto es stretch: CSS Grid ya hace nativamente que
+     todas las tarjetas de una misma fila compartan el alto de la más alta
+     de esa fila -- sin medir nada por JS. Filas distintas sí pueden tener
+     alturas distintas entre ellas, eso es normal. */
 }
 
 .producto-card {
@@ -111,16 +110,7 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  /* NO height:100% -- con .productos-grid en align-items:start, esto
-     forzaría a la tarjeta a igualar la altura de la fila (heredada del
-     grid item), que es justo lo que "Ver más" necesita evitar: si una
-     tarjeta se expande y la fila crece, height:100% arrastraria a las
-     vecinas con ella pese a align-items:start (confirmado midiendo en
-     vivo: con height:100% las 4 tarjetas de una fila crecian juntas al
-     expandir solo la primera). Cada tarjeta mide lo que su contenido
-     necesita, punto -- por eso ahora en la version colapsada tarjetas con
-     descripcion corta pueden verse un poco mas bajas que las de al lado;
-     es el trade-off real de que cada una sea independiente. */
+  height: 100%;
 }
 .producto-card:hover {
   transform: translateY(-4px);
@@ -162,14 +152,6 @@
   font-size: 11px; color: #888; font-weight: 600;
   line-height: 1.4; margin-bottom: 8px;
 }
-.producto-card-vermas {
-  display: block;
-  background: none; border: none; padding: 0;
-  font-size: 11px; font-weight: 800; color: #CA0B0B;
-  cursor: pointer; font-family: 'Nunito', sans-serif;
-  margin: -4px 0 8px;
-}
-.producto-card-vermas:hover { text-decoration: underline; }
 .producto-card-footer {
   display: flex; justify-content: space-between; align-items: center;
   margin-top: auto;
