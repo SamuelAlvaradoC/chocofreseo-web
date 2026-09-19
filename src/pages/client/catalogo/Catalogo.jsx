@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+﻿import { useState, useEffect, useMemo, useRef } from 'react';
 import { Check } from 'lucide-react';
 import { imgCl } from '../../../utils/cloudinary';
 import { useNavigate } from 'react-router-dom';
@@ -1013,6 +1013,28 @@ function BadgeMasPedido() {
 }
 
 function CardProducto({ p, onAgregar, destacado }) {
+  const [expandido, setExpandido] = useState(false);
+  const [truncado,  setTruncado]  = useState(false);
+  const descRef = useRef(null);
+
+  // Mide contra el clamp de 3 líneas para saber si el texto realmente se
+  // corta -- así "Ver más" solo aparece cuando hace falta. Con
+  // ResizeObserver en vez de medir una sola vez al montar: el ancho de la
+  // tarjeta puede cambiar después (rotar el celular, redimensionar la
+  // ventana, la grilla pasando de 4 a 2 columnas) y el truncamiento debe
+  // recalcularse con el ancho real en ese momento. Se desactiva mientras
+  // está expandida -- sin el clamp, scrollHeight===clientHeight no sirve
+  // para medir truncamiento.
+  useEffect(() => {
+    const el = descRef.current;
+    if (!el || expandido) return;
+    const medir = () => setTruncado(el.scrollHeight - el.clientHeight > 1);
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [p.descripcion, expandido]);
+
   return (
     // Wrapper externo SIN overflow:hidden (a diferencia de .producto-card,
     // que sí lo tiene para recortar la imagen) -- así la estrella puede
@@ -1034,17 +1056,29 @@ function CardProducto({ p, onAgregar, destacado }) {
         <div className="producto-card-body">
           <h3 className="producto-card-nombre">{p.nombre}</h3>
           {p.descripcion && (
-            <p
-              className="producto-card-desc"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {p.descripcion}
-            </p>
+            <>
+              <p
+                ref={descRef}
+                className="producto-card-desc"
+                style={expandido ? undefined : {
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {p.descripcion}
+              </p>
+              {truncado && (
+                <button
+                  type="button"
+                  className="producto-card-vermas"
+                  onClick={(e) => { e.stopPropagation(); setExpandido((v) => !v); }}
+                >
+                  {expandido ? 'Ver menos' : 'Ver más'}
+                </button>
+              )}
+            </>
           )}
           <div className="producto-card-footer">
             <span className="producto-card-precio">${Number(p.precio).toLocaleString('es-CO')}</span>
