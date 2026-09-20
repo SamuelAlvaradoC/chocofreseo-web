@@ -599,7 +599,24 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
 
       <div className="checkout-botones">
         <button className="checkout-btn-sec" onClick={onBack}>← Atrás</button>
-        <button className="checkout-btn-confirmar" onClick={handleConfirmar} disabled={!pagoCompleto || !aguaRespondida || procesando} style={{ opacity: procesando ? 0.7 : 1, cursor: procesando ? 'not-allowed' : 'pointer' }}>
+        <button
+          className="checkout-btn-confirmar"
+          onClick={handleConfirmar}
+          disabled={!pagoCompleto || !aguaRespondida || procesando}
+          style={{
+            // Sin esto el botón se veía igual de rojo estuviera completo o
+            // no el formulario -- no había forma de notar a simple vista
+            // que faltaba algo (ej. elegir agua de cortesía) antes de
+            // intentar enviar. Gris cuando falta algo, rojo normal cuando
+            // ya se puede enviar -- mismo criterio que ya se usa en
+            // Pedidos.jsx (admin) para su botón "Crear venta".
+            background: (!pagoCompleto || !aguaRespondida) ? '#e5e7eb' : undefined,
+            color:      (!pagoCompleto || !aguaRespondida) ? '#999'    : undefined,
+            boxShadow:  (!pagoCompleto || !aguaRespondida) ? 'none'    : undefined,
+            opacity: procesando ? 0.7 : 1,
+            cursor: (!pagoCompleto || !aguaRespondida || procesando) ? 'not-allowed' : 'pointer',
+          }}
+        >
           {procesando ? 'Enviando pedido...' : 'Confirmar pedido'}
           {!procesando && <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>}
         </button>
