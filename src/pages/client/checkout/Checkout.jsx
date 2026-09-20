@@ -702,7 +702,19 @@ export default function Checkout() {
           const formData = new FormData();
           formData.append('file', pagoInfo.comprobante);
           formData.append('upload_preset', 'chocoadmin_upload');
-          const res  = await fetch('https://api.cloudinary.com/v1_1/dnoxlv5kn/image/upload', { method: 'POST', body: formData });
+          // AbortController: sin esto, una subida que se cuelga (red lenta,
+          // Cloudinary lento) deja el fetch esperando para siempre y el
+          // pedido nunca se termina de enviar -- mejor perder el
+          // comprobante (no bloqueante, ver catch abajo) que trabar todo
+          // el checkout.
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000);
+          const res = await fetch('https://api.cloudinary.com/v1_1/dnoxlv5kn/image/upload', {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
           const json = await res.json();
           comprobanteUrl = json.secure_url || null;
         } catch (_) { /* silencioso — no bloquear pedido */ }
@@ -764,7 +776,9 @@ export default function Checkout() {
       limpiarCarrito();
       setConfirmado(true);
     } catch (err) {
-      console.error('Error al crear pedido:', err?.response?.data?.message || err.message);
+      const mensaje = err?.response?.data?.message || 'No pudimos enviar tu pedido. Verifica tu conexión e intenta de nuevo.';
+      console.error('Error al crear pedido:', mensaje);
+      toast.error(mensaje);
     } finally {
       setProcesando(false);
     }

@@ -5,7 +5,11 @@ export { SESSION_EXPIRED_EVENT } from './authEvents';
 
 const BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
 
-const http = axios.create({ baseURL: BASE });
+// timeout: sin esto, una petición que se cuelga (Render con cold start,
+// problema de red) deja al cliente esperando indefinidamente sin ningún
+// mensaje -- ej. el botón "Enviando pedido..." del checkout quedándose
+// cargando para siempre en vez de fallar con un error manejable.
+const http = axios.create({ baseURL: BASE, timeout: 20000 });
 
 http.interceptors.request.use((cfg) => {
   const token = localStorage.getItem('token');
