@@ -2,11 +2,10 @@
 import { toast } from '../../../utils/toast';
 import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
+import Paginacion from '../../../components/Paginacion';
 import './Usuarios.css';
 import * as api from '../../../services/api';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
-
-const POR_PAGINA = 10;
 
 const fmtFecha = (f) => {
   if (!f) return '—';
@@ -202,6 +201,7 @@ export default function Usuarios() {
   const [busqueda,     setBusqueda]     = useState('');
   const [filtroRol,    setFiltroRol]    = useState('todos');
   const [pagina,       setPagina]       = useState(1);
+  const [porPagina,    setPorPagina]    = useState(10);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando,     setEditando]     = useState(null);
   const [eliminando,   setEliminando]   = useState(null);
@@ -229,8 +229,13 @@ export default function Usuarios() {
     return coincideBusqueda && coincideRol;
   });
 
-  const totalPaginas = Math.ceil(filtrados.length / POR_PAGINA);
-  const paginados    = filtrados.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+  const mostrandoTodos = porPagina === 'todos';
+  const totalPaginas   = mostrandoTodos ? 1 : Math.ceil(filtrados.length / porPagina);
+  const paginados      = mostrandoTodos ? filtrados : filtrados.slice((pagina - 1) * porPagina, pagina * porPagina);
+
+  useEffect(() => {
+    setPagina((p) => Math.min(Math.max(1, p), totalPaginas || 1));
+  }, [totalPaginas]);
 
   const crear = async (f) => {
     if (procesando) return; setProcesando(true);
@@ -347,14 +352,11 @@ export default function Usuarios() {
             )}
           </tbody>
         </table>
-        {totalPaginas > 1 && (
-          <div className="paginacion">
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1}>‹</button>
-            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-              <button key={n} className={`btn-pagina${pagina === n ? ' activo' : ''}`} onClick={() => setPagina(n)}>{n}</button>
-            ))}
-            <button className="btn-pagina" onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>›</button>
-          </div>
+        {filtrados.length > 0 && (
+          <Paginacion
+            pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
+            porPagina={porPagina} onCambiarPorPagina={setPorPagina}
+          />
         )}
       </div>
 

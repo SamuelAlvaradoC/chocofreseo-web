@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip,
 } from 'recharts';
 import AdminLayout from '../../../components/layout/AdminLayout';
+import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
 import './Metricas.css';
 
@@ -61,7 +62,7 @@ export default function Metricas() {
   const [busqueda,       setBusqueda]     = useState('');
   const [filtroClientes, setFiltroClientes] = useState('todos');
   const [pagina,         setPagina]       = useState(1);
-  const [totalPaginas,   setTotalPaginas] = useState(1);
+  const [porPagina,      setPorPagina]    = useState(10);
   const [cargandoClientes, setCargandoClientes] = useState(true);
 
   useEffect(() => {
@@ -83,28 +84,38 @@ export default function Metricas() {
     api.metricasRegistros(granularidad, mes).then(setRegistros).catch(() => setRegistros([])).finally(() => setCargandoRegistros(false));
   }, [granularidad, mes]);
 
+  // Paginación en el cliente (mismo patrón que Barrios/Clientes/Usuarios/
+  // Ventas) -- se trae todo lo que coincide con busqueda+filtro en una sola
+  // llamada (pageSize grande, escala bien a unos cuantos miles como ya
+  // documentaba el backend) y se pagina/muestra "Todos" en el navegador.
   const cargarClientes = useCallback(() => {
     setCargandoClientes(true);
     api.metricasClientesFrecuencia({
       q: busqueda,
-      page: pagina,
-      pageSize: 10,
+      pageSize: 10000,
       filtro: filtroClientes === 'todos' ? undefined : filtroClientes,
     })
       .then((r) => {
         setClientes(r.data || []);
         setResumenClientes(r.resumen || null);
-        setTotalPaginas(r.total_paginas || 1);
       })
       .catch(() => { setClientes([]); setResumenClientes(null); })
       .finally(() => setCargandoClientes(false));
-  }, [busqueda, pagina, filtroClientes]);
+  }, [busqueda, filtroClientes]);
 
   useEffect(() => { cargarClientes(); }, [cargarClientes]);
 
   // Buscar o cambiar el filtro reinicia a la página 1 -- si no, se puede
   // quedar viendo una página vacía de un filtro anterior con más resultados.
   useEffect(() => { setPagina(1); }, [busqueda, filtroClientes]);
+
+  const mostrandoTodosClientes = porPagina === 'todos';
+  const totalPaginas = mostrandoTodosClientes ? 1 : Math.ceil(clientes.length / porPagina);
+  const clientesPaginados = mostrandoTodosClientes ? clientes : clientes.slice((pagina - 1) * porPagina, pagina * porPagina);
+
+  useEffect(() => {
+    setPagina((p) => Math.min(Math.max(1, p), totalPaginas || 1));
+  }, [totalPaginas]);
 
   const fmt = (n) => `$${Number(n || 0).toLocaleString('es-CO')}`;
   const diasDesdeLabel = (d) => d === null ? 'Nunca ha comprado' : d === 0 ? 'Hoy' : `hace ${d} día${d === 1 ? '' : 's'}`;
@@ -348,7 +359,7 @@ export default function Metricas() {
                 <tr><td colSpan={5}><div className="tabla-vacia">Cargando...</div></td></tr>
               ) : clientes.length === 0 ? (
                 <tr><td colSpan={5}><div className="tabla-vacia">Sin datos aún</div></td></tr>
-              ) : clientes.map((c) => (
+              ) : clientesPaginados.map((c) => (
                 <tr key={c.id_cliente}>
                   <td>{c.nombre}</td>
                   <td className="td-suave">{c.telefono || '—'}</td>
@@ -362,14 +373,11 @@ export default function Metricas() {
               ))}
             </tbody>
           </table>
-          {totalPaginas > 1 && (
-            <div className="paginacion">
-              <button className="btn-pagina" onClick={() => setPagina((p) => Math.max(1, p - 1))} disabled={pagina === 1}>‹</button>
-              {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-                <button key={n} className={`btn-pagina${pagina === n ? ' activo' : ''}`} onClick={() => setPagina(n)}>{n}</button>
-              ))}
-              <button className="btn-pagina" onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>›</button>
-            </div>
+          {clientes.length > 0 && (
+            <Paginacion
+              pagina={pagina} totalPaginas={totalPaginas} onCambiarPagina={setPagina}
+              porPagina={porPagina} onCambiarPorPagina={setPorPagina}
+            />
           )}
         </div>
       </div>
