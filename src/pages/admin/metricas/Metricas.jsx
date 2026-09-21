@@ -59,6 +59,7 @@ export default function Metricas() {
   const [clientes,      setClientes]      = useState([]);
   const [resumenClientes, setResumenClientes] = useState(null);
   const [busqueda,       setBusqueda]     = useState('');
+  const [filtroClientes, setFiltroClientes] = useState('todos');
   const [pagina,         setPagina]       = useState(1);
   const [totalPaginas,   setTotalPaginas] = useState(1);
   const [cargandoClientes, setCargandoClientes] = useState(true);
@@ -84,7 +85,12 @@ export default function Metricas() {
 
   const cargarClientes = useCallback(() => {
     setCargandoClientes(true);
-    api.metricasClientesFrecuencia({ q: busqueda, page: pagina, pageSize: 10 })
+    api.metricasClientesFrecuencia({
+      q: busqueda,
+      page: pagina,
+      pageSize: 10,
+      filtro: filtroClientes === 'todos' ? undefined : filtroClientes,
+    })
       .then((r) => {
         setClientes(r.data || []);
         setResumenClientes(r.resumen || null);
@@ -92,13 +98,13 @@ export default function Metricas() {
       })
       .catch(() => { setClientes([]); setResumenClientes(null); })
       .finally(() => setCargandoClientes(false));
-  }, [busqueda, pagina]);
+  }, [busqueda, pagina, filtroClientes]);
 
   useEffect(() => { cargarClientes(); }, [cargarClientes]);
 
-  // Buscar reinicia a la página 1 -- si no, se puede quedar viendo una
-  // página vacía de un filtro anterior con más resultados.
-  useEffect(() => { setPagina(1); }, [busqueda]);
+  // Buscar o cambiar el filtro reinicia a la página 1 -- si no, se puede
+  // quedar viendo una página vacía de un filtro anterior con más resultados.
+  useEffect(() => { setPagina(1); }, [busqueda, filtroClientes]);
 
   const fmt = (n) => `$${Number(n || 0).toLocaleString('es-CO')}`;
   const diasDesdeLabel = (d) => d === null ? 'Nunca ha comprado' : d === 0 ? 'Hoy' : `hace ${d} día${d === 1 ? '' : 's'}`;
@@ -268,10 +274,29 @@ export default function Metricas() {
           </div>
         )}
 
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', padding: '14px 20px 0' }}>
+          {[
+            { v: 'todos',      l: 'Todos' },
+            { v: 'frecuentes', l: 'Frecuentes' },
+            { v: 'activos',    l: 'Activos' },
+          ].map((op) => (
+            <button
+              key={op.v}
+              onClick={() => setFiltroClientes(op.v)}
+              style={{
+                padding: '5px 12px', borderRadius: 20, border: filtroClientes === op.v ? 'none' : '1px solid #e0e0e0',
+                background: filtroClientes === op.v ? '#CA0B0B' : '#f5f5f5',
+                color: filtroClientes === op.v ? '#fff' : '#555',
+                fontWeight: filtroClientes === op.v ? 700 : 400, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >{op.l}</button>
+          ))}
+        </div>
+
         <div className="buscador" style={{ margin: '14px 20px 0' }}>
           <Search size={14} color="#aaa" />
           <input
-            placeholder="Buscar cliente por nombre o email..."
+            placeholder="Buscar cliente por nombre o celular..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
           />
@@ -282,7 +307,7 @@ export default function Metricas() {
             <thead>
               <tr>
                 <th>Cliente</th>
-                <th>Email</th>
+                <th>Celular</th>
                 <th>Compras entregadas</th>
                 <th>Última compra</th>
                 <th>Segmento</th>
@@ -296,7 +321,7 @@ export default function Metricas() {
               ) : clientes.map((c) => (
                 <tr key={c.id_cliente}>
                   <td>{c.nombre}</td>
-                  <td className="td-suave">{c.email}</td>
+                  <td className="td-suave">{c.telefono || '—'}</td>
                   <td>{c.total_compras}</td>
                   <td>
                     {c.ultima_compra ? new Date(c.ultima_compra).toLocaleDateString('es-CO') : '—'}

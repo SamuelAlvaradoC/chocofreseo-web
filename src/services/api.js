@@ -72,8 +72,8 @@ export const dashRecaudoPedidos     = ()       => get('/dashboard/recaudo-pedido
 export const metricasResumen            = (mes) => get('/metricas/resumen', mes ? { mes } : undefined);
 export const metricasMesesDisponibles   = ()    => get('/metricas/meses-disponibles');
 export const metricasRegistros          = (granularidad, mes) => get('/metricas/registros', { granularidad, ...(mes ? { mes } : {}) });
-export const metricasClientesFrecuencia = ({ q, page, pageSize } = {}) =>
-  get('/metricas/clientes-frecuencia', { q, page, pageSize });
+export const metricasClientesFrecuencia = ({ q, page, pageSize, filtro } = {}) =>
+  get('/metricas/clientes-frecuencia', { q, page, pageSize, filtro });
 export const pedidosRecientes       = (n, fecha) => get('/dashboard/pedidos-recientes', { ...(n ? { limite: n } : {}), ...(fecha ? { fecha } : {}) });
 export const getDomiciliariosDia    = (fecha) => get('/dashboard/domiciliarios-dia', fecha ? { fecha } : undefined);
 
