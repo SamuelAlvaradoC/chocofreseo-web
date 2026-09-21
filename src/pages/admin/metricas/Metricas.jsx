@@ -258,18 +258,35 @@ export default function Metricas() {
 
         {resumenClientes && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', padding: '14px 20px 0', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, background: SEGMENTO_INFO.en_riesgo.bg }}>
+            {/* Los 4 badges son a la vez informativos y el filtro -- se
+                evita tener dos filas de controles que dicen lo mismo.
+                "en_riesgo"/"nuevo" filtran por `segmento` (clasificación
+                histórica que ya existía); "frecuentes"/"activos" por la
+                ventana de 7/30 días -- en ambos casos el número mostrado
+                YA es el mismo que se usa para filtrar. */}
+            <button
+              type="button"
+              onClick={() => setFiltroClientes((f) => f === 'en_riesgo' ? 'todos' : 'en_riesgo')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10,
+                border: filtroClientes === 'en_riesgo' ? `2px solid ${SEGMENTO_INFO.en_riesgo.color}` : '2px solid transparent',
+                background: SEGMENTO_INFO.en_riesgo.bg, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
               <AlertTriangle size={14} color={SEGMENTO_INFO.en_riesgo.color} />
               <span style={{ fontSize: 12, fontWeight: 700, color: SEGMENTO_INFO.en_riesgo.color }}>{resumenClientes.en_riesgo} en riesgo de fuga</span>
-            </div>
-            <div style={{ padding: '6px 14px', borderRadius: 10, background: SEGMENTO_INFO.nuevo.bg }}>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFiltroClientes((f) => f === 'nuevo' ? 'todos' : 'nuevo')}
+              style={{
+                padding: '6px 14px', borderRadius: 10,
+                border: filtroClientes === 'nuevo' ? `2px solid ${SEGMENTO_INFO.nuevo.color}` : '2px solid transparent',
+                background: SEGMENTO_INFO.nuevo.bg, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
               <span style={{ fontSize: 12, fontWeight: 700, color: SEGMENTO_INFO.nuevo.color }}>{resumenClientes.nuevo} nuevos</span>
-            </div>
-            {/* "frecuentes"/"activos" son a la vez informativos y el botón
-                de filtro -- se evita tener dos filas de controles que dicen
-                lo mismo con distintos números. El número que muestran YA es
-                el de la ventana de 7/30 días (ver resumenSegmentos en el
-                backend), así que coincide exactamente con lo que filtran. */}
+            </button>
             <button
               type="button"
               onClick={() => setFiltroClientes((f) => f === 'frecuentes' ? 'todos' : 'frecuentes')}
