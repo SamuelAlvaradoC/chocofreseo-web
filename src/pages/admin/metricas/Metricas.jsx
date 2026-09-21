@@ -257,7 +257,7 @@ export default function Metricas() {
         </div>
 
         {resumenClientes && (
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', padding: '14px 20px 0' }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', padding: '14px 20px 0', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10, background: SEGMENTO_INFO.en_riesgo.bg }}>
               <AlertTriangle size={14} color={SEGMENTO_INFO.en_riesgo.color} />
               <span style={{ fontSize: 12, fontWeight: 700, color: SEGMENTO_INFO.en_riesgo.color }}>{resumenClientes.en_riesgo} en riesgo de fuga</span>
@@ -265,33 +265,46 @@ export default function Metricas() {
             <div style={{ padding: '6px 14px', borderRadius: 10, background: SEGMENTO_INFO.nuevo.bg }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: SEGMENTO_INFO.nuevo.color }}>{resumenClientes.nuevo} nuevos</span>
             </div>
-            <div style={{ padding: '6px 14px', borderRadius: 10, background: SEGMENTO_INFO.frecuente.bg }}>
+            {/* "frecuentes"/"activos" son a la vez informativos y el botón
+                de filtro -- se evita tener dos filas de controles que dicen
+                lo mismo con distintos números. El número que muestran YA es
+                el de la ventana de 7/30 días (ver resumenSegmentos en el
+                backend), así que coincide exactamente con lo que filtran. */}
+            <button
+              type="button"
+              onClick={() => setFiltroClientes((f) => f === 'frecuentes' ? 'todos' : 'frecuentes')}
+              style={{
+                padding: '6px 14px', borderRadius: 10, border: filtroClientes === 'frecuentes' ? `2px solid ${SEGMENTO_INFO.frecuente.color}` : '2px solid transparent',
+                background: SEGMENTO_INFO.frecuente.bg, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
               <span style={{ fontSize: 12, fontWeight: 700, color: SEGMENTO_INFO.frecuente.color }}>{resumenClientes.frecuente} frecuentes</span>
-            </div>
-            <div style={{ padding: '6px 14px', borderRadius: 10, background: SEGMENTO_INFO.activo.bg }}>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFiltroClientes((f) => f === 'activos' ? 'todos' : 'activos')}
+              style={{
+                padding: '6px 14px', borderRadius: 10, border: filtroClientes === 'activos' ? `2px solid ${SEGMENTO_INFO.activo.color}` : '2px solid transparent',
+                background: SEGMENTO_INFO.activo.bg, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
               <span style={{ fontSize: 12, fontWeight: 700, color: SEGMENTO_INFO.activo.color }}>{resumenClientes.activo} activos</span>
-            </div>
+            </button>
+            {filtroClientes !== 'todos' && (
+              <button
+                type="button"
+                onClick={() => setFiltroClientes('todos')}
+                style={{
+                  padding: '6px 14px', borderRadius: 10, border: '1px solid #e0e0e0',
+                  background: '#fff', color: '#555', fontSize: 12, fontWeight: 700,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                Todos ✕
+              </button>
+            )}
           </div>
         )}
-
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', padding: '14px 20px 0' }}>
-          {[
-            { v: 'todos',      l: 'Todos' },
-            { v: 'frecuentes', l: 'Frecuentes' },
-            { v: 'activos',    l: 'Activos' },
-          ].map((op) => (
-            <button
-              key={op.v}
-              onClick={() => setFiltroClientes(op.v)}
-              style={{
-                padding: '5px 12px', borderRadius: 20, border: filtroClientes === op.v ? 'none' : '1px solid #e0e0e0',
-                background: filtroClientes === op.v ? '#CA0B0B' : '#f5f5f5',
-                color: filtroClientes === op.v ? '#fff' : '#555',
-                fontWeight: filtroClientes === op.v ? 700 : 400, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
-              }}
-            >{op.l}</button>
-          ))}
-        </div>
 
         <div className="buscador" style={{ margin: '14px 20px 0' }}>
           <Search size={14} color="#aaa" />
