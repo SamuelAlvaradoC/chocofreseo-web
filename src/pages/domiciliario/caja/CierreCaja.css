@@ -162,6 +162,7 @@
 }
 .cc-pago-badge.efectivo      { background: #f0fdf4; color: #16a34a; }
 .cc-pago-badge.transferencia { background: #eff6ff; color: #3b82f6; }
+.cc-pago-badge.datafono      { background: #fff7ed; color: #c2410c; }
 
 .cc-estado-badge {
   font-size: 11px; font-weight: 700;

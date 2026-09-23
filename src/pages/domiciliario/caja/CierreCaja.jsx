@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react';
-import { Banknote, Smartphone, Zap, Bike, Check } from 'lucide-react';
+import { Banknote, Smartphone, Zap, Bike, Check, CreditCard } from 'lucide-react';
 import DomiciliarioLayout from '../../../components/layout/DomiciliarioLayout/DomiciliarioLayout';
 import * as api from '../../../services/api';
 import './CierreCaja.css';
@@ -8,6 +8,7 @@ const coloresTarjeta = [
   { border: '#22c55e', bg: '#f0fdf4', Icon: Banknote,    label: 'bg-verde'   },
   { border: '#3b82f6', bg: '#eff6ff', Icon: Banknote,    label: 'bg-azul'    },
   { border: '#f97316', bg: '#fff7ed', Icon: Smartphone,  label: 'bg-naranja' },
+  { border: '#c2410c', bg: '#fff7ed', Icon: CreditCard,  label: 'bg-datafono' },
   { border: '#6b7280', bg: '#f9fafb', Icon: Bike,        label: 'bg-gris'    },
   { border: '#CA0B0B', bg: '#fff5f5', Icon: Check,       label: 'bg-rojo'    },
 ];
@@ -64,6 +65,10 @@ export default function CierreCaja() {
     if (v.forma_pago === 'mixto')         return a + v.monto_transferencia;
     return a;
   }, 0);
+  // Datáfono no reparte en mixto (no existe esa combinación) -- monto bruto,
+  // igual que el resto del proyecto: el domicilio de una venta con datáfono
+  // se paga en efectivo, no se resta de este bucket.
+  const totalDatafono   = ventasMock.reduce((a, v) => (v.forma_pago === 'datafono' ? a + v.valor : a), 0);
   const totalDomicilios = ventasMock.reduce((a, v) => a + v.costo_domicilio, 0);
   const totalAEntregar  = totalEfectivo - totalDomicilios;
 
@@ -71,8 +76,9 @@ export default function CierreCaja() {
     { titulo: 'Total día',                  valor: totalDia,        ...coloresTarjeta[0] },
     { titulo: 'Total ventas en efectivo',   valor: totalEfectivo,   ...coloresTarjeta[1] },
     { titulo: 'Total ventas transferencia', valor: totalTransf,     ...coloresTarjeta[2] },
-    { titulo: 'Total en domicilios',     valor: totalDomicilios, ...coloresTarjeta[3] },
-    { titulo: 'Total efectivo a entregar',  valor: totalAEntregar,  ...coloresTarjeta[4] },
+    { titulo: 'Total ventas datáfono',      valor: totalDatafono,   ...coloresTarjeta[3] },
+    { titulo: 'Total en domicilios',     valor: totalDomicilios, ...coloresTarjeta[4] },
+    { titulo: 'Total efectivo a entregar',  valor: totalAEntregar,  ...coloresTarjeta[5] },
   ];
 
   return (
@@ -146,7 +152,7 @@ export default function CierreCaja() {
                       <td className="cc-td-bold">{v.cliente}</td>
                       <td>
                         <span className={`cc-pago-badge ${v.forma_pago}`}>
-                          {v.forma_pago === 'efectivo' ? <><Banknote size={11} style={{marginRight:3}}/>Efectivo</> : v.forma_pago === 'transferencia' ? <><Smartphone size={11} style={{marginRight:3}}/>Transf.</> : <><Zap size={11} style={{marginRight:3}}/>Mixto</>}
+                          {v.forma_pago === 'efectivo' ? <><Banknote size={11} style={{marginRight:3}}/>Efectivo</> : v.forma_pago === 'transferencia' ? <><Smartphone size={11} style={{marginRight:3}}/>Transf.</> : v.forma_pago === 'datafono' ? <><CreditCard size={11} style={{marginRight:3}}/>Datáfono</> : <><Zap size={11} style={{marginRight:3}}/>Mixto</>}
                         </span>
                       </td>
                       <td className="cc-td-suave">${v.costo_domicilio.toLocaleString('es-CO')}</td>
