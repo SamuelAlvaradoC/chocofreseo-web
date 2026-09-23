@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { DollarSign, ShoppingCart, Truck, Clock, TrendingUp, Star, Power, CalendarClock, Wallet, Plus, Trash2, Printer } from 'lucide-react';
+import { DollarSign, ShoppingCart, Truck, CreditCard, Clock, TrendingUp, Star, Power, CalendarClock, Wallet, Plus, Trash2, Printer } from 'lucide-react';
 import { toast } from '../../../utils/toast';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
@@ -354,9 +354,9 @@ export default function Dashboard() {
 
       {/* Stats — 4 tarjetas: 3 métricas + tiempo estimado editable */}
       <div className="stats-grid">
-        <TarjetaStat icono={<DollarSign size={20} />} color="#059669" titulo="Ingresos hoy"       valor={`$${Number(stats.ingresos_hoy || 0).toLocaleString('es-CO')}`} sub="Efectivo neto + transferencia" />
+        <TarjetaStat icono={<DollarSign size={20} />} color="#059669" titulo="Ingresos hoy"       valor={`$${Number(stats.ingresos_hoy || 0).toLocaleString('es-CO')}`} sub="Efectivo neto + transferencia + datáfono" />
         <TarjetaStat icono={<ShoppingCart size={20} />} color="#2563eb" titulo="Ventas hoy"       valor={stats.ventas_hoy ?? 0}                                  sub="Pedidos del día" />
-        <TarjetaStat icono={<Truck size={20} />} color="#7c3aed" titulo="Domicilios activos"      valor={stats.domicilios_activos ?? 0}                          sub="En camino" />
+        <TarjetaStat icono={<CreditCard size={20} />} color="#7c3aed" titulo="Pagos con datáfono"  valor={`$${Number(stats.total_datafono || 0).toLocaleString('es-CO')}`} sub={`${stats.count_datafono ?? 0} pagos del día`} />
         {/* Card tiempo estimado editable */}
         <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => !editandoTiempo && setEditandoTiempo(true)}>
           <div className="stat-icono" style={{ background: '#37415118', color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
