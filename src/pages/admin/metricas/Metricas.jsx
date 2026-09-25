@@ -120,8 +120,8 @@ export default function Metricas() {
   const fmt = (n) => `$${Number(n || 0).toLocaleString('es-CO')}`;
   const diasDesdeLabel = (d) => d === null ? 'Nunca ha comprado' : d === 0 ? 'Hoy' : `hace ${d} día${d === 1 ? '' : 's'}`;
 
-  const totalNuevosRecurrentes = (resumen?.clientes_nuevos_mes || 0) + (resumen?.clientes_recurrentes_mes || 0);
-  const pctNuevos = totalNuevosRecurrentes > 0 ? Math.round((resumen.clientes_nuevos_mes / totalNuevosRecurrentes) * 100) : 0;
+  const totalNuevosActivos = (resumen?.clientes_nuevos_mes || 0) + (resumen?.clientes_activos_mes || 0);
+  const pctNuevos = totalNuevosActivos > 0 ? Math.round((resumen.clientes_nuevos_mes / totalNuevosActivos) * 100) : 0;
 
   return (
     <AdminLayout>
@@ -188,10 +188,10 @@ export default function Metricas() {
 
             <div className="dash-card">
               <div className="dash-card-header" style={{ marginBottom: 10 }}>
-                <span className="dash-card-titulo">Nuevos vs. recurrentes — {resumen?.mes_label}</span>
-                <span className="dash-card-sub">Primera compra este mes o no</span>
+                <span className="dash-card-titulo">Nuevos vs. activos — {resumen?.mes_label}</span>
+                <span className="dash-card-sub">Una compra vs. clientes que ya repitieron</span>
               </div>
-              {totalNuevosRecurrentes === 0 ? (
+              {totalNuevosActivos === 0 ? (
                 <div className="tabla-vacia">Sin compras entregadas este mes</div>
               ) : (
                 <>
@@ -206,7 +206,7 @@ export default function Metricas() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Repeat size={14} color="#059669" />
-                      <span style={{ fontSize: 12, color: '#555' }}><strong style={{ color: '#1a1a1a' }}>{resumen.clientes_recurrentes_mes}</strong> recurrentes ({100 - pctNuevos}%)</span>
+                      <span style={{ fontSize: 12, color: '#555' }}><strong style={{ color: '#1a1a1a' }}>{resumen.clientes_activos_mes}</strong> activos ({100 - pctNuevos}%)</span>
                     </div>
                   </div>
                 </>
