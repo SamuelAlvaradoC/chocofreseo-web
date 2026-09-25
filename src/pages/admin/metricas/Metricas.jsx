@@ -7,6 +7,7 @@ import {
 import AdminLayout from '../../../components/layout/AdminLayout';
 import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
+import { toast } from '../../../utils/toast';
 import './Metricas.css';
 
 const METODO_LABEL = { efectivo: 'Efectivo', transferencia: 'Transferencia', datafono: 'Datafono' };
@@ -17,6 +18,16 @@ const SEGMENTO_INFO = {
   frecuente: { label: 'Frecuente',  color: '#059669', bg: '#ecfdf5' },
   en_riesgo: { label: 'En riesgo',  color: '#dc2626', bg: '#fef2f2' },
   activo:    { label: 'Activo',     color: '#6b7280', bg: '#f5f5f5' },
+};
+
+// Definición real de cada segmento (metricas/service.js clientesFrecuencia) --
+// se usan tanto en el title (tooltip de mouse) como en el toast que se
+// muestra al tocar el chip en pantallas táctiles, donde title no se ve.
+const SEGMENTO_DEFINICION = {
+  en_riesgo:  'En riesgo de fuga: sin comprar hace más de 30 días',
+  nuevo:      'Nuevos: 1 sola compra en todo su historial, hecha en los últimos 30 días',
+  frecuentes: 'Frecuentes: 3 o más compras en los últimos 7 días',
+  activos:    'Activos: 2 o más compras en su historial, la última hace 30 días o menos',
 };
 
 function TarjetaStat({ icono, titulo, valor, color }) {
@@ -264,21 +275,22 @@ export default function Metricas() {
       <div className="dash-card dash-card--full" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="dash-card-header" style={{ padding: '20px 20px 0' }}>
           <span className="dash-card-titulo">Clientes por frecuencia de compra</span>
-          <span className="dash-card-sub">En riesgo y Nuevos: todo el historial. Frecuentes y Activos: últimos 7/30 días — ordenado por última compra</span>
+          <span className="dash-card-sub">Según su historial y su última compra — ordenado por última compra</span>
         </div>
 
         {resumenClientes && (
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', padding: '14px 20px 0', alignItems: 'center' }}>
             {/* Los 4 badges son a la vez informativos y el filtro -- se
                 evita tener dos filas de controles que dicen lo mismo.
-                "en_riesgo"/"nuevo" filtran por `segmento` (clasificación
-                histórica que ya existía); "frecuentes"/"activos" por la
-                ventana de 7/30 días -- en ambos casos el número mostrado
-                YA es el mismo que se usa para filtrar. */}
+                "en_riesgo"/"nuevo" filtran por `segmento`; "frecuentes"/
+                "activos" por `cumple_filtro` -- en ambos casos el número
+                mostrado YA es el mismo que se usa para filtrar. El title
+                (tooltip) no se ve en touch, así que el onClick también
+                muestra un toast con la misma definición. */}
             <button
               type="button"
-              title="Sin comprar hace más de 30 días"
-              onClick={() => setFiltroClientes((f) => f === 'en_riesgo' ? 'todos' : 'en_riesgo')}
+              title={SEGMENTO_DEFINICION.en_riesgo}
+              onClick={() => { toast.info(SEGMENTO_DEFINICION.en_riesgo); setFiltroClientes((f) => f === 'en_riesgo' ? 'todos' : 'en_riesgo'); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10,
                 border: filtroClientes === 'en_riesgo' ? `2px solid ${SEGMENTO_INFO.en_riesgo.color}` : '2px solid transparent',
@@ -290,8 +302,8 @@ export default function Metricas() {
             </button>
             <button
               type="button"
-              title="1 sola compra en todo su historial, hecha en los últimos 30 días"
-              onClick={() => setFiltroClientes((f) => f === 'nuevo' ? 'todos' : 'nuevo')}
+              title={SEGMENTO_DEFINICION.nuevo}
+              onClick={() => { toast.info(SEGMENTO_DEFINICION.nuevo); setFiltroClientes((f) => f === 'nuevo' ? 'todos' : 'nuevo'); }}
               style={{
                 padding: '6px 14px', borderRadius: 10,
                 border: filtroClientes === 'nuevo' ? `2px solid ${SEGMENTO_INFO.nuevo.color}` : '2px solid transparent',
@@ -302,8 +314,8 @@ export default function Metricas() {
             </button>
             <button
               type="button"
-              title="3 o más compras en los últimos 7 días"
-              onClick={() => setFiltroClientes((f) => f === 'frecuentes' ? 'todos' : 'frecuentes')}
+              title={SEGMENTO_DEFINICION.frecuentes}
+              onClick={() => { toast.info(SEGMENTO_DEFINICION.frecuentes); setFiltroClientes((f) => f === 'frecuentes' ? 'todos' : 'frecuentes'); }}
               style={{
                 padding: '6px 14px', borderRadius: 10, border: filtroClientes === 'frecuentes' ? `2px solid ${SEGMENTO_INFO.frecuente.color}` : '2px solid transparent',
                 background: SEGMENTO_INFO.frecuente.bg, cursor: 'pointer', fontFamily: 'inherit',
@@ -313,8 +325,8 @@ export default function Metricas() {
             </button>
             <button
               type="button"
-              title="2 o más compras en los últimos 30 días"
-              onClick={() => setFiltroClientes((f) => f === 'activos' ? 'todos' : 'activos')}
+              title={SEGMENTO_DEFINICION.activos}
+              onClick={() => { toast.info(SEGMENTO_DEFINICION.activos); setFiltroClientes((f) => f === 'activos' ? 'todos' : 'activos'); }}
               style={{
                 padding: '6px 14px', borderRadius: 10, border: filtroClientes === 'activos' ? `2px solid ${SEGMENTO_INFO.activo.color}` : '2px solid transparent',
                 background: SEGMENTO_INFO.activo.bg, cursor: 'pointer', fontFamily: 'inherit',
