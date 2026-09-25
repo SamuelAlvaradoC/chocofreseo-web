@@ -189,7 +189,7 @@ export default function Metricas() {
             <div className="dash-card">
               <div className="dash-card-header" style={{ marginBottom: 10 }}>
                 <span className="dash-card-titulo">Nuevos vs. activos — {resumen?.mes_label}</span>
-                <span className="dash-card-sub">Una compra vs. clientes que ya repitieron</span>
+                <span className="dash-card-sub">Activos = 2 o más compras (incluye frecuentes)</span>
               </div>
               {totalNuevosActivos === 0 ? (
                 <div className="tabla-vacia">Sin compras entregadas este mes</div>
@@ -264,7 +264,7 @@ export default function Metricas() {
       <div className="dash-card dash-card--full" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="dash-card-header" style={{ padding: '20px 20px 0' }}>
           <span className="dash-card-titulo">Clientes por frecuencia de compra</span>
-          <span className="dash-card-sub">Ordenado por última compra — los más antiguos primero</span>
+          <span className="dash-card-sub">En riesgo y Nuevos: todo el historial. Frecuentes y Activos: últimos 7/30 días — ordenado por última compra</span>
         </div>
 
         {resumenClientes && (
@@ -277,6 +277,7 @@ export default function Metricas() {
                 YA es el mismo que se usa para filtrar. */}
             <button
               type="button"
+              title="Sin comprar hace más de 30 días"
               onClick={() => setFiltroClientes((f) => f === 'en_riesgo' ? 'todos' : 'en_riesgo')}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 10,
@@ -289,6 +290,7 @@ export default function Metricas() {
             </button>
             <button
               type="button"
+              title="1 sola compra en todo su historial, hecha en los últimos 30 días"
               onClick={() => setFiltroClientes((f) => f === 'nuevo' ? 'todos' : 'nuevo')}
               style={{
                 padding: '6px 14px', borderRadius: 10,
@@ -300,6 +302,7 @@ export default function Metricas() {
             </button>
             <button
               type="button"
+              title="3 o más compras en los últimos 7 días"
               onClick={() => setFiltroClientes((f) => f === 'frecuentes' ? 'todos' : 'frecuentes')}
               style={{
                 padding: '6px 14px', borderRadius: 10, border: filtroClientes === 'frecuentes' ? `2px solid ${SEGMENTO_INFO.frecuente.color}` : '2px solid transparent',
@@ -310,6 +313,7 @@ export default function Metricas() {
             </button>
             <button
               type="button"
+              title="2 o más compras en los últimos 30 días"
               onClick={() => setFiltroClientes((f) => f === 'activos' ? 'todos' : 'activos')}
               style={{
                 padding: '6px 14px', borderRadius: 10, border: filtroClientes === 'activos' ? `2px solid ${SEGMENTO_INFO.activo.color}` : '2px solid transparent',
