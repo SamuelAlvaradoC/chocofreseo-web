@@ -5,4 +5,4 @@ Allow: /nosotros
 Disallow: /admin
 Disallow: /domiciliario
 Disallow: /cocina
-Sitemap: https://chocofreseo.com/sitemap.xml
+Sitemap: https://www.chocofreseo.com/sitemap.xml
