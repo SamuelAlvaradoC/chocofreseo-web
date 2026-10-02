@@ -19,24 +19,30 @@
     <meta name="keywords" content="ChocoFreseo, chocolates Medellín, fresas con crema Medellín, ChocoNachos, ChocoBowls, KrispiCream, CherryCream, ChocoSpaguetis, Crema Antigravedad, postres Medellín, domicilios dulces Medellín, La Milagrosa Medellín, Aranjuez Medellín, emprendimiento Medellín" />
     <meta name="author" content="ChocoFreseo" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://chocofreseo.com" />
+    <link rel="canonical" href="https://www.chocofreseo.com/" />
 
-    <!-- Open Graph (Facebook, WhatsApp, Instagram) -->
-    <meta property="og:type" content="restaurant" />
-    <meta property="og:title" content="ChocoFreseo | Chocolates y Postres en Medellín" />
-    <meta property="og:description" content="Los mejores chocolates, fresas con crema y postres artesanales en Medellín. Pide a domicilio ahora 🍓🍫" />
-    <meta property="og:url" content="https://chocofreseo.com" />
+    <!-- Open Graph (Facebook, WhatsApp, Instagram). Los crawlers NO ejecutan
+         JS: estas etiquetas deben vivir aquí, en el HTML estático. Usar URLs
+         absolutas en www: el dominio sin www responde 308 hacia www. -->
+    <meta property="og:type" content="website" />
     <meta property="og:site_name" content="ChocoFreseo" />
     <meta property="og:locale" content="es_CO" />
-    <meta property="og:image" content="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778551977/Captura_de_pantalla_2026-05-11_210420_xc3wav.png" />
+    <meta property="og:title" content="ChocoFreseo | Chocolates, fresas y postres en Medellín" />
+    <meta property="og:description" content="Fresas con chocolate, ChocoBowls, ChocoNachos y más postres artesanales a domicilio en Medellín. ChocoFreseo es Puro Freseo 🍓🍫" />
+    <meta property="og:url" content="https://www.chocofreseo.com/" />
+    <meta property="og:image" content="https://www.chocofreseo.com/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://www.chocofreseo.com/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Logo de ChocoFreseo con el eslogan ChocoFreseo es Puro Freseo" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ChocoFreseo | Chocolates y Postres en Medellín" />
-    <meta name="twitter:description" content="Los mejores chocolates, fresas con crema y postres artesanales en Medellín 🍓🍫" />
-    <meta name="twitter:image" content="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778551977/Captura_de_pantalla_2026-05-11_210420_xc3wav.png" />
+    <meta name="twitter:title" content="ChocoFreseo | Chocolates, fresas y postres en Medellín" />
+    <meta name="twitter:description" content="Fresas con chocolate, ChocoBowls, ChocoNachos y más postres artesanales a domicilio en Medellín 🍓🍫" />
+    <meta name="twitter:image" content="https://www.chocofreseo.com/og-image.jpg" />
+    <meta name="twitter:image:alt" content="Logo de ChocoFreseo con el eslogan ChocoFreseo es Puro Freseo" />
 
     <!-- Schema.org - Local Business -->
     <script type="application/ld+json">
@@ -45,7 +51,7 @@
       "@type": "FoodEstablishment",
       "name": "ChocoFreseo",
       "description": "Postres con estética juvenil y sabores únicos. ChocoNachos, ChocoBowls, ChocoSpaguetis, Fresas con chocolate y más experiencias dulces en Medellín.",
-      "url": "https://chocofreseo.com",
+      "url": "https://www.chocofreseo.com/",
       "telephone": "+57-315-991-46-24",
       "email": "chocofreseo@gmail.com",
       "foundingDate": "2024-03",
@@ -79,7 +85,7 @@
       },
       "servesCuisine": ["Chocolates", "Postres", "Fresas con chocolate", "ChocoNachos", "ChocoBowls"],
       "priceRange": "$$",
-      "image": "https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778551977/Captura_de_pantalla_2026-05-11_210420_xc3wav.png",
+      "image": "https://www.chocofreseo.com/og-image.jpg",
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Menú ChocoFreseo",
@@ -104,8 +110,9 @@
     </script>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dnoxlv5kn/image/upload/w_32,h_32,c_pad,b_transparent/v1778822634/logo_sin_fondo_remove_uuu8tt.png" />
-    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnoxlv5kn/image/upload/w_192,h_192,c_pad,b_transparent/v1778822634/logo_sin_fondo_remove_uuu8tt.png" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
   </head>
   <body>
