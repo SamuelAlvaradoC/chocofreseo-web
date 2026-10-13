@@ -13,8 +13,8 @@ const nombreSalsa   = (s) => { const n = typeof s === 'object' ? s.nombre : s; i
 
 const mapPedido = (v) => ({
   id_venta:           v.id_venta,
-  hora:               v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : '—',
-  fecha_completa:     v.fecha ? new Date(v.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : '—',
+  hora:               v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' }) : '—',
+  fecha_completa:     v.fecha ? new Date(v.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', timeZone: 'America/Bogota' }) : '—',
   cliente:            v.cliente?.usuario?.nombre || '—',
   telefono:           v.cliente?.telefono || null,
   observaciones:      v.observaciones || null,

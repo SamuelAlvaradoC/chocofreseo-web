@@ -29,9 +29,9 @@ export default function Hero() {
       <div className="hero-contenido">
         {!estadoTienda.cargando && (
           estadoTienda.abierto
-            ? <span style={{ background: '#dcfce7', color: '#166534', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, display: 'inline-block', marginBottom: 8 }}>🟢 Abierto ahora</span>
+            ? <span style={{ background: '#dcfce7', color: '#166534', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, display: 'inline-block', marginBottom: 8 }}>🟢 Domicilios abiertos</span>
             : <span style={{ background: '#fee2e2', color: '#991b1b', padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700, display: 'inline-block', marginBottom: 8 }}>
-                🔴 Cerrado · {estadoTienda.estado === 'closed' ? 'Temporalmente' : `Abrimos ${formatHora12(estadoTienda.hora_apertura)}`}
+                🔴 Domicilios cerrados · {estadoTienda.estado === 'closed' ? 'Temporalmente' : `Abrimos ${formatHora12(estadoTienda.hora_apertura)}`}
               </span>
         )}
         <h1 className="hero-titulo">

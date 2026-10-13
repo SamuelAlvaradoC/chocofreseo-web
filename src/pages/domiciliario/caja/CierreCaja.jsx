@@ -39,7 +39,7 @@ export default function CierreCaja() {
         return {
           id_venta:           v.id_venta,
           cliente:            v.cliente?.usuario?.nombre || '—',
-          hora:               v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : '—',
+          hora:               v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' }) : '—',
           valor:              Number(v.total || 0),
           costo_domicilio:    Number(v.costo_domicilio || 0),
           forma_pago:         formaPago,

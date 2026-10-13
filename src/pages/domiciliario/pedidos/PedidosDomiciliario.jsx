@@ -18,7 +18,7 @@ const mapVentaPedido = (v, facturado = false) => {
     'efectivo';
   return {
     id_venta:        v.id_venta,
-    hora:            v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : '—',
+    hora:            v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' }) : '—',
     cliente:         v.nombre_cliente   || v.cliente?.usuario?.nombre || '—',
     telefono:        v.telefono_cliente || v.cliente?.telefono        || '—',
     direccion:       v.direccion_linea || '—',

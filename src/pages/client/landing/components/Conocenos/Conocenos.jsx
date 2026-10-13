@@ -49,7 +49,11 @@ export default function Conocenos() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: '#555' }}>
             <Clock size={16} color="#CA0B0B" />
-            <span><strong>Horario:</strong> Todos los días · 1:00 PM – 8:00 PM</span>
+            <span><strong>Horario de atención:</strong> Todos los días · 3:00 PM – 9:00 PM</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: '#555', marginTop: 6 }}>
+            <Clock size={16} color="#CA0B0B" />
+            <span><strong>Domicilios:</strong> Todos los días · 1:00 PM – 8:00 PM</span>
           </div>
         </div>
       </div>
