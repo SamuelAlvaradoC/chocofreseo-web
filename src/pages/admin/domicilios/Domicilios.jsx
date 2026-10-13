@@ -8,6 +8,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Domicilios.css';
+import { pagoDeVenta, fmtCop } from '../../../utils/pago';
 
 const COLOR_SALSAS = '#ea580c';
 const parsearSalsas = (raw) => { if (!raw) return []; try { const p = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(p) ? p : []; } catch { return []; } };
@@ -26,9 +27,10 @@ const mapVentaDomi = (v) => ({
   costo_domicilio: Number(v.costo_domicilio ?? 3000),
   descuento_puntos: Number(v.descuento_puntos || 0),
   puntos_usados:   Number(v.puntos_usados || 0),
-  metodo_pago:  v.metodo_pago || (v.pagos?.[0]?.detallePagos?.length > 1 ? 'mixto' : v.pagos?.[0]?.detallePagos?.[0]?.metodoPago?.nombre) || 'efectivo',
-  monto_efectivo:      Number(v.monto_efectivo      || v.pagos?.[0]?.detallePagos?.find((d) => d.metodoPago?.nombre === 'efectivo')?.monto      || 0),
-  monto_transferencia: Number(v.monto_transferencia || v.pagos?.[0]?.detallePagos?.find((d) => d.metodoPago?.nombre === 'transferencia')?.monto || 0),
+  // Método y montos desde la venta (utils/pago.js), no desde detallePagos.
+  metodo_pago:  pagoDeVenta(v).metodo || 'efectivo',
+  monto_efectivo:      pagoDeVenta(v).efectivo,
+  monto_transferencia: pagoDeVenta(v).transferencia,
   comprobante:  v.comprobante_url || v.pagos?.[0]?.detallePagos?.find((d) => d.comprobante)?.comprobante || null,
   fecha:        v.fecha ? new Date(v.fecha).toLocaleString('es-CO') : '—',
   observaciones: v.observaciones || '',
@@ -242,8 +244,8 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
               </div>
               {pedido.metodo_pago === 'mixto' && (
                 <div style={{ fontSize: 13, marginTop: 4 }}>
-                  <div>Efectivo: <strong>${Number(pedido.monto_efectivo || 0).toLocaleString('es-CO')}</strong></div>
-                  <div>Transferencia: <strong>${Number(pedido.monto_transferencia || 0).toLocaleString('es-CO')}</strong></div>
+                  <div>Efectivo: <strong>{fmtCop(pedido.monto_efectivo)}</strong></div>
+                  <div>Transferencia: <strong>{fmtCop(pedido.monto_transferencia)}</strong></div>
                 </div>
               )}
               {(pedido.metodo_pago === 'transferencia' || pedido.metodo_pago === 'mixto') && (

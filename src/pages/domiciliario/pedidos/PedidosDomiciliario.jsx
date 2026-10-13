@@ -5,6 +5,7 @@ import DomiciliarioLayout from '../../../components/layout/DomiciliarioLayout/Do
 import * as api from '../../../services/api';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './PedidosDomiciliario.css';
+import { pagoDeVenta, fmtCop } from '../../../utils/pago';
 
 const COLOR_SALSAS = '#ea580c';
 const parsearSalsas = (raw) => { if (!raw) return []; try { const p = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(p) ? p : []; } catch { return []; } };
@@ -12,10 +13,9 @@ const nombreSalsa   = (s) => { const n = typeof s === 'object' ? s.nombre : s; i
 
 // Aplana una venta de API a la forma que espera PedidoCard
 const mapVentaPedido = (v, facturado = false) => {
-  const detallesPago = v.pagos?.[0]?.detallePagos || [];
-  const forma_pago = v.metodo_pago ||
-    (detallesPago.length > 1 ? 'mixto' : detallesPago[0]?.metodoPago?.nombre) ||
-    'efectivo';
+  // Método y montos desde la venta (utils/pago.js), no desde detallePagos.
+  const pago = pagoDeVenta(v);
+  const forma_pago = pago.metodo || 'efectivo';
   return {
     id_venta:        v.id_venta,
     hora:            v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' }) : '—',
@@ -27,8 +27,8 @@ const mapVentaPedido = (v, facturado = false) => {
     observaciones:   v.observaciones   || '',
     ciudad:          v.ciudad         || '',
     forma_pago,
-    monto_efectivo:      Number(v.monto_efectivo      || detallesPago.find(d => d.metodoPago?.nombre === 'efectivo')?.monto      || 0),
-    monto_transferencia: Number(v.monto_transferencia || detallesPago.find(d => d.metodoPago?.nombre === 'transferencia')?.monto || 0),
+    monto_efectivo:      pago.efectivo,
+    monto_transferencia: pago.transferencia,
     valor:            Number(v.total || 0),
     subtotalBruto:    Number(v.subtotal || 0),
     costo_domicilio:  Number(v.costo_domicilio || 3000),
@@ -188,10 +188,10 @@ function ModalDetalle({ pedido, onClose }) {
             <div className="pd-modal-item pd-modal-full" style={{ gridColumn: '1 / -1' }}>
               <span className="pd-modal-label">Desglose</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
-                <span style={{ fontSize: 13, display:'flex', alignItems:'center', gap:4 }}><LogoEfectivo size={12}/>Efectivo: <strong>${Number(pedido.monto_efectivo || 0).toLocaleString('es-CO')}</strong></span>
+                <span style={{ fontSize: 13, display:'flex', alignItems:'center', gap:4 }}><LogoEfectivo size={12}/>Efectivo: <strong>{fmtCop(pedido.monto_efectivo)}</strong></span>
                 <span style={{ fontSize: 13, display:'flex', alignItems:'center', gap:4 }}>
                   <LogoBancolombia size={16} /><LogoNequi size={16} />
-                  Transferencia: <strong>${Number(pedido.monto_transferencia || 0).toLocaleString('es-CO')}</strong>
+                  Transferencia: <strong>{fmtCop(pedido.monto_transferencia)}</strong>
                 </span>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { Banknote, Smartphone, Zap, Bike, Check, CreditCard } from 'lucide-react
 import DomiciliarioLayout from '../../../components/layout/DomiciliarioLayout/DomiciliarioLayout';
 import * as api from '../../../services/api';
 import './CierreCaja.css';
+import { pagoDeVenta, fmtCop } from '../../../utils/pago';
 
 const coloresTarjeta = [
   { border: '#22c55e', bg: '#f0fdf4', Icon: Banknote,    label: 'bg-verde'   },
@@ -22,19 +23,11 @@ export default function CierreCaja() {
   const cargarVentas = (f) => {
     api.misDespachados('entregado', f).then((data) => {
       setVentasMock(data.map((v) => {
-        // Detectar método real: mixto si tiene 2+ detallePagos
-        const detalles = v.pagos?.[0]?.detallePagos || [];
-        const tieneEf  = detalles.some((d) => d.metodoPago?.nombre === 'efectivo');
-        const tieneT   = detalles.some((d) => d.metodoPago?.nombre === 'transferencia');
-        const formaPago = v.metodo_pago || (tieneEf && tieneT ? 'mixto' : tieneT ? 'transferencia' : 'efectivo');
-
-        // Montos reales por método
-        const montoEf = tieneEf
-          ? detalles.filter((d) => d.metodoPago?.nombre === 'efectivo').reduce((s, d) => s + Number(d.monto), 0)
-          : (formaPago === 'efectivo' ? Number(v.total || 0) : Number(v.monto_efectivo || 0));
-        const montoT = tieneT
-          ? detalles.filter((d) => d.metodoPago?.nombre === 'transferencia').reduce((s, d) => s + Number(d.monto), 0)
-          : (formaPago === 'transferencia' ? Number(v.total || 0) : Number(v.monto_transferencia || 0));
+        // Método y montos desde la venta (utils/pago.js), no desde detallePagos.
+        const pago      = pagoDeVenta(v);
+        const formaPago = pago.metodo || 'efectivo';
+        const montoEf   = pago.efectivo;
+        const montoT    = pago.transferencia;
 
         return {
           id_venta:           v.id_venta,
@@ -160,7 +153,7 @@ export default function CierreCaja() {
                         ${v.valor.toLocaleString('es-CO')}
                         {v.forma_pago === 'mixto' && (
                           <div style={{ fontSize: 10, color: '#888', fontWeight: 400 }}>
-                            <Banknote size={9} style={{display:'inline',verticalAlign:'middle'}}/>${v.monto_efectivo.toLocaleString('es-CO')} + <Smartphone size={9} style={{display:'inline',verticalAlign:'middle'}}/>${v.monto_transferencia.toLocaleString('es-CO')}
+                            <Banknote size={9} style={{display:'inline',verticalAlign:'middle'}}/>Efectivo: {fmtCop(v.monto_efectivo)} + <Smartphone size={9} style={{display:'inline',verticalAlign:'middle'}}/>Transferencia: {fmtCop(v.monto_transferencia)}
                           </div>
                         )}
                       </td>

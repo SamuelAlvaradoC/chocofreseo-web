@@ -6,6 +6,7 @@ import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import * as api from '../../../services/api';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import '../perfil/Perfil.css';
+import { pagoDeVenta, fmtCop } from '../../../utils/pago';
 
 const COLOR_SALSAS       = '#ea580c';
 const MAX_SALSAS_GRATIS  = 2;
@@ -195,8 +196,13 @@ export default function MisPedidos() {
                             {v.metodo_pago && (
                               <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
                                 <span style={{ background: '#f0f0f0', padding: '3px 10px', borderRadius: 20, fontWeight: 700 }}>
-                                  {v.metodo_pago === 'efectivo' ? <><LogoEfectivo size={12} style={{marginRight:3}}/>Efectivo</> : v.metodo_pago === 'transferencia' ? <><LogoBancolombia size={12} style={{marginRight:3}}/>Transferencia</> : <><LogoEfectivo size={12} style={{marginRight:3}}/>Mixto</>}
+                                  {v.metodo_pago === 'efectivo' ? <><LogoEfectivo size={12} style={{marginRight:3}}/>Efectivo</> : v.metodo_pago === 'transferencia' ? <><LogoBancolombia size={12} style={{marginRight:3}}/>Transferencia</> : v.metodo_pago === 'datafono' ? <>Datáfono</> : <><LogoEfectivo size={12} style={{marginRight:3}}/>Mixto</>}
                                 </span>
+                                {pagoDeVenta(v).metodo === 'mixto' && (
+                                  <div style={{ marginTop: 6 }}>
+                                    Efectivo: <strong>{fmtCop(pagoDeVenta(v).efectivo)}</strong> · Transferencia: <strong>{fmtCop(pagoDeVenta(v).transferencia)}</strong>
+                                  </div>
+                                )}
                               </div>
                             )}
                             {estadoNombre === 'anulado' && v.motivo_anulacion && (

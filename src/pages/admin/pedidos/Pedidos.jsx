@@ -13,6 +13,7 @@ import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import { nombreConFrutas, COMBOS_FRUTAS } from '../../../utils/nombreProducto';
 import '../ventas/Ventas.css';
+import { pagoDeVenta, fmtCop } from '../../../utils/pago';
 
 const ESTADO_LABELS = {
   pendiente:  'Pendiente',
@@ -28,21 +29,6 @@ const ESTADOS = Object.keys(ESTADO_LABELS);
 // filtro de esta pantalla.
 const ESTADOS_PEDIDOS = ESTADOS.filter((e) => e !== 'entregado');
 
-const getMetodoPago = (v) => {
-  const detalles = v.pagos?.[0]?.detallePagos || [];
-  if (detalles.length > 1) return 'mixto';
-  return detalles[0]?.metodoPago?.nombre || v.metodo_pago || null;
-};
-
-const getMontoPorMetodo = (v, nombreMetodo) => {
-  const detalles = v.pagos?.[0]?.detallePagos || [];
-  const found = detalles.find((d) => d.metodoPago?.nombre === nombreMetodo);
-  if (found) return Number(found.monto || 0);
-  if (nombreMetodo === 'efectivo') return Number(v.monto_efectivo || 0);
-  if (nombreMetodo === 'transferencia') return Number(v.monto_transferencia || 0);
-  return 0;
-};
-
 const mapVenta = (v) => ({
   ...v,
   cliente:          v.nombre_cliente    || v.cliente?.usuario?.nombre || v.cliente?.nombre || '—',
@@ -53,9 +39,10 @@ const mapVenta = (v) => ({
   ciudad:           v.ciudad  || '',
   referencia:       v.referencia_direccion || '',
   fecha:            v.fecha ? new Date(v.fecha).toLocaleString('es-CO') : '—',
-  metodo_pago:      getMetodoPago(v),
-  monto_efectivo:   getMontoPorMetodo(v, 'efectivo'),
-  monto_transferencia: getMontoPorMetodo(v, 'transferencia'),
+  // Método y montos desde la venta (utils/pago.js), no desde detallePagos.
+  metodo_pago:      pagoDeVenta(v).metodo,
+  monto_efectivo:   pagoDeVenta(v).efectivo,
+  monto_transferencia: pagoDeVenta(v).transferencia,
   comprobante_url:  v.comprobante_url || v.pagos?.[0]?.comprobante_url || null,
 });
 
@@ -1307,11 +1294,11 @@ function ModalDetalle({ open, onClose, venta }) {
               <div style={{ marginTop: 8, padding: '8px 12px', background: '#f5f3ff', borderRadius: 8, fontSize: 13 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                   <span style={{ color: '#555', display:'flex', alignItems:'center', gap:4 }}><LogoEfectivo size={13}/>Efectivo</span>
-                  <span style={{ fontWeight: 700, color: '#16a34a' }}>${Number(venta.monto_efectivo || 0).toLocaleString('es-CO')}</span>
+                  <span style={{ fontWeight: 700, color: '#16a34a' }}>{fmtCop(venta.monto_efectivo)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#555', display:'flex', alignItems:'center', gap:4 }}><LogoBancolombia size={13}/><LogoNequi size={13}/>Transferencia</span>
-                  <span style={{ fontWeight: 700, color: '#3b82f6' }}>${Number(venta.monto_transferencia || 0).toLocaleString('es-CO')}</span>
+                  <span style={{ fontWeight: 700, color: '#3b82f6' }}>{fmtCop(venta.monto_transferencia)}</span>
                 </div>
               </div>
             )}

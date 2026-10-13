@@ -11,6 +11,7 @@ import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Perfil.css';
+import { pagoDeVenta, fmtCop } from '../../../utils/pago';
 
 const COLOR_SALSAS       = '#ea580c';
 const MAX_SALSAS_GRATIS  = 2;
@@ -571,8 +572,15 @@ function SeccionHistorial() {
                       ? <><LogoEfectivo size={12} />Efectivo</>
                       : v.metodo_pago === 'transferencia'
                       ? <><LogoBancolombia size={12} />Transferencia</>
+                      : v.metodo_pago === 'datafono'
+                      ? <>Datáfono</>
                       : <><LogoEfectivo size={12} />Mixto</>}
                   </span>
+                  {pagoDeVenta(v).metodo === 'mixto' && (
+                    <div style={{ marginTop: 6 }}>
+                      Efectivo: <strong>{fmtCop(pagoDeVenta(v).efectivo)}</strong> · Transferencia: <strong>{fmtCop(pagoDeVenta(v).transferencia)}</strong>
+                    </div>
+                  )}
                 </div>
               )}
               {estadoNombre === 'anulado' && v.motivo_anulacion && (
