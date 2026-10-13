@@ -1408,7 +1408,13 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
     const adicionTotal = (item.adiciones || []).reduce((s, a) => s + Number(a.precio || 0) * (a.cantidad || 1), 0);
     return (Number(item.precio) + adicionTotal) * item.cantidad;
   };
-  const total = carrito.reduce((s, i) => s + calcItemEdit(i), 0) + Number(costoEnvio || 0);
+  // Mismo cálculo que la API (ventas/service.js editar): el descuento por
+  // puntos ya aplicado a la venta se resta del subtotal (sin pasarlo) y el
+  // domicilio va aparte. Sin esto, el mixto de una venta con puntos se
+  // repartía sobre un total mayor y la API rechazaba la edición.
+  const subtotalEdit = carrito.reduce((s, i) => s + calcItemEdit(i), 0);
+  const descuentoPuntos = Math.min(Number(venta?.descuento_puntos || 0), subtotalEdit);
+  const total = Math.max(0, subtotalEdit - descuentoPuntos) + Number(costoEnvio || 0);
   const montoEfectivo = Number(efDisplay.replace(/\./g, '')) || 0;
   const montoTransfer = efDisplay !== '' ? Math.max(0, total - montoEfectivo) : 0;
 
@@ -1711,6 +1717,11 @@ function ModalEditarVenta({ open, onClose, onGuardar, venta, productosData = [],
           })()}
         </div>
 
+        {descuentoPuntos > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#7c3aed', fontWeight: 700, padding: '0 12px', marginBottom: 6 }}>
+            <span>Descuento por puntos ({Number(venta?.puntos_usados || 0)} pts)</span><span>−{fmtCop(descuentoPuntos)}</span>
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 15, color: '#16a34a', padding: '8px 12px', background: '#f0fdf4', borderRadius: 8, marginBottom: 16 }}>
           <span>Total</span><span>${total.toLocaleString('es-CO')}</span>
         </div>

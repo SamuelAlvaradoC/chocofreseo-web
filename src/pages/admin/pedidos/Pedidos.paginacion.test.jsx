@@ -30,6 +30,8 @@ jest.mock('../../../services/api', () => ({
   anularVenta: jest.fn(),
   obtenerVenta: jest.fn(),
   getValorPunto: jest.fn().mockResolvedValue(12.5),
+  // Pedidos.jsx consulta si el datáfono está habilitado al montar (desde 2026-09-22).
+  getDatafono: jest.fn().mockResolvedValue(false),
 }));
 
 jest.mock('../../../context/AuthContext', () => ({
@@ -55,6 +57,7 @@ function mockApiDefaults() {
   api.listarAdiciones.mockResolvedValue([]);
   api.listarCategorias.mockResolvedValue([]);
   api.getValorPunto.mockResolvedValue(12.5);
+  api.getDatafono.mockResolvedValue(false);
 }
 
 const filasVenta = () => screen.getAllByText((_, el) => el.tagName === 'SPAN' && el.className === 'id-badge');
