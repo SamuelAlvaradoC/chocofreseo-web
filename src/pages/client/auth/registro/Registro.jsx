@@ -97,7 +97,7 @@ export default function Registro() {
   return (
     <div className="login-page">
       <div className="login-izquierda">
-        <img src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778822634/logo_sin_fondo_remove_uuu8tt.png" alt="ChocoFreseo" className="login-logo" />
+        <img src="/img/logo.png" alt="ChocoFreseo" className="login-logo" />
         <div className="login-nombre">ChocoFreseo</div>
         <h1 className="login-titulo">Únete a la<br />familia</h1>
         <p className="login-subtitulo">Regístrate y disfruta de ChocoNachos, ChocoBowls, Fresas con chocolate y mucho más.</p>

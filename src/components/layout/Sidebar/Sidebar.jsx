@@ -149,7 +149,7 @@ export default function Sidebar({ collapsed = false, onToggle }) {
         title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
       >
         <img
-          src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778822634/logo_sin_fondo_remove_uuu8tt.png"
+          src="/img/logo.png"
           alt="ChocoFreseo"
           style={{ width: 36, height: 36, objectFit: 'contain', flexShrink: 0 }}
         />

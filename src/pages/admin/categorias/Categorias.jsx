@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import * as api from '../../../services/api';
 import './Categorias.css';
+import { imgOpt } from '../../../utils/cloudinary';
 
 function Toggle({ activo, onChange }) {
   return (
@@ -125,7 +126,7 @@ function ModalDetalle({ open, onClose, categoria }) {
         </div>
         {categoria.img && (
           <div style={{ textAlign: 'center', marginBottom: 14 }}>
-            <img src={categoria.img} alt={categoria.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
+            <img src={imgOpt(categoria.img, 400)} alt={categoria.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
           </div>
         )}
         <div className="detalle-grid">

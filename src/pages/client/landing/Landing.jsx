@@ -7,6 +7,7 @@ import CtaFinal     from './components/CtaFinal';
 import { ShoppingBag, List, CreditCard, Truck, Maximize2, Minimize2 } from 'lucide-react';
 import { LogoInstagram, LogoTikTok, LogoFacebook } from '../../../components/common/LogosApps';
 import './Landing.css';
+import { imgOpt } from '../../../utils/cloudinary';
 
 const PRODUCTOS_ESTRELLA = [
   { nombre: 'Cherry Cream',        keywords: ['cherry cream'] },
@@ -242,7 +243,7 @@ export default function Landing() {
                 }}>
                   <div style={{ height: 160, position: 'relative', overflow: 'hidden' }}>
                     {img ? (
-                      <img src={img} alt={p.nombre}
+                      <img src={imgOpt(img, 600)} alt={p.nombre}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     ) : (
                       <div style={{

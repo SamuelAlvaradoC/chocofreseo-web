@@ -13,6 +13,7 @@ import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Checkout.css';
+import { comprimirImagen } from '../../../utils/comprimirImagen';
 
 const COSTO_DOMICILIO_DEFAULT = 5500;
 const MAX_SALSAS_GRATIS       = 2;
@@ -221,7 +222,9 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
   const totalPagado       = efNum + (Number(String(pagoTransfer).replace(/\./g, '')) || 0);
 
   const FORMATOS_PERMITIDOS = ['image/jpeg', 'image/jpg', 'image/png'];
-  const MAX_SIZE_MB = 5;
+  // La foto se comprime en el navegador antes de subirla (utils/comprimirImagen),
+  // así que se aceptan fotos de celular grandes; lo que se sube queda en ~300 KB.
+  const MAX_SIZE_MB = 15;
 
   const handleComprobante = (e) => {
     const file = e.target.files[0];
@@ -421,7 +424,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
       {verQR && (
         <div onClick={() => setVerQR(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
           <div onClick={(e) => e.stopPropagation()}>
-            <img src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778551977/Captura_de_pantalla_2026-05-11_210420_xc3wav.png"
+            <img src="/img/qr-bancolombia.png"
               alt="QR Bancolombia" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }} />
             <p style={{ color: 'white', textAlign: 'center', marginTop: 12, fontSize: 13 }}>Toca fuera para cerrar</p>
           </div>
@@ -433,7 +436,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
           <div className="checkout-pago-grid">
             {/* QR */}
             <div onClick={() => setVerQR(true)} style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 12, padding: 14, textAlign: 'center', cursor: 'zoom-in' }}>
-              <img src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778551977/Captura_de_pantalla_2026-05-11_210420_xc3wav.png"
+              <img src="/img/qr-bancolombia.png"
                 alt="QR" style={{ width: '100%', maxWidth: 120, height: 'auto', borderRadius: 8, objectFit: 'contain', margin: '0 auto 8px', display: 'block' }} />
               <div style={{ fontSize: 12, fontWeight: 700, color: '#1a1a1a' }}>QR Bancolombia</div>
               <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>Toca para ampliar</div>
@@ -717,7 +720,7 @@ export default function Checkout() {
       if (pagoInfo?.comprobante instanceof File) {
         try {
           const formData = new FormData();
-          formData.append('file', pagoInfo.comprobante);
+          formData.append('file', await comprimirImagen(pagoInfo.comprobante));
           formData.append('upload_preset', 'chocoadmin_upload');
           // AbortController: sin esto, una subida que se cuelga (red lenta,
           // Cloudinary lento) deja el fetch esperando para siempre y el

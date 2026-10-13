@@ -38,7 +38,7 @@ export default function DomiciliarioLayout({ children }) {
         {/* Header del drawer */}
         <div className="domi-drawer-header">
           <img
-            src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778822634/logo_sin_fondo_remove_uuu8tt.png"
+            src="/img/logo.png"
             alt="ChocoFreseo"
             className="domi-drawer-header-logo"
           />

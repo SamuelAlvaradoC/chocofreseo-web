@@ -5,6 +5,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import './Adiciones.css';
 import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
+import { imgOpt } from '../../../utils/cloudinary';
 
 const POR_PAGINA = 10;
 
@@ -199,7 +200,7 @@ function ModalDetalle({ open, onClose, adicion }) {
         </div>
         {adicion.img && (
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <img src={adicion.img} alt={adicion.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
+            <img src={imgOpt(adicion.img, 400)} alt={adicion.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
           </div>
         )}
         <div className="detalle-grid">
@@ -306,7 +307,7 @@ export default function Adiciones() {
               paginados.map((a) => (
                 <tr key={a.id_adicion} style={{ opacity: a.estado === 0 ? 0.6 : 1 }}>
                   <td style={{ textTransform: 'capitalize' }}>
-                    {a.img && <img src={a.img} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', marginRight: 8, verticalAlign: 'middle' }} />}
+                    {a.img && <img src={imgOpt(a.img, 120)} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', marginRight: 8, verticalAlign: 'middle' }} />}
                     {a.nombre}
                   </td>
                   <td className="td-suave">{a.descripcion}</td>

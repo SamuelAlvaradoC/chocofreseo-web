@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="footer-marca">
           <div className="footer-logo">
             <img
-              src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778822634/logo_sin_fondo_remove_uuu8tt.png"
+              src="/img/logo.png"
               alt="ChocoFreseo"
               className="footer-logo-icono"
               style={{ objectFit: 'contain', background: 'none', boxShadow: 'none', width: 48, height: 48 }}

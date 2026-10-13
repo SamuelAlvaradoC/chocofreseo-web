@@ -55,7 +55,7 @@ export default function Recuperar() {
   return (
     <div className="login-page">
       <div className="login-izquierda">
-        <img src="https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778822634/logo_sin_fondo_remove_uuu8tt.png" alt="ChocoFreseo" className="login-logo" />
+        <img src="/img/logo.png" alt="ChocoFreseo" className="login-logo" />
         <div className="login-nombre">ChocoFreseo</div>
         <h1 className="login-titulo">Recupera tu<br />contraseña</h1>
         <p className="login-subtitulo">Sin drama. En segundos recuperas el acceso. Puro Freseo 🍓</p>

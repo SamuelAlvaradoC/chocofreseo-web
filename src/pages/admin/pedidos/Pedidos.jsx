@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import { Eye, Edit, Check, X, FileText, RotateCcw, AlertTriangle, Search, CreditCard } from 'lucide-react';
 import { LogoBancolombia, LogoNequi, LogoEfectivo, LogoWhatsApp } from '../../../components/common/LogosApps';
 import { toast } from '../../../utils/toast';
-import { imgCl } from '../../../utils/cloudinary';
+import { imgCl, imgOpt } from '../../../utils/cloudinary';
 import AdminLayout from '../../../components/layout/AdminLayout';
 import Paginacion from '../../../components/Paginacion';
 import * as api from '../../../services/api';
@@ -276,7 +276,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                     <button key={op.id} type="button" onClick={() => setFrutasTemp(op.id)}
                       style={{ padding: 0, borderRadius: 12, border: sel ? '2.5px solid #CA0B0B' : '2px solid transparent', background: '#fff', cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 110,
                         boxShadow: sel ? '0 4px 16px rgba(202,11,11,0.3)' : '0 2px 8px rgba(0,0,0,0.12)', transition: 'all 0.2s ease' }}>
-                      <img src={op.img} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img src={imgOpt(op.img, 300)} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)', padding: '22px 8px 8px', textAlign: 'center' }}>
                         <div style={{ fontWeight: 700, fontSize: 10, color: '#fff' }}>{op.etiqueta}</div>
                         {sel && <div style={{ fontSize: 9, color: '#fca5a5', marginTop: 1, fontWeight: 600 }}>✓</div>}
@@ -292,8 +292,8 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
               <p style={{ fontSize: 12, color: '#888', marginBottom: 12 }}>Elige la cobertura — obligatorio</p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
                 {[
-                  { nombre: 'Chocolate Negro',  img: 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815863/chocolate_negro_ancho_kzqpjd.png',  color: '#1a1a1a' },
-                  { nombre: 'Chocolate Blanco', img: 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815900/chocolate_blanco_ancho_rw2b5l.png', color: '#F5E6D0' },
+                  { nombre: 'Chocolate Negro',  img: '/img/chocolate-negro.webp',  color: '#1a1a1a' },
+                  { nombre: 'Chocolate Blanco', img: '/img/chocolate-blanco.webp', color: '#F5E6D0' },
                   { nombre: 'Arequipe',         img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742573/patatas_arequipe_vhgewf.png',         color: '#C8860A' },
                 ].map((op) => {
                   const sel = coberturaTemp === op.nombre;
@@ -301,7 +301,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                     <button key={op.nombre} type="button" onClick={() => setCoberturaTemp(op.nombre)}
                       style={{ padding: 0, borderRadius: 12, border: sel ? '2.5px solid #CA0B0B' : '2px solid transparent', background: op.color, cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 110,
                         boxShadow: sel ? '0 4px 16px rgba(202,11,11,0.3)' : '0 2px 8px rgba(0,0,0,0.12)', transition: 'all 0.2s ease' }}>
-                      <img src={op.img} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img src={imgOpt(op.img, 300)} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)', padding: '22px 8px 8px', textAlign: 'center' }}>
                         <div style={{ fontWeight: 700, fontSize: 10, color: '#fff' }}>{op.nombre}</div>
                         {sel && <div style={{ fontSize: 9, color: '#fca5a5', marginTop: 1, fontWeight: 600 }}>✓</div>}
@@ -317,8 +317,8 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
               {['Negro', 'Blanco'].map((tipo) => {
                 const sel = chocolateTemp === tipo;
                 const img = tipo === 'Negro'
-                  ? 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815863/chocolate_negro_ancho_kzqpjd.png'
-                  : 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815900/chocolate_blanco_ancho_rw2b5l.png';
+                  ? '/img/chocolate-negro.webp'
+                  : '/img/chocolate-blanco.webp';
                 return (
                   <button key={tipo} onClick={() => setChocolateTemp(tipo)} style={{
                     flex: 1, height: 140, borderRadius: 14, cursor: 'pointer', padding: 0,
@@ -352,7 +352,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                       onClick={() => setSalsasTemp(p => sel ? p.filter(s => s.id !== salsa.id) : [...p, salsa])}
                       style={{ padding: 0, borderRadius: 10, border: sel ? `2.5px solid ${COLOR_SALSAS}` : '2px solid transparent', background: 'none', cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 90,
                         boxShadow: sel ? '0 4px 14px rgba(234,88,12,0.3)' : '0 2px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' }}>
-                      <img src={salsa.img} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img src={imgOpt(salsa.img, 300)} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)', padding: '20px 6px 6px', textAlign: 'center' }}>
                         <div style={{ fontWeight: 700, fontSize: 12, color: '#fff' }}>{salsa.nombre}</div>
                         {sel && <div style={{ fontSize: 10, color: esExtra ? '#fbbf24' : '#4ade80', marginTop: 1, fontWeight: 700 }}>{esExtra ? `+$${PRECIO_SALSA_EXTRA.toLocaleString('es-CO')}` : 'Gratis ✓'}</div>}

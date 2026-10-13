@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { Check } from 'lucide-react';
-import { imgCl } from '../../../utils/cloudinary';
+import { imgCl, imgOpt } from '../../../utils/cloudinary';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../../components/layout/Navbar/Navbar';
 import { useCart } from '../../../context/CartContext';
@@ -153,8 +153,8 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
         <p style={{ ...secLbl }}>¿Con qué cobertura lo prefieres?</p>
         <div style={{ display: 'flex', gap: 10, margin: '4px 0' }}>
           {[
-            { nombre: 'Chocolate Negro',  img: 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815863/chocolate_negro_ancho_kzqpjd.png',  color: '#1a1a1a' },
-            { nombre: 'Chocolate Blanco', img: 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815900/chocolate_blanco_ancho_rw2b5l.png', color: '#F5E6D0' },
+            { nombre: 'Chocolate Negro',  img: '/img/chocolate-negro.webp',  color: '#1a1a1a' },
+            { nombre: 'Chocolate Blanco', img: '/img/chocolate-blanco.webp', color: '#F5E6D0' },
             { nombre: 'Arequipe',         img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742573/patatas_arequipe_vhgewf.png',         color: '#C8860A' },
           ].map((op) => {
             const sel = coberturaElegida === op.nombre;
@@ -167,7 +167,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                 boxShadow: sel ? '0 6px 20px rgba(202,11,11,0.35)' : 'none',
                 transition: 'all 0.2s ease',
               }}>
-                <img src={op.img} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <img src={imgOpt(op.img, 300)} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <div style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0,
                   background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
@@ -230,7 +230,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                 boxShadow: sel ? '0 6px 20px rgba(202,11,11,0.35)' : 'none',
                 transition: 'all 0.2s ease',
               }}>
-                <img src={op.img} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <img src={imgOpt(op.img, 300)} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <div style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0,
                   background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
@@ -286,8 +286,8 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
           {['Negro', 'Blanco'].map((tipo) => {
             const sel = chocolateElegido === tipo;
             const img = tipo === 'Negro'
-              ? 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815863/chocolate_negro_ancho_kzqpjd.png'
-              : 'https://res.cloudinary.com/dnoxlv5kn/image/upload/v1778815900/chocolate_blanco_ancho_rw2b5l.png';
+              ? '/img/chocolate-negro.webp'
+              : '/img/chocolate-blanco.webp';
             return (
               <button key={tipo} onClick={() => setChocolateElegido(tipo)} style={{
                 flex: 1, height: 155, borderRadius: 16, cursor: 'pointer', padding: 0,
@@ -628,7 +628,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                 <button key={salsa.id} onClick={() => setSalsasElegidas(prev => sel ? prev.filter(s => s.id !== salsa.id) : [...prev, salsa])}
                   style={{ padding: 0, borderRadius: 12, border: sel ? '3px solid #CA0B0B' : '1px solid #eee', background: 'none', cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 100,
                     boxShadow: sel ? '0 4px 14px rgba(202,11,11,0.3)' : 'none', transition: 'all 0.2s ease' }}>
-                  <img src={salsa.img} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  <img src={imgOpt(salsa.img, 300)} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0,
                     background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)',
