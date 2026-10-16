@@ -2,9 +2,9 @@
 // El valor `id` es lo único que se guarda en detalle_venta.frutas — el nombre
 // visible siempre se arma con nombreConFrutas(), nunca se guarda como texto.
 export const COMBOS_FRUTAS = [
-  { id: 'fresa_cereza',   etiqueta: 'Fresa/Cereza',   img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1789244675/cereza_fresa_cfbhf2.jpg' },
-  { id: 'fresa_durazno',  etiqueta: 'Fresa/Durazno',  img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1789244723/fresa_durzano_lkobxl.jpg' },
-  { id: 'cereza_durazno', etiqueta: 'Cereza/Durazno', img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1789244748/2f8a8676-e6b8-4095-ba63-186aef146e98_ftrj9k.png' },
+  { id: 'fresa_cereza',   etiqueta: 'Fresa/Cereza',   img: '/img/combos/fresa-cereza.jpg' },
+  { id: 'fresa_durazno',  etiqueta: 'Fresa/Durazno',  img: '/img/combos/fresa-durazno.jpg' },
+  { id: 'cereza_durazno', etiqueta: 'Cereza/Durazno', img: '/img/combos/cereza-durazno.png' },
 ];
 
 const ETIQUETA_POR_ID = Object.fromEntries(COMBOS_FRUTAS.map((c) => [c.id, c.etiqueta]));

@@ -17,10 +17,10 @@ import './Catalogo.css';
 
 
 const SALSAS_DISPONIBLES = [
-  { id: 'arequipe',         nombre: 'Arequipe',          img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742573/patatas_arequipe_vhgewf.png' },
-  { id: 'chocolate_negro',  nombre: 'Chocolate Negro',   img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742679/patatas_chocolate_negro_oluxzf.png' },
-  { id: 'chocolate_blanco', nombre: 'Chocolate Blanco',  img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742648/patatas_chocolate_blanco_t6dwl5.png' },
-  { id: 'mermelada_mora',   nombre: 'Mermelada de Mora', img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742724/patatas_mermelada_jlcyrs.png' },
+  { id: 'arequipe',         nombre: 'Arequipe',          img: '/img/salsas/arequipe.png' },
+  { id: 'chocolate_negro',  nombre: 'Chocolate Negro',   img: '/img/salsas/chocolate-negro.png' },
+  { id: 'chocolate_blanco', nombre: 'Chocolate Blanco',  img: '/img/salsas/chocolate-blanco.png' },
+  { id: 'mermelada_mora',   nombre: 'Mermelada de Mora', img: '/img/salsas/mermelada-mora.png' },
 ];
 const MAX_SALSAS_GRATIS  = 2;
 const PRECIO_SALSA_EXTRA = 5000;
@@ -155,7 +155,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
           {[
             { nombre: 'Chocolate Negro',  img: '/img/chocolate-negro.webp',  color: '#1a1a1a' },
             { nombre: 'Chocolate Blanco', img: '/img/chocolate-blanco.webp', color: '#F5E6D0' },
-            { nombre: 'Arequipe',         img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742573/patatas_arequipe_vhgewf.png',         color: '#C8860A' },
+            { nombre: 'Arequipe',         img: '/img/salsas/arequipe.png',         color: '#C8860A' },
           ].map((op) => {
             const sel = coberturaElegida === op.nombre;
             return (

@@ -29,7 +29,7 @@ export const LogoTikTok = ({ size = 20, color = '#000' }) => (
 
 export const LogoBancolombia = ({ size = 20, style = {} }) => (
   <img
-    src="https://res.cloudinary.com/diqeuyoqo/image/upload/v1779736112/bancolombia_wiytke.png"
+    src="/img/bancos/bancolombia.png"
     alt="Bancolombia"
     style={{ width: size, height: size, objectFit: 'contain', display: 'block', ...style }}
   />
@@ -37,7 +37,7 @@ export const LogoBancolombia = ({ size = 20, style = {} }) => (
 
 export const LogoNequi = ({ size = 20, style = {} }) => (
   <img
-    src="https://res.cloudinary.com/diqeuyoqo/image/upload/v1779736049/nequi_pfgazy.png"
+    src="/img/bancos/nequi.png"
     alt="Nequi"
     style={{ width: 'auto', height: size, objectFit: 'contain', display: 'block', ...style }}
   />

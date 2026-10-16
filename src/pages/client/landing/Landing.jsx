@@ -148,7 +148,7 @@ export default function Landing() {
               preload="auto"
               style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
             >
-              <source src="https://res.cloudinary.com/diqeuyoqo/video/upload/v1787968751/ChocoFreseo_video_landing_v2_fark9e.mp4" type="video/mp4" />
+              <source src="/video/chocofreseo-landing.mp4" type="video/mp4" />
               Tu navegador no soporta la reproducción de video.
             </video>
             <button

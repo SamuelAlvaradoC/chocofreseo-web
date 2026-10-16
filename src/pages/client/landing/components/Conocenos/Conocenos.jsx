@@ -7,7 +7,7 @@ export default function Conocenos() {
       <div className="conocenos-wrap">
         <div className="conocenos-imagen">
           <img
-            src="https://res.cloudinary.com/diqeuyoqo/image/upload/v1781960585/951d154f-bddd-4c5a-b606-e5a38e309433_d2nfnl.jpg"
+            src="/img/landing/conocenos.jpg"
             alt="ChocoFreseo - Nuestra historia"
           />
         </div>

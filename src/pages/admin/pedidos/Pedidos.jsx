@@ -127,10 +127,10 @@ const INCREMENTO_PUNTOS_PESOS = 1000;
 const calcularPasoPuntos = (valorPunto) => Math.round(INCREMENTO_PUNTOS_PESOS / valorPunto);
 const redondearPuntos = (puntos, paso) => Math.floor(puntos / paso) * paso;
 const SALSAS_DISPONIBLES = [
-  { id: 'arequipe',         nombre: 'Arequipe',          img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742573/patatas_arequipe_vhgewf.png' },
-  { id: 'chocolate_negro',  nombre: 'Chocolate Negro',   img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742679/patatas_chocolate_negro_oluxzf.png' },
-  { id: 'chocolate_blanco', nombre: 'Chocolate Blanco',  img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742648/patatas_chocolate_blanco_t6dwl5.png' },
-  { id: 'mermelada_mora',   nombre: 'Mermelada de Mora', img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742724/patatas_mermelada_jlcyrs.png' },
+  { id: 'arequipe',         nombre: 'Arequipe',          img: '/img/salsas/arequipe.png' },
+  { id: 'chocolate_negro',  nombre: 'Chocolate Negro',   img: '/img/salsas/chocolate-negro.png' },
+  { id: 'chocolate_blanco', nombre: 'Chocolate Blanco',  img: '/img/salsas/chocolate-blanco.png' },
+  { id: 'mermelada_mora',   nombre: 'Mermelada de Mora', img: '/img/salsas/mermelada-mora.png' },
 ];
 const parsearSalsas = (raw) => { if (!raw) return []; try { const p = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(p) ? p : []; } catch { return []; } };
 const nombreSalsa   = (s) => { const n = typeof s === 'object' ? s.nombre : s; if (!n) return ''; return n.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); };
@@ -294,7 +294,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                 {[
                   { nombre: 'Chocolate Negro',  img: '/img/chocolate-negro.webp',  color: '#1a1a1a' },
                   { nombre: 'Chocolate Blanco', img: '/img/chocolate-blanco.webp', color: '#F5E6D0' },
-                  { nombre: 'Arequipe',         img: 'https://res.cloudinary.com/diqeuyoqo/image/upload/v1779742573/patatas_arequipe_vhgewf.png',         color: '#C8860A' },
+                  { nombre: 'Arequipe',         img: '/img/salsas/arequipe.png',         color: '#C8860A' },
                 ].map((op) => {
                   const sel = coberturaTemp === op.nombre;
                   return (

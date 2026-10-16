@@ -56,7 +56,7 @@ export default function Hero() {
         <div className="hero-imagen-wrap">
           <div className="hero-imagen-tonalizada">
             <img
-              src="https://res.cloudinary.com/diqeuyoqo/image/upload/v1780607775/40bc9e7c-2c1d-48a5-a4b8-fdcd46a17a4e_al6zv9.jpg"
+              src="/img/landing/portada.jpg"
               alt="ChocoFreseo - Puro Freseo"
               fetchPriority="high"
               style={{
