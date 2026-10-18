@@ -90,13 +90,6 @@ export default function Login() {
             <h2 className="login-caja-titulo">Bienvenido de nuevo</h2>
             <p className="login-caja-sub">Ingresa tus datos para continuar</p>
           </div>
-          {/* Viene de "Hacer pedido": el carrito queda guardado y al terminar vuelve al checkout */}
-          {location.state?.paraPedido && (
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 12px', margin: '8px 0 4px', fontSize: 13, color: '#166534', fontFamily: 'Nunito, sans-serif' }}>
-              <strong>Inicia sesión o crea tu cuenta para hacer tu pedido.</strong> Tu carrito queda guardado y vuelves directo a terminar tu pedido.
-              <div style={{ marginTop: 4, fontWeight: 700 }}>🎁 ¡Gana 200 puntos solo por registrarte!</div>
-            </div>
-          )}
           <form onSubmit={handleLogin} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Correo electrónico</label>

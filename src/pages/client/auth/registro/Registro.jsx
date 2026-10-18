@@ -119,12 +119,6 @@ export default function Registro() {
           <p style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, margin: '4px 0 0', fontFamily: 'Nunito, sans-serif' }}>
             🎁 ¡Gana 200 puntos solo por registrarte!
           </p>
-          {/* Viene de "Hacer pedido": el carrito queda guardado y al terminar vuelve al checkout */}
-          {location.state?.paraPedido && (
-            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 12px', margin: '8px 0 4px', fontSize: 13, color: '#166534', fontFamily: 'Nunito, sans-serif' }}>
-              <strong>Inicia sesión o crea tu cuenta para hacer tu pedido.</strong> Tu carrito queda guardado y vuelves directo a terminar tu pedido.
-            </div>
-          )}
           <form onSubmit={handleRegistro} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Nombre completo</label>

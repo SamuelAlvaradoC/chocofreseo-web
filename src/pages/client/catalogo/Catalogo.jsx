@@ -14,6 +14,7 @@ import * as api from '../../../services/api';
 import { nombreConFrutas, COMBOS_FRUTAS } from '../../../utils/nombreProducto';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import { SALSAS_DISPONIBLES } from '../../../utils/salsas';
+import { toast } from '../../../utils/toast';
 import './Catalogo.css';
 
 
@@ -1192,7 +1193,8 @@ export default function Catalogo() {
           if (!usuario) {
             // Al iniciar sesión o registrarse vuelve DIRECTO al checkout; el
             // carrito de invitado se conserva y se combina con el de su cuenta.
-            navigate('/login', { state: { from: '/checkout', paraPedido: true } });
+            toast.info('Inicia sesión o crea tu cuenta para poder seguir con tu pedido');
+            navigate('/login', { state: { from: '/checkout' } });
             return;
           }
           navigate('/checkout', { state: { puntosAUsar: pts || 0, descuentoPuntos: desc || 0 } });
