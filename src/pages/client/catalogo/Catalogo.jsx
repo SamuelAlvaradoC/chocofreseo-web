@@ -9,19 +9,14 @@ import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { useValorPunto } from '../../../hooks/useValorPunto';
 import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
-import { formatHora12 } from '../../../utils/formatHora';
+import { formatHora12, mensajeTiendaCerrada } from '../../../utils/formatHora';
 import * as api from '../../../services/api';
 import { nombreConFrutas, COMBOS_FRUTAS } from '../../../utils/nombreProducto';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
+import { SALSAS_DISPONIBLES } from '../../../utils/salsas';
 import './Catalogo.css';
 
 
-const SALSAS_DISPONIBLES = [
-  { id: 'arequipe',         nombre: 'Arequipe',          img: '/img/salsas/arequipe.png' },
-  { id: 'chocolate_negro',  nombre: 'Chocolate Negro',   img: '/img/salsas/chocolate-negro.png' },
-  { id: 'chocolate_blanco', nombre: 'Chocolate Blanco',  img: '/img/salsas/chocolate-blanco.png' },
-  { id: 'mermelada_mora',   nombre: 'Mermelada de Mora', img: '/img/salsas/mermelada-mora.png' },
-];
 const MAX_SALSAS_GRATIS  = 2;
 const PRECIO_SALSA_EXTRA = 5000;
 const COLOR_SALSAS       = '#ea580c';
@@ -683,26 +678,6 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
 }
 
 /* ─── Modal login requerido ─── */
-function ModalLoginRequerido({ open, onClose }) {
-  if (!open) return null;
-  return (
-    <div className="modal-overlay">
-      <div className="modal-login-req">
-        <div style={{ fontSize: 48, marginBottom: 12 }}>🔒</div>
-        <h3 className="modal-login-titulo">Inicia sesión para continuar</h3>
-        <p className="modal-login-desc">Necesitas una cuenta para agregar productos al carrito.</p>
-        <div className="modal-login-botones">
-          <button className="btn-login-req-sec" onClick={onClose}>Cancelar</button>
-          <a href="/login" className="btn-login-req-pri">Iniciar sesión</a>
-        </div>
-        <p className="modal-login-registro">
-          ¿No tienes cuenta? <a href="/registro" className="modal-login-link">Regístrate</a>
-        </p>
-      </div>
-    </div>
-  );
-}
-
 // El cliente solo puede usar puntos en incrementos de $1000 de descuento
 // (antes eran incrementos fijos de 8 puntos = $100 con valorPunto=$12.5).
 // El paso en PUNTOS se recalcula según el valor del punto vigente -- si el
@@ -712,7 +687,7 @@ const calcularPasoPuntos = (valorPunto) => Math.round(INCREMENTO_PUNTOS_PESOS / 
 const redondearPuntos = (puntos, paso) => Math.floor(puntos / paso) * paso;
 
 /* ─── Carrito flotante ─── */
-function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrCheckout, abierto }) {
+function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrCheckout, abierto, avisoCerrado }) {
   const [expandido,         setExpandido]         = useState(false);
   const [puntosDisponibles, setPuntosDisponibles] = useState({ puntos: 0, saldo_pesos: 0 });
   const [puntosAUsar,       setPuntosAUsar]       = useState(0);
@@ -887,6 +862,11 @@ function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrC
                 <strong>${totalConDescuento.toLocaleString('es-CO')}</strong>
               </div>
 
+              {avisoCerrado && (
+                <div style={{ background: '#fef3c7', border: '1px solid #fde68a', color: '#92400e', borderRadius: 10, padding: '10px 12px', fontSize: 13, fontWeight: 600, marginBottom: 10 }}>
+                  🔒 {avisoCerrado}
+                </div>
+              )}
               <button className="carrito-btn-checkout" onClick={() => onIrCheckout(puntosAUsar, descuentoPuntos)}>
                 Hacer pedido
               </button>
@@ -1076,7 +1056,6 @@ export default function Catalogo() {
   const [busqueda,        setBusqueda]        = useState('');
   const [productoActual,        setProductoActual]        = useState(null);
   const [modalProducto,         setModalProducto]         = useState(false);
-  const [modalLogin,            setModalLogin]            = useState(false);
   const [mostrarAlertaCerrado,  setMostrarAlertaCerrado]  = useState(false);
 
   const cargar = () => {
@@ -1129,9 +1108,10 @@ export default function Catalogo() {
     return lista;
   }, [productos, busqueda, categoriaActiva, rankMasPedidos]);
 
+  // Cualquiera puede agregar al carrito (con o sin sesión, tienda abierta o
+  // cerrada): el carrito se guarda en el dispositivo. La sesión y el horario
+  // se piden recién al tocar "Hacer pedido".
   const handleAgregar = (producto) => {
-    if (!estadoTienda.abierto) { setMostrarAlertaCerrado(true); return; }
-    if (!usuario) { setModalLogin(true); return; }
     setProductoActual(producto);
     setModalProducto(true);
   };
@@ -1154,9 +1134,8 @@ export default function Catalogo() {
                 {mensajeTienda === 'cerrado_temporal' ? 'Cerrado temporalmente' : 'Estamos cerrados por el momento'}
               </div>
               <div style={{ color: mensajeTienda === 'cerrado_temporal' ? '#CA0B0B' : '#b45309', fontSize: 12 }}>
-                {mensajeTienda === 'cerrado_temporal'
-                  ? 'Volveremos pronto'
-                  : `Domicilios: Todos los días · ${formatHora12(estadoTienda.hora_apertura)} - ${formatHora12(estadoTienda.hora_cierre)}`}
+                {mensajeTiendaCerrada(estadoTienda)}
+                {mensajeTienda === 'cerrado_horario' && ` (Domicilios: todos los días, ${formatHora12(estadoTienda.hora_apertura)} - ${formatHora12(estadoTienda.hora_cierre)})`}
               </div>
             </div>
           </div>
@@ -1210,9 +1189,16 @@ export default function Catalogo() {
         onQuitar={quitarItem}
         onIrCheckout={(pts, desc) => {
           if (!estadoTienda.abierto) { setMostrarAlertaCerrado(true); return; }
+          if (!usuario) {
+            // Al iniciar sesión o registrarse vuelve DIRECTO al checkout; el
+            // carrito de invitado se conserva y se combina con el de su cuenta.
+            navigate('/login', { state: { from: '/checkout', paraPedido: true } });
+            return;
+          }
           navigate('/checkout', { state: { puntosAUsar: pts || 0, descuentoPuntos: desc || 0 } });
         }}
         abierto={estadoTienda.abierto}
+        avisoCerrado={!estadoTienda.cargando && !estadoTienda.abierto ? mensajeTiendaCerrada(estadoTienda) : null}
       />
 
       <ModalProducto
@@ -1223,7 +1209,6 @@ export default function Catalogo() {
         toppingsDisponibles={toppings}
         adicionesDisponibles={adiciones}
       />
-      <ModalLoginRequerido open={modalLogin} onClose={() => setModalLogin(false)} />
 
       {mostrarAlertaCerrado && (
         <div onClick={() => setMostrarAlertaCerrado(false)}
@@ -1240,7 +1225,7 @@ export default function Catalogo() {
               {mensajeTienda === 'cerrado_temporal' ? 'Cerrado temporalmente' : 'Estamos cerrados'}
             </h3>
             <p style={{ fontSize:14, color:'#888', margin:'0 0 20px', lineHeight:1.6 }}>
-              En este momento no estamos recibiendo pedidos. ¡Pero vuelve pronto, te esperamos!
+              {mensajeTiendaCerrada(estadoTienda)}
             </p>
             {mensajeTienda === 'cerrado_horario' && (
               <div style={{ background:'#f7f8fd', borderRadius:12, padding:'14px 20px', marginBottom:24 }}>

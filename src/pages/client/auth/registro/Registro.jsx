@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 import * as api from '../../../../services/api';
@@ -51,6 +51,7 @@ export default function Registro() {
   const [verContrasena, setVerContrasena] = useState(false);
   const [verConfirmar,  setVerConfirmar]  = useState(false);
   const navigate        = useNavigate();
+  const location        = useLocation();
   const { loginConAPI } = useAuth();
 
   // Un debounce por campo -- cada uno valida 400ms después de que el
@@ -81,7 +82,8 @@ export default function Registro() {
     try {
       await api.register({ nombre: nombre.trim(), email: email.trim().toLowerCase(), contrasena, id_rol: 4 });
       await loginConAPI(email.trim().toLowerCase(), contrasena);
-      navigate('/landing');
+      // Venía de "Hacer pedido": volver directo al checkout con su carrito.
+      navigate(location.state?.from || '/landing', { replace: true });
     } catch (err) {
       const msg = err?.response?.data?.message || 'Error al crear la cuenta. Inténtalo de nuevo.';
       if (msg.toLowerCase().includes('correo') || msg.toLowerCase().includes('email')) {
@@ -109,7 +111,7 @@ export default function Registro() {
 
       <div className="login-derecha">
         <div className="login-caja">
-          <button className="lf-btn-volver" onClick={() => navigate('/login')}>
+          <button className="lf-btn-volver" onClick={() => navigate('/login', { state: location.state })}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             Volver a iniciar sesión
           </button>
@@ -117,6 +119,12 @@ export default function Registro() {
           <p style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, margin: '4px 0 0', fontFamily: 'Nunito, sans-serif' }}>
             🎁 ¡Gana 200 puntos solo por registrarte!
           </p>
+          {/* Viene de "Hacer pedido": el carrito queda guardado y al terminar vuelve al checkout */}
+          {location.state?.paraPedido && (
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 12px', margin: '8px 0 4px', fontSize: 13, color: '#166534', fontFamily: 'Nunito, sans-serif' }}>
+              <strong>Inicia sesión o crea tu cuenta para hacer tu pedido.</strong> Tu carrito queda guardado y vuelves directo a terminar tu pedido.
+            </div>
+          )}
           <form onSubmit={handleRegistro} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Nombre completo</label>
@@ -190,7 +198,7 @@ export default function Registro() {
             </button>
             <p className="lf-registro">
               ¿Ya tienes cuenta?{' '}
-              <Link to="/login" className="lf-link-bold">Inicia sesión</Link>
+              <Link to="/login" state={location.state} className="lf-link-bold">Inicia sesión</Link>
             </p>
           </form>
         </div>

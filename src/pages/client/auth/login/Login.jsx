@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 import useDebounce from '../../../../hooks/useDebounce';
@@ -28,6 +28,7 @@ export default function Login() {
   const [cargando,   setCargando]   = useState(false);
   const [verContrasena, setVerContrasena] = useState(false);
   const navigate        = useNavigate();
+  const location        = useLocation();
   const { loginConAPI } = useAuth();
 
   const debounceEmail      = useDebounce((v) => setErrores((p) => ({ ...p, email: validarEmail(v) })), 400);
@@ -42,7 +43,10 @@ export default function Login() {
     setErrores({});
     try {
       const usuario = await loginConAPI(email.trim().toLowerCase(), contrasena);
-      if (usuario.rol === 'admin' || usuario.rol === 'Administrador') {
+      if (location.state?.from) {
+        // Venía de "Hacer pedido" (u otra ruta protegida): volver allí.
+        navigate(location.state.from, { replace: true });
+      } else if (usuario.rol === 'admin' || usuario.rol === 'Administrador') {
         navigate('/admin/dashboard');
       } else if (usuario.rol === 'domiciliario' || usuario.rol === 'Domiciliario') {
         navigate('/domiciliario/pedidos');
@@ -86,6 +90,13 @@ export default function Login() {
             <h2 className="login-caja-titulo">Bienvenido de nuevo</h2>
             <p className="login-caja-sub">Ingresa tus datos para continuar</p>
           </div>
+          {/* Viene de "Hacer pedido": el carrito queda guardado y al terminar vuelve al checkout */}
+          {location.state?.paraPedido && (
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 12px', margin: '8px 0 4px', fontSize: 13, color: '#166534', fontFamily: 'Nunito, sans-serif' }}>
+              <strong>Inicia sesión o crea tu cuenta para hacer tu pedido.</strong> Tu carrito queda guardado y vuelves directo a terminar tu pedido.
+              <div style={{ marginTop: 4, fontWeight: 700 }}>🎁 ¡Gana 200 puntos solo por registrarte!</div>
+            </div>
+          )}
           <form onSubmit={handleLogin} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Correo electrónico</label>
@@ -132,7 +143,7 @@ export default function Login() {
             <div className="lf-divisor"><span>o</span></div>
             <p className="lf-registro">
               ¿No tienes cuenta?{' '}
-              <Link to="/registro" className="lf-link-bold">Regístrate</Link>
+              <Link to="/registro" state={location.state} className="lf-link-bold">Regístrate</Link>
             </p>
           </form>
         </div>

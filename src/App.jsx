@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import { useAuth } from './context/AuthContext';
 import SessionExpiredListener from './components/SessionExpiredListener';
@@ -45,7 +45,9 @@ import MisPedidosPage from './pages/client/mispedidos';
 // ── Rutas protegidas ───────────────────────────────────────────
 function RutaPrivada({ children }) {
   const { usuario } = useAuth();
-  return usuario ? children : <Navigate to="/login" />;
+  const location = useLocation();
+  // Recordar a dónde quería ir (ej. /checkout) para volver allí tras iniciar sesión.
+  return usuario ? children : <Navigate to="/login" state={{ from: location.pathname }} />;
 }
 
 function RutaAdmin({ children }) {
@@ -79,7 +81,10 @@ function RutaAdminOConfirmador({ children }) {
 
 function RutaPublica({ children }) {
   const { usuario } = useAuth();
+  const location = useLocation();
   if (!usuario) return children;
+  // Si venía de una ruta protegida (ej. "Hacer pedido" -> /checkout), volver allí.
+  if (location.state?.from) return <Navigate to={location.state.from} replace />;
   const rol = usuario.rol;
   if (rol === 'admin')                 return <Navigate to="/admin/dashboard" />;
   if (rol === 'confirmador_domicilio') return <Navigate to="/admin/domicilios" />;

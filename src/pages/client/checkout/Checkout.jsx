@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Check, AlertTriangle, Bike, User, CreditCard } from 'lucide-react';
 import { LogoBancolombia, LogoNequi, LogoEfectivo } from '../../../components/common/LogosApps';
@@ -8,6 +8,8 @@ import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { useValorPunto } from '../../../hooks/useValorPunto';
+import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
+import { mensajeTiendaCerrada } from '../../../utils/formatHora';
 import * as api from '../../../services/api';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
@@ -678,14 +680,54 @@ export default function Checkout() {
   const navigate                           = useNavigate();
   const location                           = useLocation();
   const { usuario, actualizarUsuario }     = useAuth();
-  const { carrito, limpiarCarrito }        = useCart();
+  const { carrito, limpiarCarrito, validarCarrito, sincronizando } = useCart();
 
   // Puntos que viene desde el carrito del catálogo
   const puntosAUsarNav = location.state?.puntosAUsar || 0;
 
+  // Tienda cerrada: se puede revisar el pedido, pero no enviarlo (la API
+  // también lo valida al crear el pedido).
+  const estadoTienda  = useEstadoTienda();
+  const tiendaCerrada = !estadoTienda.cargando && !estadoTienda.abierto;
+
+  // Cambios encontrados al revalidar el carrito (precio, producto agotado,
+  // topping o adición que ya no existe...), para mostrárselos al cliente.
+  const [cambiosCarrito, setCambiosCarrito] = useState([]);
+  const validadoAlEntrar = useRef(false);
+
+  // Al entrar al checkout: revalidar con la API lo que hay en el carrito
+  // (después de combinarlo con el del servidor si acaba de iniciar sesión).
+  useEffect(() => {
+    if (sincronizando || validadoAlEntrar.current || carrito.length === 0) return;
+    validadoAlEntrar.current = true;
+    validarCarrito().then((cambios) => { if (cambios && cambios.length > 0) setCambiosCarrito(cambios); });
+  }, [sincronizando, carrito.length, validarCarrito]);
+
+  const avisoCambios = cambiosCarrito.length > 0 && (
+    <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 12, padding: '14px 16px', margin: '0 auto 16px', maxWidth: 720, color: '#92400e', fontSize: 14 }}>
+      <strong>Actualizamos tu carrito con la información más reciente:</strong>
+      <ul style={{ margin: '8px 0 10px', paddingLeft: 20 }}>
+        {cambiosCarrito.map((c, i) => <li key={i}>{c}</li>)}
+      </ul>
+      <button type="button" className="checkout-btn-sec" onClick={() => setCambiosCarrito([])}>Entendido</button>
+    </div>
+  );
+
   const handleDatosNext = () => {
     setPaso(2);
   };
+
+  // Recién inició sesión: se está combinando su carrito con el del servidor.
+  if (carrito.length === 0 && !confirmado && sincronizando) {
+    return (
+      <div className="checkout-wrapper">
+        <Navbar />
+        <div className="checkout-page">
+          <div className="checkout-contenido" style={{ textAlign: 'center', padding: '60px 32px', color: '#888', fontWeight: 600 }}>Cargando tu carrito…</div>
+        </div>
+      </div>
+    );
+  }
 
   // Carrito vacío sin haber confirmado → redirige al catálogo
   if (carrito.length === 0 && !confirmado) {
@@ -694,6 +736,7 @@ export default function Checkout() {
         <Navbar />
         <div className="checkout-page">
           <div className="checkout-contenido" style={{ textAlign: 'center', padding: '60px 32px' }}>
+            {avisoCambios}
             <div style={{ fontSize: 48, marginBottom: 12 }}>🛒</div>
             <h2 style={{ fontWeight: 900, marginBottom: 8 }}>Tu carrito está vacío</h2>
             <p style={{ color: '#888', marginBottom: 24, fontWeight: 600 }}>Agrega productos antes de continuar con el pedido.</p>
@@ -711,6 +754,19 @@ export default function Checkout() {
     if (procesando) return;
     if (contieneEtiquetaHtml(pagoInfo?.observaciones) || contieneEtiquetaHtml(direccion?.direccion_linea) || contieneEtiquetaHtml(direccion?.referencia)) {
       toast.error(MSG_HTML);
+      return;
+    }
+    if (tiendaCerrada) {
+      toast.error(mensajeTiendaCerrada(estadoTienda));
+      return;
+    }
+    // Revalidar justo antes de pedir: si algo cambió (precio, agotado...),
+    // se actualiza el carrito, se avisa y NO se envía hasta que confirme de nuevo.
+    const cambios = await validarCarrito();
+    if (cambios && cambios.length > 0) {
+      setCambiosCarrito(cambios);
+      toast.error('Actualizamos tu carrito. Revisa los cambios y confirma de nuevo.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     setProcesando(true);
@@ -831,6 +887,12 @@ export default function Checkout() {
             </div>
           ))}
         </div>
+        {tiendaCerrada && (
+          <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 12, padding: '12px 16px', margin: '0 auto 16px', maxWidth: 720, color: '#92400e', fontWeight: 700, fontSize: 14 }}>
+            🔒 {mensajeTiendaCerrada(estadoTienda)}
+          </div>
+        )}
+        {avisoCambios}
         <div className="checkout-contenido">
           {paso === 1 && <PasoDatos     usuario={usuario} onNext={handleDatosNext} onActualizarUsuario={actualizarUsuario} />}
           {paso === 2 && <PasoDireccion usuario={usuario} onNext={(d) => { setDireccion(d); setPaso(3); }} onBack={() => setPaso(1)} />}

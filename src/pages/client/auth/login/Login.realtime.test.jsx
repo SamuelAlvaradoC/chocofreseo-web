@@ -4,6 +4,7 @@ import Login from './Login';
 
 jest.mock('react-router-dom', () => ({
   useNavigate: () => jest.fn(),
+  useLocation: () => ({ pathname: '/login', state: null }),
   Link: ({ children }) => <a>{children}</a>,
 }), { virtual: true });
 

@@ -59,6 +59,10 @@ export const editarVenta         = (id,d) => patch(`/ventas/${id}/editar`, d);
 export const misVentas           = ()     => get('/ventas/mis-pedidos');
 export const misDespachados      = (est, fecha) => get('/ventas/mis-despachos', { ...(est ? { estado: est } : {}), ...(fecha ? { fecha } : {}) });
 export const crearMiPedido       = (d)    => post('/ventas/mi-pedido', d);
+// Carrito: el guardado del usuario (con sesión) y la revalidación (pública).
+export const getCarritoGuardado  = ()      => get('/carrito');
+export const guardarCarrito      = (items) => put('/carrito', { items });
+export const validarCarrito      = (items) => post('/carrito/validar', { items });
 
 // ── Dashboard ─────────────────────────────────────────────────
 export const dashTotalDia           = (fecha) => get('/dashboard/total-dia', fecha ? { fecha } : undefined);
