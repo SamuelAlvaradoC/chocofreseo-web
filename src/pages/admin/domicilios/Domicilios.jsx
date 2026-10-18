@@ -9,6 +9,7 @@ import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Domicilios.css';
 import { pagoDeVenta, fmtCop } from '../../../utils/pago';
+import { imgOpt } from '../../../utils/cloudinary';
 
 const COLOR_SALSAS = '#ea580c';
 const parsearSalsas = (raw) => { if (!raw) return []; try { const p = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(p) ? p : []; } catch { return []; } };
@@ -136,7 +137,7 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
     <>
       {lightbox && (
         <div onClick={() => setLightbox(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
-          <img src={pedido.comprobante} alt="Comprobante" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} />
+          <img loading="lazy" decoding="async" src={pedido.comprobante} alt="Comprobante" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} />
         </div>
       )}
 
@@ -264,8 +265,8 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
               <p className="form-seccion-titulo">Comprobante de pago</p>
               {pedido.comprobante ? (
                 <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-                  <img
-                    src={pedido.comprobante}
+                  <img loading="lazy" decoding="async"
+                    src={imgOpt(pedido.comprobante)}
                     alt="Comprobante"
                     onClick={() => setLightbox(true)}
                     style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block', cursor: 'zoom-in' }}

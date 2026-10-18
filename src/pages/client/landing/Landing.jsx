@@ -243,7 +243,7 @@ export default function Landing() {
                 }}>
                   <div style={{ height: 160, position: 'relative', overflow: 'hidden' }}>
                     {img ? (
-                      <img src={imgOpt(img, 600)} alt={p.nombre}
+                      <img loading="lazy" decoding="async" src={imgOpt(img)} alt={p.nombre}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     ) : (
                       <div style={{

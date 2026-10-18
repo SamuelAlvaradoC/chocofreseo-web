@@ -5,7 +5,7 @@ import AdminLayout from '../../../components/layout/AdminLayout';
 import './Toppings.css';
 import * as api from '../../../services/api';
 import { uploadToCloudinary } from '../../../utils/uploadCloudinary';
-import { imgOpt } from '../../../utils/cloudinary';
+import { imgOpt, imgCl } from '../../../utils/cloudinary';
 
 const POR_PAGINA = 10;
 
@@ -176,7 +176,7 @@ function ModalDetalle({ open, onClose, topping }) {
         </div>
         {topping.img && (
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <img src={imgOpt(topping.img, 400)} alt={topping.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
+            <img loading="lazy" decoding="async" src={imgOpt(topping.img)} alt={topping.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
           </div>
         )}
         <div className="detalle-grid">
@@ -279,7 +279,7 @@ export default function Toppings() {
               paginados.map((t) => (
                 <tr key={t.id_topping} style={{ opacity: t.estado === 0 ? 0.6 : 1 }}>
                   <td style={{ textTransform: 'capitalize' }}>
-                    {t.img && <img src={imgOpt(t.img, 120)} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', marginRight: 8, verticalAlign: 'middle' }} />}
+                    {t.img && <img loading="lazy" decoding="async" src={imgCl(t.img, 400, 400)} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', marginRight: 8, verticalAlign: 'middle' }} />}
                     {t.nombre}
                   </td>
                   <td className="td-suave">{t.descripcion}</td>

@@ -126,7 +126,7 @@ function ModalDetalle({ open, onClose, categoria }) {
         </div>
         {categoria.img && (
           <div style={{ textAlign: 'center', marginBottom: 14 }}>
-            <img src={imgOpt(categoria.img, 400)} alt={categoria.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
+            <img loading="lazy" decoding="async" src={imgOpt(categoria.img)} alt={categoria.nombre} style={{ maxHeight: 120, borderRadius: 10, objectFit: 'cover' }} />
           </div>
         )}
         <div className="detalle-grid">

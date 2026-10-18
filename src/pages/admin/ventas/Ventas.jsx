@@ -11,6 +11,7 @@ import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Ventas.css';
 import { pagoDeVenta, fmtCop } from '../../../utils/pago';
+import { imgOpt } from '../../../utils/cloudinary';
 
 const ESTADO_LABELS = {
   pendiente:  'Pendiente',
@@ -96,7 +97,7 @@ function ModalDetalle({ open, onClose, venta }) {
     <>
       {lightbox && (
         <div onClick={() => setLightbox(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
-          <img src={venta.comprobante_url} alt="Comprobante" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} />
+          <img loading="lazy" decoding="async" src={venta.comprobante_url} alt="Comprobante" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} />
         </div>
       )}
       <div className="modal-overlay">
@@ -268,8 +269,8 @@ function ModalDetalle({ open, onClose, venta }) {
             {venta.comprobante_url && (
               <div style={{ marginTop: 10 }}>
                 <p style={{ fontSize: 12, color: '#888', marginBottom: 6, fontWeight: 600 }}>Comprobante de pago</p>
-                <img
-                  src={venta.comprobante_url}
+                <img loading="lazy" decoding="async"
+                  src={imgOpt(venta.comprobante_url)}
                   alt="Comprobante"
                   onClick={() => setLightbox(true)}
                   style={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 8, border: '1px solid #e5e7eb', cursor: 'zoom-in', display: 'block' }}

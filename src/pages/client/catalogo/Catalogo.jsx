@@ -140,7 +140,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
     <>
       <div style={{ position: 'relative', height: 160, flexShrink: 0 }}>
         {producto.img
-          ? <img src={imgCl(producto.img, 600, 320)} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px 20px 0 0' }} />
+          ? <img loading="lazy" decoding="async" src={imgCl(producto.img, 600, 320)} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px 20px 0 0' }} />
           : <div style={{ height: '100%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, borderRadius: '20px 20px 0 0' }}>🥣</div>
         }
         <button onClick={cerrar} style={{ position: 'absolute', top: 12, right: 12, background: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, fontWeight: 800, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -167,7 +167,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                 boxShadow: sel ? '0 6px 20px rgba(202,11,11,0.35)' : 'none',
                 transition: 'all 0.2s ease',
               }}>
-                <img src={imgOpt(op.img, 300)} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <img loading="lazy" decoding="async" src={imgOpt(op.img)} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <div style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0,
                   background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
@@ -207,7 +207,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
     <>
       <div style={{ position: 'relative', height: 160, flexShrink: 0 }}>
         {producto.img
-          ? <img src={imgCl(producto.img, 600, 320)} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px 20px 0 0' }} />
+          ? <img loading="lazy" decoding="async" src={imgCl(producto.img, 600, 320)} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px 20px 0 0' }} />
           : <div style={{ height: '100%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, borderRadius: '20px 20px 0 0' }}>🍓</div>
         }
         <button onClick={cerrar} style={{ position: 'absolute', top: 12, right: 12, background: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, fontWeight: 800, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -230,7 +230,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                 boxShadow: sel ? '0 6px 20px rgba(202,11,11,0.35)' : 'none',
                 transition: 'all 0.2s ease',
               }}>
-                <img src={imgOpt(op.img, 300)} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                <img loading="lazy" decoding="async" src={imgOpt(op.img)} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 <div style={{
                   position: 'absolute', bottom: 0, left: 0, right: 0,
                   background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
@@ -271,7 +271,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
       {/* Imagen del producto */}
       <div style={{ position: 'relative', height: 220, flexShrink: 0 }}>
         {producto.img
-          ? <img src={imgCl(producto.img, 600, 440)} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px 20px 0 0' }} />
+          ? <img loading="lazy" decoding="async" src={imgCl(producto.img, 600, 440)} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px 20px 0 0' }} />
           : <div style={{ height: '100%', background: '#fff5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, borderRadius: '20px 20px 0 0' }}>🍫</div>
         }
         <button onClick={cerrar} style={{ position: 'absolute', top: 12, right: 12, background: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, fontWeight: 800, boxShadow: '0 2px 8px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -370,7 +370,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                 transition: 'all 0.2s ease',
               }}>
                 {t.img
-                  ? <img src={imgCl(t.img, 200, 200)} alt={t.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ? <img loading="lazy" decoding="async" src={imgCl(t.img, 200, 200)} alt={t.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   : <div style={{ width: '100%', height: '100%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 28, color: '#aaa' }}>{t.nombre.charAt(0).toUpperCase()}</div>
                 }
                 {/* Overlay nombre */}
@@ -431,7 +431,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                     transition: 'all 0.2s ease',
                   }}>
                     {a.img
-                      ? <img src={imgCl(a.img, 200, 200)} alt={a.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      ? <img loading="lazy" decoding="async" src={imgCl(a.img, 200, 200)} alt={a.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       : <div style={{ width: '100%', height: '100%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 28, color: '#d97706' }}>{a.nombre.charAt(0).toUpperCase()}</div>
                     }
                     {/* Overlay nombre + precio */}
@@ -482,7 +482,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                     transition: 'all 0.2s ease',
                   }}>
                     {t.img
-                      ? <img src={imgCl(t.img, 200, 200)} alt={t.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      ? <img loading="lazy" decoding="async" src={imgCl(t.img, 200, 200)} alt={t.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       : <div style={{ width: '100%', height: '100%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 28, color: '#aaa' }}>{t.nombre.charAt(0).toUpperCase()}</div>
                     }
                     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)', padding: '22px 8px 8px', textAlign: 'center' }}>
@@ -628,7 +628,7 @@ function ModalProducto({ open, onClose, onConfirmar, producto, toppingsDisponibl
                 <button key={salsa.id} onClick={() => setSalsasElegidas(prev => sel ? prev.filter(s => s.id !== salsa.id) : [...prev, salsa])}
                   style={{ padding: 0, borderRadius: 12, border: sel ? '3px solid #CA0B0B' : '1px solid #eee', background: 'none', cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 100,
                     boxShadow: sel ? '0 4px 14px rgba(202,11,11,0.3)' : 'none', transition: 'all 0.2s ease' }}>
-                  <img src={imgOpt(salsa.img, 300)} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  <img loading="lazy" decoding="async" src={imgOpt(salsa.img)} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   <div style={{
                     position: 'absolute', bottom: 0, left: 0, right: 0,
                     background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)',
@@ -765,7 +765,7 @@ function CarritoBottom({ carrito, totalItems, onCambiarCantidad, onQuitar, onIrC
                   <div key={item.lineaId} className="carrito-item">
                     <div className="carrito-item-thumb" style={{ overflow: 'hidden', borderRadius: 8, flexShrink: 0 }}>
                       {item.img
-                        ? <img src={imgCl(item.img, 104, 104)} alt={item.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        ? <img loading="lazy" decoding="async" src={imgCl(item.img, 104, 104)} alt={item.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                         : <div style={{ width: '100%', height: '100%', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 16, color: '#bbb' }}>{item.nombre.charAt(0)}</div>
                       }
                     </div>
@@ -1024,7 +1024,7 @@ function CardProducto({ p, onAgregar, destacado }) {
         <div style={{ position: 'relative' }}>
           <div style={{ width:'100%', height:200, borderRadius:'12px 12px 0 0', overflow:'hidden', background:'#f5f5f5' }}>
             {p.img ? (
-              <img src={imgCl(p.img, 400, 400)} alt={p.nombre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              <img loading="lazy" decoding="async" src={imgCl(p.img, 400, 400)} alt={p.nombre} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             ) : (
               <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize: 48 }}>🍫</div>
             )}

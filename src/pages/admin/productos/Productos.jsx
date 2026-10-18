@@ -312,7 +312,7 @@ function ModalDetalle({ open, onClose, producto, categoriasLista = [], onEditar 
         {/* Contenido con scroll */}
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {producto.img && (
-            <img src={imgCl(producto.img, 600, 400)} alt={producto.nombre} style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+            <img loading="lazy" decoding="async" src={imgCl(producto.img, 600, 400)} alt={producto.nombre} style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
           )}
           <div style={{ padding: '16px 20px' }}>
             <div className="detalle-grid">
@@ -489,7 +489,7 @@ export default function Productos() {
               paginados.map((p) => (
                 <tr key={p.id_producto} style={{ opacity: p.estado === 0 ? 0.6 : 1 }}>
                   <td style={{ textTransform: 'capitalize' }}>
-                    {p.img && <img src={imgCl(p.img, 56, 56)} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', marginRight: 8, verticalAlign: 'middle' }} />}
+                    {p.img && <img loading="lazy" decoding="async" src={imgCl(p.img, 56, 56)} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', marginRight: 8, verticalAlign: 'middle' }} />}
                     {p.nombre}
                   </td>
                   <td className="td-suave">{getCategoria(p.id_categoria)}</td>

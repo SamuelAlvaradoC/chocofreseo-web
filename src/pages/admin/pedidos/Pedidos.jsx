@@ -226,7 +226,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
               transition: 'all 0.2s ease',
             }}>
             {t.img
-              ? <img src={imgCl(t.img, 200, 200)} alt={t.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ? <img loading="lazy" decoding="async" src={imgCl(t.img, 200, 200)} alt={t.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               : <div style={{ width: '100%', height: '100%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, color: '#aaa' }}>{t.nombre.charAt(0).toUpperCase()}</div>
             }
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)', padding: '20px 6px 6px', textAlign: 'center' }}>
@@ -276,7 +276,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                     <button key={op.id} type="button" onClick={() => setFrutasTemp(op.id)}
                       style={{ padding: 0, borderRadius: 12, border: sel ? '2.5px solid #CA0B0B' : '2px solid transparent', background: '#fff', cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 110,
                         boxShadow: sel ? '0 4px 16px rgba(202,11,11,0.3)' : '0 2px 8px rgba(0,0,0,0.12)', transition: 'all 0.2s ease' }}>
-                      <img src={imgOpt(op.img, 300)} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img loading="lazy" decoding="async" src={imgOpt(op.img)} alt={op.etiqueta} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)', padding: '22px 8px 8px', textAlign: 'center' }}>
                         <div style={{ fontWeight: 700, fontSize: 10, color: '#fff' }}>{op.etiqueta}</div>
                         {sel && <div style={{ fontSize: 9, color: '#fca5a5', marginTop: 1, fontWeight: 600 }}>✓</div>}
@@ -301,7 +301,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                     <button key={op.nombre} type="button" onClick={() => setCoberturaTemp(op.nombre)}
                       style={{ padding: 0, borderRadius: 12, border: sel ? '2.5px solid #CA0B0B' : '2px solid transparent', background: op.color, cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 110,
                         boxShadow: sel ? '0 4px 16px rgba(202,11,11,0.3)' : '0 2px 8px rgba(0,0,0,0.12)', transition: 'all 0.2s ease' }}>
-                      <img src={imgOpt(op.img, 300)} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img loading="lazy" decoding="async" src={imgOpt(op.img)} alt={op.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)', padding: '22px 8px 8px', textAlign: 'center' }}>
                         <div style={{ fontWeight: 700, fontSize: 10, color: '#fff' }}>{op.nombre}</div>
                         {sel && <div style={{ fontSize: 9, color: '#fca5a5', marginTop: 1, fontWeight: 600 }}>✓</div>}
@@ -352,7 +352,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                       onClick={() => setSalsasTemp(p => sel ? p.filter(s => s.id !== salsa.id) : [...p, salsa])}
                       style={{ padding: 0, borderRadius: 10, border: sel ? `2.5px solid ${COLOR_SALSAS}` : '2px solid transparent', background: 'none', cursor: 'pointer', fontFamily: 'inherit', overflow: 'hidden', position: 'relative', height: 90,
                         boxShadow: sel ? '0 4px 14px rgba(234,88,12,0.3)' : '0 2px 6px rgba(0,0,0,0.1)', transition: 'all 0.2s ease' }}>
-                      <img src={imgOpt(salsa.img, 300)} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <img loading="lazy" decoding="async" src={imgOpt(salsa.img)} alt={salsa.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)', padding: '20px 6px 6px', textAlign: 'center' }}>
                         <div style={{ fontWeight: 700, fontSize: 12, color: '#fff' }}>{salsa.nombre}</div>
                         {sel && <div style={{ fontSize: 10, color: esExtra ? '#fbbf24' : '#4ade80', marginTop: 1, fontWeight: 700 }}>{esExtra ? `+$${PRECIO_SALSA_EXTRA.toLocaleString('es-CO')}` : 'Gratis ✓'}</div>}
@@ -407,7 +407,7 @@ function ConfiguradorProducto({ producto, toppingsActivos, adicionesActivas, onA
                           transition: 'all 0.2s ease',
                         }}>
                         {a.img
-                          ? <img src={imgCl(a.img, 200, 200)} alt={a.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          ? <img loading="lazy" decoding="async" src={imgCl(a.img, 200, 200)} alt={a.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           : <div style={{ width: '100%', height: '100%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 24, color: '#d97706' }}>{a.nombre.charAt(0).toUpperCase()}</div>
                         }
                         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)', padding: '20px 6px 6px', textAlign: 'center' }}>
@@ -863,7 +863,7 @@ function ModalCrearVenta({ open, onClose, onGuardar, clientesData = [], producto
                       <div key={p.id_producto} onClick={() => setProductoConfigurar(p)}
                         style={{ border: `2px solid ${unidades > 0 ? '#CA0B0B' : '#e5e7eb'}`, borderRadius: 12, padding: '12px', background: unidades > 0 ? '#fff5f5' : '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', transition: 'all 0.15s' }}>
                         {p.img ? (
-                          <img src={imgCl(p.img, 80, 80)} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover' }} />
+                          <img loading="lazy" decoding="async" src={imgCl(p.img, 80, 80)} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover' }} />
                         ) : (
                           <div style={{ width: 52, height: 52, borderRadius: 8, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 20, color: '#aaa' }}>{(p.nombre || '?').charAt(0).toUpperCase()}</div>
                         )}
@@ -1133,7 +1133,7 @@ function ModalDetalle({ open, onClose, venta }) {
     <>
       {lightbox && (
         <div onClick={() => setLightbox(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
-          <img src={venta.comprobante_url} alt="Comprobante" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} />
+          <img loading="lazy" decoding="async" src={venta.comprobante_url} alt="Comprobante" style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: 8 }} />
         </div>
       )}
       <div className="modal-overlay">
@@ -1305,8 +1305,8 @@ function ModalDetalle({ open, onClose, venta }) {
             {venta.comprobante_url && (
               <div style={{ marginTop: 10 }}>
                 <p style={{ fontSize: 12, color: '#888', marginBottom: 6, fontWeight: 600 }}>Comprobante de pago</p>
-                <img
-                  src={venta.comprobante_url}
+                <img loading="lazy" decoding="async"
+                  src={imgOpt(venta.comprobante_url)}
                   alt="Comprobante"
                   onClick={() => setLightbox(true)}
                   style={{ width: '100%', maxHeight: 200, objectFit: 'contain', borderRadius: 8, border: '1px solid #e5e7eb', cursor: 'zoom-in', display: 'block' }}

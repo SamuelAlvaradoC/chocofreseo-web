@@ -507,7 +507,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
             <label className="checkout-label">Comprobante de transferencia</label>
             <label className="checkout-upload">
               {comprobante
-                ? <img src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
+                ? <img loading="lazy" decoding="async" src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
                 : <div className="checkout-upload-placeholder">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     <span>Subir comprobante</span>
@@ -544,7 +544,7 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
             <label className="checkout-label">Comprobante de transferencia</label>
             <label className="checkout-upload">
               {comprobante
-                ? <img src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
+                ? <img loading="lazy" decoding="async" src={URL.createObjectURL(comprobante)} className="checkout-upload-preview" alt="comprobante" />
                 : <div className="checkout-upload-placeholder">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     <span>Subir comprobante</span>
