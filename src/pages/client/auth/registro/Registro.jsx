@@ -5,7 +5,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import * as api from '../../../../services/api';
 import useDebounce from '../../../../hooks/useDebounce';
 import useContinuarConGoogle from '../../../../hooks/useContinuarConGoogle';
-import BotonGoogle from '../../../../components/auth/BotonGoogle';
+import BotonGoogle, { GOOGLE_CLIENT_ID } from '../../../../components/auth/BotonGoogle';
 import './Registro.css';
 
 // Reglas de frontend más estrictas que registerSchema en el backend
@@ -119,10 +119,15 @@ export default function Registro() {
             Volver a iniciar sesión
           </button>
           <h2 className="login-caja-titulo">Crear cuenta</h2>
-          <p style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, margin: '4px 0 0', fontFamily: 'Nunito, sans-serif' }}>
-            🎁 ¡Gana 200 puntos solo por registrarte!
-          </p>
-          <BotonGoogle onCredential={continuarConGoogle} texto="signup_with" />
+          {/* Con Google disponible, el mensaje de los puntos va encima de su
+              botón; sin Google, se muestra aquí (una sola vez). */}
+          {!GOOGLE_CLIENT_ID && (
+            <p style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, margin: '4px 0 0', fontFamily: 'Nunito, sans-serif' }}>
+              🎁 ¡Gana 200 puntos solo por registrarte!
+            </p>
+          )}
+          <BotonGoogle onCredential={continuarConGoogle} texto="signup_with"
+            encabezado="🎁 Regístrate en un toque con Google y gana 200 puntos" />
           <form onSubmit={handleRegistro} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Nombre completo</label>
@@ -200,7 +205,7 @@ export default function Registro() {
               y la{' '}
               <Link to="/privacidad" target="_blank" className="lf-link-bold">Política de privacidad</Link>.
             </p>
-            <p className="lf-registro">
+            <p className="lf-registro" style={{ marginTop: 14 }}>
               ¿Ya tienes cuenta?{' '}
               <Link to="/login" state={location.state} className="lf-link-bold">Inicia sesión</Link>
             </p>

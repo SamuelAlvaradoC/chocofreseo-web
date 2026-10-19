@@ -28,8 +28,9 @@ export const cargarGoogleIdentity = () => {
 /**
  * @param onCredential (credential: string) => void  se llama con el ID token
  * @param texto 'continue_with' | 'signup_with' | 'signin_with'
+ * @param encabezado texto pequeño opcional encima del botón
  */
-export default function BotonGoogle({ onCredential, texto = 'continue_with', clientId = GOOGLE_CLIENT_ID }) {
+export default function BotonGoogle({ onCredential, texto = 'continue_with', encabezado = null, clientId = GOOGLE_CLIENT_ID }) {
   const contenedor = useRef(null);
   const callback = useRef(onCredential);
   callback.current = onCredential;
@@ -58,9 +59,17 @@ export default function BotonGoogle({ onCredential, texto = 'continue_with', cli
 
   if (!clientId) return null;
   return (
-    <div style={{ margin: '12px 0 4px' }}>
+    <div style={{ margin: '16px 0 4px' }}>
+      {encabezado && (
+        <p style={{ margin: '0 0 8px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: '#16a34a', fontFamily: 'Nunito, sans-serif', textWrap: 'balance' }}>
+          {encabezado}
+        </p>
+      )}
+      {/* El iframe de Google trae 10 px de margen propio a cada lado: el
+          botón visible queda del mismo ancho que los campos. 'large' (40 px)
+          es la altura máxima que permite Google Identity Services. */}
       <div ref={contenedor} data-testid="boton-google" style={{ display: 'flex', justifyContent: 'center', minHeight: 44 }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 2px', color: '#aaa', fontSize: 12, fontWeight: 700, fontFamily: 'Nunito, sans-serif' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 14px', color: '#aaa', fontSize: 12, fontWeight: 700, fontFamily: 'Nunito, sans-serif' }}>
         <span style={{ flex: 1, height: 1, background: '#e5e5e5' }} />o con tu correo<span style={{ flex: 1, height: 1, background: '#e5e5e5' }} />
       </div>
     </div>

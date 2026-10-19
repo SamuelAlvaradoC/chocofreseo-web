@@ -137,8 +137,7 @@ export default function Login() {
             <button className="lf-btn-primario" type="submit" disabled={cargando}>
               {cargando ? 'Ingresando...' : 'Iniciar sesión →'}
             </button>
-            <div className="lf-divisor"><span>o</span></div>
-            <p className="lf-registro">
+            <p className="lf-registro" style={{ marginTop: 24 }}>
               ¿No tienes cuenta?{' '}
               <Link to="/registro" state={location.state} className="lf-link-bold">Regístrate</Link>
             </p>
