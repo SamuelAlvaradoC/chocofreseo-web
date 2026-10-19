@@ -60,13 +60,6 @@
   font-weight: 700;
 }
 
-.legal-completar {
-  background: #fef9c3;
-  border-radius: 4px;
-  padding: 0 4px;
-  font-weight: 700;
-}
-
 .legal-indice {
   background: var(--rojo-light, #fff5f5);
   border-radius: 12px;

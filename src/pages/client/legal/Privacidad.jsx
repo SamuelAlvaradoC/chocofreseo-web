@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import LegalLayout, { EMPRESA, Completar } from './LegalLayout';
+import LegalLayout, { EMPRESA } from './LegalLayout';
 
 // Política de tratamiento de datos personales (Ley 1581 de 2012 y Decreto
 // 1074 de 2015, que compila el Decreto 1377 de 2013). Describe lo que el
@@ -17,11 +17,10 @@ export default function Privacidad() {
 
       <h2>1. Responsable del tratamiento</h2>
       <ul>
-        <li><strong>Nombre comercial:</strong> {EMPRESA.nombre}</li>
-        <li><strong>Razón social:</strong> {EMPRESA.razonSocial || <Completar />}</li>
-        <li><strong>NIT:</strong> {EMPRESA.nit || <Completar />}</li>
+        <li><strong>Responsable:</strong> {EMPRESA.nombreLegal} (nombre comercial), NIT {EMPRESA.nit}</li>
         <li><strong>Domicilio:</strong> {EMPRESA.ciudad}</li>
         <li><strong>Sedes:</strong> {EMPRESA.sedes.join(' · ')}</li>
+        <li><strong>Persona que atiende las solicitudes de datos personales:</strong> {EMPRESA.encargadoDatos}</li>
         <li><strong>Correo para temas de datos personales:</strong> <a href={`mailto:${EMPRESA.correo}`}>{EMPRESA.correo}</a></li>
         <li><strong>WhatsApp:</strong> <a href={EMPRESA.whatsappUrl} target="_blank" rel="noopener noreferrer">{EMPRESA.whatsapp}</a></li>
       </ul>
@@ -62,24 +61,10 @@ export default function Privacidad() {
       </p>
 
       <h2>4. Con quién se comparten y dónde se guardan</h2>
-      <p>Para prestar el servicio usamos proveedores que tratan los datos por cuenta nuestra (encargados):</p>
-      <ul>
-        <li><strong>Render:</strong> servidores donde funcionan nuestro sistema y la base de datos.</li>
-        <li><strong>Vercel:</strong> servidores que publican nuestra página web.</li>
-        <li><strong>Cloudinary:</strong> almacenamiento de imágenes, incluidos los comprobantes de pago.</li>
-        <li><strong>Google:</strong> envío de los correos del servicio (Gmail) y, si lo eliges, inicio de sesión con Google.</li>
-      </ul>
       <p>
-        Estos proveedores tienen sus servidores fuera de Colombia (por ejemplo, en Estados Unidos), por lo que tus datos
-        pueden ser objeto de transferencia o transmisión internacional. Al aceptar esta política autorizas esa
-        transmisión, que se hace solo para las finalidades descritas aquí.
-      </p>
-      <p>
-        Dentro de {EMPRESA.nombre}, cada persona ve solo lo que necesita para su trabajo: por ejemplo, el domiciliario
-        ve el nombre, el teléfono y la dirección del pedido que va a entregar.
-      </p>
-      <p>
-        También podremos entregar datos a autoridades que los soliciten en ejercicio de sus funciones legales.
+        Para prestar el servicio usamos proveedores tecnológicos que guardan y procesan los datos en servidores fuera de
+        Colombia; al aceptar esta política autorizas esa transferencia internacional de tus datos, solo para las
+        finalidades descritas aquí. Dentro de {EMPRESA.nombre}, cada persona ve solo lo necesario para su trabajo.
       </p>
 
       <h2>5. Cómo protegemos tus datos</h2>
@@ -116,26 +101,10 @@ export default function Privacidad() {
 
       <h2>8. Cómo ejercer tus derechos</h2>
       <p>
-        Puedes actualizar tu nombre, correo y teléfono en cualquier momento desde tu perfil. Para cualquier otra solicitud
-        (conocer, rectificar, suprimir, revocar), escríbenos a <a href={`mailto:${EMPRESA.correo}`}>{EMPRESA.correo}</a> desde
-        el correo de tu cuenta, indicando:
-      </p>
-      <ul>
-        <li>Tu nombre y el correo con el que te registraste.</li>
-        <li>Qué solicitas y, si es un reclamo, los hechos y los documentos que quieras aportar.</li>
-        <li>El medio por el que quieres recibir la respuesta.</li>
-      </ul>
-      <p>Tiempos de respuesta (artículos 14 y 15 de la Ley 1581 de 2012):</p>
-      <ul>
-        <li><strong>Consultas:</strong> máximo 10 días hábiles desde que la recibimos. Si no es posible, te diremos el motivo y
-          responderemos en máximo 5 días hábiles más.</li>
-        <li><strong>Reclamos</strong> (corrección, actualización, supresión o revocatoria): máximo 15 días hábiles. Si no es
-          posible, te diremos el motivo y responderemos en máximo 8 días hábiles más. Si el reclamo está incompleto, te
-          pediremos lo que falte dentro de los 5 días siguientes; si no lo completas en 2 meses, se entenderá que
-          desististe.</li>
-      </ul>
-      <p>
-        La persona o área encargada de atender estas solicitudes es: <Completar>COMPLETAR: nombre o cargo</Completar>.
+        Puedes actualizar tu nombre, correo y teléfono en cualquier momento desde tu perfil. Para ejercer cualquiera de tus
+        derechos (conocer, actualizar, rectificar, suprimir o revocar), escríbenos a{' '}
+        <a href={`mailto:${EMPRESA.correo}`}>{EMPRESA.correo}</a> desde el correo de tu cuenta; te responderemos dentro de los
+        plazos que establece la ley. Las solicitudes las atiende {EMPRESA.encargadoDatos}.
       </p>
 
       <h2>9. Menores de edad</h2>

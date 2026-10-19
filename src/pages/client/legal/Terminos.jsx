@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import LegalLayout, { EMPRESA, Completar } from './LegalLayout';
+import LegalLayout, { EMPRESA } from './LegalLayout';
 
 // Términos y condiciones según cómo funciona HOY el sistema (pedidos solo a
 // domicilio, horario configurable, costo de domicilio por barrio, programa de
@@ -9,9 +9,8 @@ export default function Terminos() {
   return (
     <LegalLayout titulo="Términos y condiciones">
       <p>
-        Estos términos regulan el uso de la página web ({EMPRESA.web}) y la aplicación de {EMPRESA.nombre}
-        {EMPRESA.razonSocial ? ` (${EMPRESA.razonSocial})` : <> (<Completar>COMPLETAR: razón social</Completar>)</>},
-        NIT {EMPRESA.nit || <Completar />}, con domicilio en {EMPRESA.ciudad}. Al crear una cuenta o hacer un pedido
+        Estos términos regulan el uso de la página web ({EMPRESA.web}) y la aplicación de {EMPRESA.nombreLegal} (nombre
+        comercial), NIT {EMPRESA.nit}, con domicilio en {EMPRESA.ciudad}. Al crear una cuenta o hacer un pedido
         aceptas estos términos y nuestra <Link to="/privacidad">Política de tratamiento de datos personales</Link>.
       </p>
 
@@ -33,9 +32,7 @@ export default function Terminos() {
         <li>Los precios están en pesos colombianos. Antes de enviar tu pedido revisamos de nuevo los precios y la disponibilidad
           de cada producto, topping y adición; si algo cambió te lo mostramos para que confirmes. El valor que vale es el que ves
           al confirmar.</li>
-        <li>Las personalizaciones tienen el costo que se muestra al elegirlas. Por ejemplo, cada producto incluye cierta cantidad
-          de toppings y los adicionales cuestan $2.000 cada uno; las dos primeras salsas son gratis y cada salsa adicional
-          cuesta $5.000.</li>
+        <li>Las personalizaciones adicionales (toppings, salsas, adiciones, etc.) tienen el costo que se muestra al elegirlas.</li>
         <li>Tu pedido queda <strong>pendiente</strong> hasta que lo confirmemos. Podemos rechazarlo o anularlo si un producto se
           agotó, si la dirección está fuera de nuestra zona de cobertura o si no podemos verificar el pago. En ese caso te
           avisamos y, si usaste puntos, te los devolvemos.</li>
@@ -62,10 +59,10 @@ export default function Terminos() {
         <li>Si necesitas cambiar o cancelar tu pedido, escríbenos cuanto antes por WhatsApp
           (<a href={EMPRESA.whatsappUrl} target="_blank" rel="noopener noreferrer">{EMPRESA.whatsapp}</a>). Si ya está en
           preparación, puede que no sea posible.</li>
-        <li>Nuestros productos son perecederos, por lo que no aplica el derecho de retracto (artículo 47 de la Ley 1480 de 2011).</li>
-        <li>Si un producto llega en mal estado o no corresponde a lo que pediste, avísanos por WhatsApp o a
-          {' '}<a href={`mailto:${EMPRESA.correo}`}>{EMPRESA.correo}</a> el mismo día, con fotos si es posible, y lo revisamos
-          según el Estatuto del Consumidor (Ley 1480 de 2011).</li>
+        <li>Si un pedido se anula, los puntos que hayas usado en él te vuelven a quedar disponibles.</li>
+        <li>No hacemos devoluciones de dinero. Si tu pedido llega con un problema (producto equivocado, incompleto o en mal
+          estado), escríbenos por WhatsApp o a <a href={`mailto:${EMPRESA.correo}`}>{EMPRESA.correo}</a> y lo solucionamos con
+          un cambio o una reposición.</li>
       </ul>
 
       <h2>6. Programa de puntos</h2>

@@ -3,13 +3,12 @@ import Navbar from '../../../components/layout/Navbar/Navbar';
 import Footer from '../../../components/layout/Footer/Footer';
 import './Legal.css';
 
-// Datos de la empresa que se repiten en Privacidad y Términos. Lo marcado
-// con COMPLETAR debe llenarlo el negocio antes de usar estos textos como
-// definitivos.
+// Datos de la empresa que se repiten en Privacidad y Términos.
 export const EMPRESA = {
   nombre:     'ChocoFreseo',
-  razonSocial: null, // [COMPLETAR]
-  nit:        null,  // [COMPLETAR]
+  nombreLegal: 'Choco Freseo',
+  nit:        '1000641172-1',
+  encargadoDatos: 'Gilberto Esneider Montoya Restrepo',
   ciudad:     'Medellín, Antioquia, Colombia',
   sedes:      ['La Milagrosa: Carrera 29 #42-49, Medellín', 'Aranjuez: Calle 90 #50D-35, Medellín'],
   correo:     'chocofreseo@gmail.com',
@@ -19,9 +18,6 @@ export const EMPRESA = {
 };
 
 export const VIGENCIA = '18 de octubre de 2026';
-
-/** Texto pendiente de completar por el negocio (resaltado en amarillo). */
-export const Completar = ({ children = 'COMPLETAR' }) => <span className="legal-completar">[{children}]</span>;
 
 export default function LegalLayout({ titulo, children }) {
   useEffect(() => {
