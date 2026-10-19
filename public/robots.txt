@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Allow: /catalogo
+Allow: /terminos
+Allow: /privacidad
 Allow: /nosotros
 Disallow: /admin
 Disallow: /domiciliario

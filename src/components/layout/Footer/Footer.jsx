@@ -48,6 +48,8 @@ export default function Footer() {
           <Link to="/catalogo" className="footer-link">Catálogo</Link>
           <Link to="/login"    className="footer-link">Iniciar sesión</Link>
           <Link to="/registro" className="footer-link">Registrarse</Link>
+          <Link to="/terminos" className="footer-link">Términos y condiciones</Link>
+          <Link to="/privacidad" className="footer-link">Política de privacidad</Link>
         </div>
 
         {/* Columna 3: Sedes */}

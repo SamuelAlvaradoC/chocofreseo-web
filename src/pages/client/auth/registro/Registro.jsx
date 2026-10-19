@@ -190,6 +190,12 @@ export default function Registro() {
             <button className="lf-btn-primario" type="submit" disabled={cargando}>
               {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
+            <p style={{ fontSize: 12, color: '#888', textAlign: 'center', margin: '10px 0 0', lineHeight: 1.5, fontFamily: 'Nunito, sans-serif' }}>
+              Al registrarte aceptas los{' '}
+              <Link to="/terminos" target="_blank" className="lf-link-bold">Términos y condiciones</Link>{' '}
+              y la{' '}
+              <Link to="/privacidad" target="_blank" className="lf-link-bold">Política de privacidad</Link>.
+            </p>
             <p className="lf-registro">
               ¿Ya tienes cuenta?{' '}
               <Link to="/login" state={location.state} className="lf-link-bold">Inicia sesión</Link>

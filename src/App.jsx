@@ -41,6 +41,8 @@ import CatalogoPage from './pages/client/catalogo';
 import CheckoutPage from './pages/client/checkout';
 import PerfilPage      from './pages/client/perfil';
 import MisPedidosPage from './pages/client/mispedidos';
+import PrivacidadPage from './pages/client/legal/Privacidad';
+import TerminosPage   from './pages/client/legal/Terminos';
 
 // ── Rutas protegidas ───────────────────────────────────────────
 function RutaPrivada({ children }) {
@@ -110,6 +112,8 @@ function App() {
         {/* ── Cliente — públicas (sin login) ── */}
         <Route path="/landing"  element={<LandingPage />} />
         <Route path="/catalogo" element={<CatalogoPage />} />
+        <Route path="/privacidad" element={<PrivacidadPage />} />
+        <Route path="/terminos"   element={<TerminosPage />} />
 
         {/* ── Cliente — requiere login ── */}
         <Route path="/checkout" element={<RutaPrivada><CheckoutPage /></RutaPrivada>} />
