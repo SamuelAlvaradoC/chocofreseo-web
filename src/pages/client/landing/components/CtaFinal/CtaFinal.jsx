@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { MapPin, RefreshCw, ThumbsUp, Star, Clock, MessageSquare, Send, AlertTriangle, Laptop } from 'lucide-react';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../../../utils/validarSinHtml';
 import { notificarResenaEnviada } from '../../../../../services/resenaEvents';
+import { headersConSesion } from '../../../../../utils/headersConSesion';
 import './CtaFinal.css';
 
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:3000') + '/api';
@@ -40,9 +41,11 @@ export default function CtaFinal() {
     setErrorResena('');
     setEnviandoResena(true);
     try {
+      // La reseña de un pedido exige la sesión del cliente dueño del pedido
+      // (la encuesta general sin pedido sigue siendo pública).
       const res = await fetch(`${API_URL}/resenas`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headersConSesion(),
         body: JSON.stringify({
           sede, frecuencia,
           calificacion_atencion: califAtencion,
