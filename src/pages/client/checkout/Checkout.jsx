@@ -680,7 +680,7 @@ export default function Checkout() {
   const navigate                           = useNavigate();
   const location                           = useLocation();
   const { usuario, actualizarUsuario }     = useAuth();
-  const { carrito, limpiarCarrito, validarCarrito, sincronizando } = useCart();
+  const { carrito, vaciarTrasPedido, validarCarrito, sincronizando } = useCart();
 
   // Puntos que viene desde el carrito del catálogo
   const puntosAUsarNav = location.state?.puntosAUsar || 0;
@@ -849,7 +849,7 @@ export default function Checkout() {
         }).catch(() => {}); // no bloquear si falla
       }
 
-      limpiarCarrito();
+      vaciarTrasPedido(); // carrito del dispositivo y de la cuenta
       setConfirmado(true);
     } catch (err) {
       const mensaje = err?.response?.data?.message || 'No pudimos enviar tu pedido. Verifica tu conexión e intenta de nuevo.';

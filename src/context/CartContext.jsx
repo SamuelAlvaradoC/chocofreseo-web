@@ -13,11 +13,18 @@ const parsearSalsas = (raw) => {
 };
 
 // ── Dónde se guarda el carrito ────────────────────────────────────────────
-// Cualquiera puede armar su carrito, con o sin sesión:
+// Una sola fuente de verdad: el estado `carrito` de este contexto es lo que
+// muestran el carrito, el checkout y la confirmación, y lo que se envía.
+// Se guarda en:
 //   - sin sesión  -> localStorage 'carrito_anon'
 //   - con sesión  -> localStorage 'carrito_<id_usuario>' + servidor (tabla carritos)
-// Al iniciar sesión, el carrito de invitado se combina con el del usuario
-// (local y servidor) sin duplicar líneas, y el de invitado se vacía.
+// Reglas:
+//   - Cerrar sesión: el carrito del dispositivo se vacía; el de la cuenta
+//     queda en el servidor.
+//   - Iniciar sesión con un carrito armado sin cuenta: ESE reemplaza al de
+//     la cuenta (no se combinan).
+//   - Iniciar sesión sin carrito: se recupera el guardado en la cuenta.
+//   - Después del pedido: se vacían el del dispositivo y el de la cuenta.
 const CLAVE_INVITADO = 'carrito_anon';
 
 const usuarioActual = () => {
@@ -93,19 +100,6 @@ export const desdeLinea = (l) => {
   return { ...item, lineaId: generarLineaId(item), subtotal: precioUnitario(item) * item.cantidad };
 };
 
-// Combina carritos SIN duplicar: si la misma línea está en dos lados (mismo
-// producto con la misma configuración) se queda una sola, con la cantidad mayor.
-export const combinarCarritos = (...listas) => {
-  const porLinea = new Map();
-  for (const lista of listas) {
-    for (const it of lista) {
-      const prev = porLinea.get(it.lineaId);
-      if (!prev || it.cantidad > prev.cantidad) porLinea.set(it.lineaId, it);
-    }
-  }
-  return [...porLinea.values()];
-};
-
 // Une líneas que quedaron iguales después de revalidar (ej. se quitó un
 // topping desactivado y ahora coincide con otra línea): aquí SÍ se suman.
 const unirIguales = (lista) => {
@@ -127,37 +121,43 @@ export function CartProvider({ children }) {
     try { localStorage.removeItem('chocofreseo_carrito'); } catch {}
     return leer(claveDe(usuarioActual()));
   });
-  // true mientras se trae y combina el carrito del servidor tras iniciar sesión
+  // true mientras se recupera el carrito guardado en la cuenta
   const [sincronizando, setSincronizando] = useState(false);
-  // No se sube el carrito al servidor hasta haber leído el que ya estaba allá
-  // (si no, un carrito local viejo pisaría al del otro dispositivo).
+  // No se sube nada al servidor hasta saber qué carrito vale (el armado sin
+  // cuenta o el recuperado de la cuenta).
   const servidorListo = useRef(false);
+  const temporizador = useRef(null);
   const carritoRef = useRef(carrito);
   carritoRef.current = carrito;
 
-  // Trae el carrito guardado en el servidor y lo combina con el local.
-  const sincronizarConServidor = useCallback(async () => {
+  // Reemplaza el carrito de la cuenta por el actual.
+  const subirAlServidor = useCallback((items) => {
+    servidorListo.current = true;
+    clearTimeout(temporizador.current);
+    api.guardarCarrito(items.map(aCanonico)).catch(() => {});
+  }, []);
+
+  // Trae el carrito guardado en la cuenta (revalidado) y lo deja como actual.
+  const recuperarDelServidor = useCallback(async () => {
     servidorListo.current = false;
     setSincronizando(true);
     try {
       const { items = [] } = (await api.getCarritoGuardado()) || {};
-      let resultado = carritoRef.current;
+      let recuperado = [];
       if (items.length > 0) {
         const { lineas } = await api.validarCarrito(items);
-        const delServidor = lineas.filter((l) => l.disponible).map(desdeLinea);
-        resultado = combinarCarritos(carritoRef.current, delServidor);
-        setCarrito(resultado);
+        recuperado = lineas.filter((l) => l.disponible).map(desdeLinea);
       }
-      servidorListo.current = true;
-      // Se guarda el resultado combinado (aunque el servidor no tuviera nada).
-      api.guardarCarrito(resultado.map(aCanonico)).catch(() => {});
+      if (!usuarioActual()) return; // cerró sesión mientras tanto
+      if (carritoRef.current.length > 0) subirAlServidor(carritoRef.current); // agregó algo mientras tanto: vale lo que ve
+      else { servidorListo.current = true; setCarrito(recuperado); }
     } catch {
-      // Sin conexión o error del servidor: se sigue con el carrito local.
+      // Sin conexión: se sigue con el carrito (vacío) del dispositivo.
       servidorListo.current = true;
     } finally {
       setSincronizando(false);
     }
-  }, []);
+  }, [subirAlServidor]);
 
   // Guardar en el dispositivo siempre; en el servidor (con un pequeño
   // retardo para no enviar un pedido por cada clic) solo si hay sesión.
@@ -165,36 +165,51 @@ export function CartProvider({ children }) {
     const u = usuarioActual();
     escribir(claveDe(u), carrito);
     if (!u || !servidorListo.current) return undefined;
-    const t = setTimeout(() => { api.guardarCarrito(carrito.map(aCanonico)).catch(() => {}); }, 800);
-    return () => clearTimeout(t);
+    temporizador.current = setTimeout(() => { api.guardarCarrito(carrito.map(aCanonico)).catch(() => {}); }, 800);
+    return () => clearTimeout(temporizador.current);
   }, [carrito]);
 
-  // Al abrir la página con sesión iniciada: combinar con el del servidor.
+  // Al abrir la página con sesión: vale lo que quedó en este dispositivo; si
+  // no hay nada, se recupera el de la cuenta.
   useEffect(() => {
-    if (usuarioActual()) sincronizarConServidor();
-  }, [sincronizarConServidor]);
+    if (!usuarioActual()) return;
+    if (carritoRef.current.length > 0) subirAlServidor(carritoRef.current);
+    else recuperarDelServidor();
+  }, [subirAlServidor, recuperarDelServidor]);
 
   // Inicio / cierre de sesión (en esta pestaña o en otra).
   useEffect(() => {
     const cambioDeUsuario = () => {
+      clearTimeout(temporizador.current);
+      servidorListo.current = false;
       const u = usuarioActual();
       if (!u) {
-        // Cerró sesión: el carrito era de esa cuenta; queda el de invitado (vacío).
-        servidorListo.current = false;
-        setCarrito(leer(CLAVE_INVITADO));
+        // Cerró sesión: el dispositivo queda sin carrito (el de la cuenta
+        // sigue en el servidor).
+        try { localStorage.removeItem(CLAVE_INVITADO); } catch {}
+        setCarrito([]);
         return;
       }
-      // Inició sesión: lo que armó como invitado + lo que tenía su cuenta en
-      // este dispositivo, al instante (el checkout no ve un carrito vacío)...
-      const local = combinarCarritos(leer(claveDe(u)), leer(CLAVE_INVITADO));
+      // Inició sesión. El carrito que se ve es el armado sin cuenta.
+      const armado = carritoRef.current;
       try { localStorage.removeItem(CLAVE_INVITADO); } catch {}
-      setCarrito(local);
-      // ...y luego lo que tenga guardado en el servidor.
-      sincronizarConServidor();
+      if (armado.length > 0) {
+        // ESE reemplaza al guardado en la cuenta.
+        escribir(claveDe(u), armado);
+        subirAlServidor(armado);
+      } else {
+        // Sin carrito: se recupera el de la cuenta.
+        setCarrito([]);
+        recuperarDelServidor();
+      }
     };
     const onStorage = (e) => {
-      if (e.key === 'usuario') cambioDeUsuario();
-      else if (e.key === claveDe(usuarioActual())) setCarrito(leer(e.key));
+      if (e.key === 'usuario') {
+        // Otra pestaña cambió la sesión: esta toma el carrito ya guardado.
+        clearTimeout(temporizador.current);
+        servidorListo.current = !!usuarioActual();
+        setCarrito(leer(claveDe(usuarioActual())));
+      } else if (e.key === claveDe(usuarioActual())) setCarrito(leer(e.key));
     };
     window.addEventListener('storage', onStorage);
     window.addEventListener('usuario-cambio', cambioDeUsuario);
@@ -202,7 +217,7 @@ export function CartProvider({ children }) {
       window.removeEventListener('storage', onStorage);
       window.removeEventListener('usuario-cambio', cambioDeUsuario);
     };
-  }, [sincronizarConServidor]);
+  }, [subirAlServidor, recuperarDelServidor]);
 
   const agregarItem = useCallback((item) => {
     const lineaId  = generarLineaId(item);
@@ -240,6 +255,15 @@ export function CartProvider({ children }) {
     try { localStorage.removeItem(claveDe(usuarioActual())); } catch {}
   }, []);
 
+  // Después de hacer el pedido: vacía el carrito del dispositivo y el de la
+  // cuenta, sin esperar el retardo de guardado.
+  const vaciarTrasPedido = useCallback(() => {
+    clearTimeout(temporizador.current);
+    setCarrito([]);
+    try { localStorage.removeItem(claveDe(usuarioActual())); } catch {}
+    if (usuarioActual()) api.guardarCarrito([]).catch(() => {});
+  }, []);
+
   /**
    * Revalida el carrito con la API (precios, disponibilidad, toppings y
    * adiciones), lo actualiza y devuelve la lista de cambios en texto para
@@ -272,7 +296,7 @@ export function CartProvider({ children }) {
   const totalItems = carrito.reduce((a, x) => a + x.cantidad, 0);
 
   return (
-    <CartContext.Provider value={{ carrito, agregarItem, quitarItem, cambiarCantidad, limpiarCarrito, validarCarrito, sincronizando, subtotal, totalItems }}>
+    <CartContext.Provider value={{ carrito, agregarItem, quitarItem, cambiarCantidad, limpiarCarrito, vaciarTrasPedido, validarCarrito, sincronizando, subtotal, totalItems }}>
       {children}
     </CartContext.Provider>
   );

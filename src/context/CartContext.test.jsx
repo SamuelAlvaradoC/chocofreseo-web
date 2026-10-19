@@ -1,5 +1,5 @@
 import { render, act, waitFor } from '@testing-library/react';
-import { CartProvider, useCart, combinarCarritos, aCanonico, desdeLinea } from './CartContext';
+import { CartProvider, useCart, aCanonico, desdeLinea } from './CartContext';
 import * as api from '../services/api';
 
 jest.mock('../services/api', () => ({
@@ -36,15 +36,6 @@ describe('funciones del carrito', () => {
     expect(aCanonico(conId)).toEqual({ id_producto: 1, cantidad: undefined, toppings: [{ id_topping: 10, cantidad: 1 }], adiciones: [], salsas: ['arequipe'], chocolate: null, frutas: null, observacion: null });
     expect(desdeLinea(lineaValidada()).salsas[0]).toMatchObject({ id: 'arequipe', nombre: 'Arequipe' });
   });
-
-  test('combinarCarritos no duplica: misma línea queda una vez con la cantidad mayor', () => {
-    const a = desdeLinea(lineaValidada({ cantidad: 2 }));
-    const b = desdeLinea(lineaValidada({ cantidad: 1 }));
-    const otra = desdeLinea(lineaValidada({ observacion: 'sin crema' }));
-    const r = combinarCarritos([a], [b, otra]);
-    expect(r).toHaveLength(2);
-    expect(r.find((x) => x.lineaId === a.lineaId).cantidad).toBe(2);
-  });
 });
 
 describe('carrito sin sesión e inicio de sesión', () => {
@@ -56,25 +47,62 @@ describe('carrito sin sesión e inicio de sesión', () => {
     expect(api.guardarCarrito).not.toHaveBeenCalled(); // sin sesión no se sube al servidor
   });
 
-  test('al iniciar sesión: invitado + servidor se combinan sin duplicar y se guarda el resultado', async () => {
+  const iniciarSesion = (id = 7) => act(() => {
+    localStorage.setItem('usuario', JSON.stringify({ id_usuario: id, rol: 'cliente' }));
+    window.dispatchEvent(new Event('usuario-cambio'));
+  });
+  const cerrarSesion = (id = 7) => act(() => {
+    // Igual que AuthContext.logout()
+    localStorage.removeItem(`carrito_${id}`);
+    localStorage.removeItem('usuario');
+    window.dispatchEvent(new Event('usuario-cambio'));
+  });
+  const bowl = { ...producto, id_producto: 2, nombre: 'Bowl', toppings: [], adiciones: [], salsas: [] };
+
+  test('al iniciar sesión con carrito armado sin cuenta, ESE reemplaza al de la cuenta (no se combinan)', async () => {
     montar();
-    act(() => ctx.agregarItem(itemFresas));                       // la misma línea que tiene el servidor
-    api.getCarritoGuardado.mockResolvedValue({ items: [{ id_producto: 1 }, { id_producto: 2 }] });
+    act(() => ctx.agregarItem(itemFresas));
+    iniciarSesion();
+    expect(ctx.carrito.map((x) => x.nombre)).toEqual(['Fresas con crema']);
+    expect(api.getCarritoGuardado).not.toHaveBeenCalled();             // no se lee el de la cuenta
+    expect(api.guardarCarrito).toHaveBeenLastCalledWith([aCanonico(ctx.carrito[0])]); // se reemplaza
+    expect(localStorage.getItem('carrito_anon')).toBeNull();
+  });
+
+  test('secuencia: agregar -> iniciar -> cerrar -> agregar otro -> iniciar: queda SOLO el último', async () => {
+    const enServidor = { items: [] };
+    api.guardarCarrito.mockImplementation(async (items) => { enServidor.items = items; });
+    api.getCarritoGuardado.mockImplementation(async () => enServidor);
+    montar();
+    act(() => ctx.agregarItem(itemFresas));
+    iniciarSesion();
+    expect(enServidor.items.map((i) => i.id_producto)).toEqual([1]);
+
+    cerrarSesion();
+    expect(ctx.carrito).toEqual([]);                                     // el dispositivo queda sin carrito
+    expect(JSON.parse(localStorage.getItem('carrito_anon') || '[]')).toEqual([]);
+    expect(enServidor.items.map((i) => i.id_producto)).toEqual([1]);     // sigue en la cuenta
+
+    act(() => ctx.agregarItem(bowl));
+    iniciarSesion();
+    expect(ctx.carrito.map((x) => x.nombre)).toEqual(['Bowl']);          // lo que se ve (y se envía)
+    expect(enServidor.items.map((i) => i.id_producto)).toEqual([2]);
+
+    act(() => ctx.vaciarTrasPedido());
+    expect(ctx.carrito).toEqual([]);
+    expect(enServidor.items).toEqual([]);
+  });
+
+  test('al iniciar sesión sin carrito se recupera el guardado en la cuenta', async () => {
+    api.getCarritoGuardado.mockResolvedValue({ items: [{ id_producto: 2, cantidad: 3 }] });
     api.validarCarrito.mockResolvedValue({ lineas: [
-      lineaValidada({ cantidad: 1 }),                                                     // duplicada con la local
-      lineaValidada({ id_producto: 2, toppings: [], salsas: [], producto: { ...producto, id_producto: 2, nombre: 'Bowl' } }),
+      lineaValidada({ id_producto: 2, cantidad: 3, toppings: [], salsas: [], producto: { ...producto, id_producto: 2, nombre: 'Bowl' } }),
     ] });
-
-    act(() => {
-      localStorage.setItem('usuario', JSON.stringify({ id_usuario: 7, rol: 'cliente' }));
-      window.dispatchEvent(new Event('usuario-cambio'));
-    });
-
-    await waitFor(() => expect(ctx.carrito).toHaveLength(2));
-    expect(ctx.carrito.map((x) => x.nombre).sort()).toEqual(['Bowl', 'Fresas con crema']);
-    expect(localStorage.getItem('carrito_anon')).toBeNull();          // el de invitado se vació
-    await waitFor(() => expect(api.guardarCarrito).toHaveBeenCalled()); // y se guardó combinado
-    expect(api.guardarCarrito.mock.calls.at(-1)[0]).toHaveLength(2);
+    montar();
+    iniciarSesion();
+    await waitFor(() => expect(ctx.carrito).toHaveLength(1));
+    expect(ctx.carrito[0]).toMatchObject({ nombre: 'Bowl', cantidad: 3 });
+    expect(api.guardarCarrito).not.toHaveBeenCalled();                    // recuperar no reescribe la cuenta
   });
 });
 
