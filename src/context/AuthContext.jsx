@@ -15,9 +15,10 @@ export function AuthProvider({ children }) {
     }
   });
 
-  const loginConAPI = async (email, contrasena) => {
-    const data = await api.login({ email, contrasena });
-    const { token, usuario: u } = data;
+  // Guarda el token, completa el usuario (perfil + permisos) y avisa al resto
+  // de la página (el carrito escucha 'usuario-cambio'). La comparten el login
+  // con contraseña y "Continuar con Google".
+  const completarSesion = async ({ token, usuario: u }) => {
     localStorage.setItem('token', token);
     let normalizado = {
       ...u,
@@ -46,6 +47,15 @@ export function AuthProvider({ children }) {
     setUsuario(normalizado);
     window.dispatchEvent(new Event('usuario-cambio'));
     return normalizado;
+  };
+
+  const loginConAPI = async (email, contrasena) => completarSesion(await api.login({ email, contrasena }));
+
+  /** @returns {{ usuario, vinculada, nueva }} vinculada: primera vez que la cuenta se conecta con Google */
+  const loginConGoogle = async (credential) => {
+    const data = await api.loginGoogle({ credential });
+    const usuario = await completarSesion(data);
+    return { usuario, vinculada: !!data.vinculada, nueva: !!data.nueva };
   };
 
   const login = (datos) => {
@@ -77,7 +87,7 @@ export function AuthProvider({ children }) {
   const tienePermiso = (nombre) => usuario?.permisos?.includes(nombre) ?? false;
 
   return (
-    <AuthContext.Provider value={{ usuario, login, loginConAPI, logout, actualizarUsuario, tienePermiso }}>
+    <AuthContext.Provider value={{ usuario, login, loginConAPI, loginConGoogle, logout, actualizarUsuario, tienePermiso }}>
       {children}
     </AuthContext.Provider>
   );

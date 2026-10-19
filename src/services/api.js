@@ -29,6 +29,7 @@ const del     = (url)         => http.delete(url).then(unwrap).catch(handleErr);
 
 // ── Auth ──────────────────────────────────────────────────────
 export const login               = (d)    => post('/auth/login', d);
+export const loginGoogle         = (d)    => post('/auth/google', d); // { credential } de Google Identity Services
 export const register            = (d)    => post('/auth/register', d);
 export const logout              = ()     => post('/auth/logout');
 export const solicitarReset      = (d)    => post('/auth/solicitar-reset', d);

@@ -3,6 +3,8 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 import useDebounce from '../../../../hooks/useDebounce';
+import useContinuarConGoogle from '../../../../hooks/useContinuarConGoogle';
+import BotonGoogle from '../../../../components/auth/BotonGoogle';
 import './Login.css';
 
 // El backend (loginSchema) solo exige formato de email válido y contraseña
@@ -33,6 +35,7 @@ export default function Login() {
 
   const debounceEmail      = useDebounce((v) => setErrores((p) => ({ ...p, email: validarEmail(v) })), 400);
   const debounceContrasena = useDebounce((v) => setErrores((p) => ({ ...p, contrasena: validarContrasena(v) })), 400);
+  const { continuarConGoogle } = useContinuarConGoogle({ onError: (msg) => setErrores({ _general: msg }) });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -90,6 +93,7 @@ export default function Login() {
             <h2 className="login-caja-titulo">Bienvenido de nuevo</h2>
             <p className="login-caja-sub">Ingresa tus datos para continuar</p>
           </div>
+          <BotonGoogle onCredential={continuarConGoogle} texto="continue_with" />
           <form onSubmit={handleLogin} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Correo electrónico</label>

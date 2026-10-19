@@ -4,6 +4,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 import * as api from '../../../../services/api';
 import useDebounce from '../../../../hooks/useDebounce';
+import useContinuarConGoogle from '../../../../hooks/useContinuarConGoogle';
+import BotonGoogle from '../../../../components/auth/BotonGoogle';
 import './Registro.css';
 
 // Reglas de frontend más estrictas que registerSchema en el backend
@@ -58,6 +60,7 @@ export default function Registro() {
   // usuario deja de escribir EN ESE campo. Al validar contraseña, si
   // confirmar ya tiene texto, se revisa de nuevo contra el valor nuevo
   // (evita que quede marcada "coincide" con una contraseña que ya cambió).
+  const { continuarConGoogle } = useContinuarConGoogle({ onError: (msg) => setErrores((p) => ({ ...p, _general: msg })) });
   const debounceNombre     = useDebounce((v) => setErrores((p) => ({ ...p, nombre: validarNombre(v) })), 400);
   const debounceEmail      = useDebounce((v) => setErrores((p) => ({ ...p, email: validarEmail(v) })), 400);
   const debounceContrasena = useDebounce((v) => setErrores((p) => ({
@@ -119,6 +122,7 @@ export default function Registro() {
           <p style={{ fontSize: 13, color: '#16a34a', fontWeight: 700, margin: '4px 0 0', fontFamily: 'Nunito, sans-serif' }}>
             🎁 ¡Gana 200 puntos solo por registrarte!
           </p>
+          <BotonGoogle onCredential={continuarConGoogle} texto="signup_with" />
           <form onSubmit={handleRegistro} className="login-form">
             <div className="lf-grupo">
               <label className="lf-label">Nombre completo</label>
