@@ -9,7 +9,8 @@ import { useCart } from '../../../context/CartContext';
 import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { useValorPunto } from '../../../hooks/useValorPunto';
 import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
-import { mensajeTiendaCerrada } from '../../../utils/formatHora';
+import { mensajeTiendaCerrada, aceptaPedidosEnEspera, textoPreparacionEnEspera } from '../../../utils/formatHora';
+import AvisoFueraDeHorario, { avisoYaAceptado, guardarAvisoAceptado } from '../../../components/common/AvisoFueraDeHorario';
 import * as api from '../../../services/api';
 import FormDireccion from '../../../components/common/FormDireccion';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
@@ -630,16 +631,29 @@ function PasoPago({ carrito, direccion, onBack, onConfirmar, puntosAUsar = 0, pr
   );
 }
 
-function PedidoConfirmado({ onVolver, onVerPedidos }) {
+// textoEspera: "Empezaremos a prepararlo mañana martes 20 a la 1:00 PM" si el
+// pedido se hizo fuera de horario; en ese caso no se promete tiempo de entrega.
+function PedidoConfirmado({ onVolver, onVerPedidos, textoEspera }) {
   const tiempoEspera = useTiempoEspera();
   return (
     <div className="checkout-confirmado">
       <div className="confirmado-icono">🎉</div>
       <h2 className="confirmado-titulo">¡Pedido recibido!</h2>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff5f5', border: '1px solid #fecaca', borderRadius: 20, padding: '8px 20px', fontSize: 14, color: '#CA0B0B', fontWeight: 700, marginBottom: 12 }}>
-        ⏱️ Tiempo estimado de entrega: {tiempoEspera}–{tiempoEspera + 20} min
-      </div>
-      <p className="confirmado-sub">Tu pedido está siendo preparado. En <strong>Mis pedidos</strong> puedes ver el estado actualizado en tiempo real.</p>
+      {textoEspera ? (
+        <>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 20, padding: '10px 20px', fontSize: 16, color: '#3730a3', fontWeight: 800, marginBottom: 12 }}>
+            🌙 {textoEspera}
+          </div>
+          <p className="confirmado-sub">Tu pedido quedó registrado. En <strong>Mis pedidos</strong> puedes ver su estado.</p>
+        </>
+      ) : (
+        <>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff5f5', border: '1px solid #fecaca', borderRadius: 20, padding: '8px 20px', fontSize: 14, color: '#CA0B0B', fontWeight: 700, marginBottom: 12 }}>
+            ⏱️ Tiempo estimado de entrega: {tiempoEspera}–{tiempoEspera + 20} min
+          </div>
+          <p className="confirmado-sub">Tu pedido está siendo preparado. En <strong>Mis pedidos</strong> puedes ver el estado actualizado en tiempo real.</p>
+        </>
+      )}
       <div className="confirmado-pasos">
         {[
           { label: 'Recibido',  activo: true  },
@@ -676,6 +690,10 @@ export default function Checkout() {
   const [direccion,  setDireccion]  = useState(null);
   const [procesando, setProcesando] = useState(false);
   const [confirmado, setConfirmado] = useState(false);
+  // Texto "Empezaremos a prepararlo..." si el pedido quedó para la apertura
+  const [textoEspera, setTextoEspera] = useState(null);
+  // Aviso obligatorio fuera de horario: { pagoInfo, textoDia, textoHora, proximaApertura }
+  const [avisoEspera, setAvisoEspera] = useState(null);
 
   const navigate                           = useNavigate();
   const location                           = useLocation();
@@ -685,10 +703,12 @@ export default function Checkout() {
   // Puntos que viene desde el carrito del catálogo
   const puntosAUsarNav = location.state?.puntosAUsar || 0;
 
-  // Tienda cerrada: se puede revisar el pedido, pero no enviarlo (la API
-  // también lo valida al crear el pedido).
-  const estadoTienda  = useEstadoTienda();
-  const tiendaCerrada = !estadoTienda.cargando && !estadoTienda.abierto;
+  // Tienda "Cerrada" manual: se puede revisar el pedido, pero no enviarlo.
+  // "Por horario" fuera de horario: se puede enviar, después de aceptar el
+  // aviso de que se preparará al abrir. (La API valida las dos cosas.)
+  const estadoTienda   = useEstadoTienda();
+  const fueraDeHorario = !estadoTienda.cargando && aceptaPedidosEnEspera(estadoTienda);
+  const tiendaCerrada  = !estadoTienda.cargando && !estadoTienda.abierto && !fueraDeHorario;
 
   // Cambios encontrados al revalidar el carrito (precio, producto agotado,
   // topping o adición que ya no existe...), para mostrárselos al cliente.
@@ -750,7 +770,8 @@ export default function Checkout() {
     );
   }
 
-  const handleConfirmar = async (pagoInfo) => {
+  // aceptoAviso: true cuando viene de la alerta de "fuera de horario"
+  const handleConfirmar = async (pagoInfo, aceptoAviso = false) => {
     if (procesando) return;
     if (contieneEtiquetaHtml(pagoInfo?.observaciones) || contieneEtiquetaHtml(direccion?.direccion_linea) || contieneEtiquetaHtml(direccion?.referencia)) {
       toast.error(MSG_HTML);
@@ -758,6 +779,13 @@ export default function Checkout() {
     }
     if (tiendaCerrada) {
       toast.error(mensajeTiendaCerrada(estadoTienda));
+      return;
+    }
+    // Fuera de horario: si no ha aceptado el aviso para esta apertura, se lo
+    // mostramos antes de enviar.
+    const aceptoEspera = aceptoAviso || avisoYaAceptado(estadoTienda.proxima_apertura);
+    if (fueraDeHorario && !aceptoEspera) {
+      setAvisoEspera({ pagoInfo, textoDia: estadoTienda.texto_dia, textoHora: estadoTienda.texto_hora, proximaApertura: estadoTienda.proxima_apertura });
       return;
     }
     // Revalidar justo antes de pedir: si algo cambió (precio, agotado...),
@@ -820,6 +848,8 @@ export default function Checkout() {
         puntos_a_usar: pagoInfo?.puntosAUsar || 0,
         agua_cortesia: !!pagoInfo?.aguaCortesia,
         ...(comprobanteUrl ? { comprobante_url: comprobanteUrl } : {}),
+        // El cliente aceptó que su pedido se prepare a la hora de apertura
+        ...(aceptoEspera ? { acepto_espera: true } : {}),
       };
 
       if (direccion?.id_direccion) {
@@ -835,7 +865,8 @@ export default function Checkout() {
         };
       }
 
-      await api.crearMiPedido(payload);
+      const pedidoCreado = await api.crearMiPedido(payload);
+      setTextoEspera(textoPreparacionEnEspera(pedidoCreado));
 
       // Auto-guardar dirección nueva en el perfil del cliente
       if (direccion?.esNueva && direccion?.direccion_linea) {
@@ -852,6 +883,12 @@ export default function Checkout() {
       vaciarTrasPedido(); // carrito del dispositivo y de la cuenta
       setConfirmado(true);
     } catch (err) {
+      // La tienda cerró mientras llenaba el pedido: la API pide el aviso.
+      const datosError = err?.response?.data;
+      if (err?.response?.status === 409 && datosError?.codigo === 'REQUIERE_AVISO') {
+        setAvisoEspera({ pagoInfo, textoDia: datosError.data.texto_dia, textoHora: datosError.data.texto_hora, proximaApertura: datosError.data.proxima_apertura });
+        return;
+      }
       const mensaje = err?.response?.data?.message || 'No pudimos enviar tu pedido. Verifica tu conexión e intenta de nuevo.';
       console.error('Error al crear pedido:', mensaje);
       toast.error(mensaje);
@@ -865,6 +902,7 @@ export default function Checkout() {
       <Navbar />
       <div className="checkout-page">
         <PedidoConfirmado
+          textoEspera={textoEspera}
           onVolver={() => navigate('/catalogo')}
           onVerPedidos={() => navigate('/perfil')}
         />
@@ -887,10 +925,23 @@ export default function Checkout() {
             </div>
           ))}
         </div>
-        {tiendaCerrada && (
+        {(tiendaCerrada || fueraDeHorario) && (
           <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 12, padding: '12px 16px', margin: '0 auto 16px', maxWidth: 720, color: '#92400e', fontWeight: 700, fontSize: 14 }}>
-            🔒 {mensajeTiendaCerrada(estadoTienda)}
+            {fueraDeHorario ? '🌙' : '🔒'} {mensajeTiendaCerrada(estadoTienda)}
           </div>
+        )}
+        {avisoEspera && (
+          <AvisoFueraDeHorario
+            textoDia={avisoEspera.textoDia}
+            textoHora={avisoEspera.textoHora}
+            onCancelar={() => setAvisoEspera(null)}
+            onAceptar={() => {
+              guardarAvisoAceptado(avisoEspera.proximaApertura);
+              const { pagoInfo } = avisoEspera;
+              setAvisoEspera(null);
+              handleConfirmar(pagoInfo, true);
+            }}
+          />
         )}
         {avisoCambios}
         <div className="checkout-contenido">

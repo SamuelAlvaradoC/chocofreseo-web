@@ -14,6 +14,7 @@ import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
 import { nombreConFrutas, COMBOS_FRUTAS } from '../../../utils/nombreProducto';
 import '../ventas/Ventas.css';
 import { pagoDeVenta, fmtCop } from '../../../utils/pago';
+import PedidoFueraDeHorario from '../../../components/common/PedidoFueraDeHorario';
 
 const ESTADO_LABELS = {
   pendiente:  'Pendiente',
@@ -1142,6 +1143,7 @@ function ModalDetalle({ open, onClose, venta }) {
             <span className="modal-titulo">Detalle — #{venta.id_venta}</span>
             <button className="modal-cerrar" onClick={onClose}>✕</button>
           </div>
+          <PedidoFueraDeHorario fechaReal={venta.fecha_real} style={{ marginBottom: 12 }} />
 
           <div className="detalle-grid">
             <div className="detalle-item">

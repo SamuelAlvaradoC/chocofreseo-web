@@ -9,7 +9,8 @@ import { useTiempoEspera } from '../../../hooks/useTiempoEspera';
 import { useValorPunto } from '../../../hooks/useValorPunto';
 import { useEstadoTienda } from '../../../hooks/useEstadoTienda';
 import useRefetchOnFocus from '../../../hooks/useRefetchOnFocus';
-import { formatHora12, mensajeTiendaCerrada } from '../../../utils/formatHora';
+import { formatHora12, mensajeTiendaCerrada, aceptaPedidosEnEspera } from '../../../utils/formatHora';
+import AvisoFueraDeHorario, { avisoYaAceptado, guardarAvisoAceptado } from '../../../components/common/AvisoFueraDeHorario';
 import * as api from '../../../services/api';
 import { nombreConFrutas, COMBOS_FRUTAS } from '../../../utils/nombreProducto';
 import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
@@ -1058,6 +1059,20 @@ export default function Catalogo() {
   const [productoActual,        setProductoActual]        = useState(null);
   const [modalProducto,         setModalProducto]         = useState(false);
   const [mostrarAlertaCerrado,  setMostrarAlertaCerrado]  = useState(false);
+  // Fuera de horario ("Por horario"): aviso obligatorio antes de seguir al
+  // pedido. Guarda los puntos elegidos en el carrito para continuar después.
+  const [avisoEspera,           setAvisoEspera]           = useState(null);
+
+  // Seguir al pedido: sin sesión va al login y vuelve directo al checkout
+  // (el carrito de invitado se conserva y se combina con el de su cuenta).
+  const irAlPedido = (pts, desc) => {
+    if (!usuario) {
+      toast.info('Inicia sesión o crea tu cuenta para poder seguir con tu pedido');
+      navigate('/login', { state: { from: '/checkout' } });
+      return;
+    }
+    navigate('/checkout', { state: { puntosAUsar: pts || 0, descuentoPuntos: desc || 0 } });
+  };
 
   const cargar = () => {
     Promise.all([
@@ -1132,7 +1147,8 @@ export default function Catalogo() {
             <span style={{ fontSize: 20 }}>🔒</span>
             <div>
               <div style={{ fontWeight: 700, color: mensajeTienda === 'cerrado_temporal' ? '#CA0B0B' : '#92400e', fontSize: 14 }}>
-                {mensajeTienda === 'cerrado_temporal' ? 'Cerrado temporalmente' : 'Estamos cerrados por el momento'}
+                {mensajeTienda === 'cerrado_temporal' ? 'Cerrado temporalmente'
+                  : aceptaPedidosEnEspera(estadoTienda) ? 'Estamos fuera de horario' : 'Estamos cerrados por el momento'}
               </div>
               <div style={{ color: mensajeTienda === 'cerrado_temporal' ? '#CA0B0B' : '#b45309', fontSize: 12 }}>
                 {mensajeTiendaCerrada(estadoTienda)}
@@ -1189,15 +1205,17 @@ export default function Catalogo() {
         onCambiarCantidad={cambiarCantidad}
         onQuitar={quitarItem}
         onIrCheckout={(pts, desc) => {
-          if (!estadoTienda.abierto) { setMostrarAlertaCerrado(true); return; }
-          if (!usuario) {
-            // Al iniciar sesión o registrarse vuelve DIRECTO al checkout; el
-            // carrito de invitado se conserva y se combina con el de su cuenta.
-            toast.info('Inicia sesión o crea tu cuenta para poder seguir con tu pedido');
-            navigate('/login', { state: { from: '/checkout' } });
-            return;
+          if (!estadoTienda.abierto) {
+            // "Por horario" fuera de horario: se puede pedir, pero primero el
+            // cliente acepta el aviso (una vez por apertura).
+            if (aceptaPedidosEnEspera(estadoTienda)) {
+              if (!avisoYaAceptado(estadoTienda.proxima_apertura)) { setAvisoEspera({ pts, desc }); return; }
+            } else {
+              setMostrarAlertaCerrado(true); // "Cerrada" manual: no se aceptan pedidos
+              return;
+            }
           }
-          navigate('/checkout', { state: { puntosAUsar: pts || 0, descuentoPuntos: desc || 0 } });
+          irAlPedido(pts, desc);
         }}
         abierto={estadoTienda.abierto}
         avisoCerrado={!estadoTienda.cargando && !estadoTienda.abierto ? mensajeTiendaCerrada(estadoTienda) : null}
@@ -1211,6 +1229,20 @@ export default function Catalogo() {
         toppingsDisponibles={toppings}
         adicionesDisponibles={adiciones}
       />
+
+      {avisoEspera && (
+        <AvisoFueraDeHorario
+          textoDia={estadoTienda.texto_dia}
+          textoHora={estadoTienda.texto_hora}
+          onCancelar={() => setAvisoEspera(null)}
+          onAceptar={() => {
+            guardarAvisoAceptado(estadoTienda.proxima_apertura);
+            const { pts, desc } = avisoEspera;
+            setAvisoEspera(null);
+            irAlPedido(pts, desc);
+          }}
+        />
+      )}
 
       {mostrarAlertaCerrado && (
         <div onClick={() => setMostrarAlertaCerrado(false)}

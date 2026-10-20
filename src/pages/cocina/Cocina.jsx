@@ -4,6 +4,7 @@ import { toast } from '../../utils/toast';
 import AdminLayout from '../../components/layout/AdminLayout';
 import * as api from '../../services/api';
 import { nombreConFrutas } from '../../utils/nombreProducto';
+import PedidoFueraDeHorario from '../../components/common/PedidoFueraDeHorario';
 
 const hoyISO = () => new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
@@ -13,6 +14,7 @@ const nombreSalsa   = (s) => { const n = typeof s === 'object' ? s.nombre : s; i
 
 const mapPedido = (v) => ({
   id_venta:           v.id_venta,
+  fecha_real:         v.fecha_real || null, // pedido hecho fuera de horario
   hora:               v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' }) : '—',
   fecha_completa:     v.fecha ? new Date(v.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', timeZone: 'America/Bogota' }) : '—',
   cliente:            v.cliente?.usuario?.nombre || '—',
@@ -104,6 +106,7 @@ function ModalDetalleCocina({ pedido, onClose, onConfirmar }) {
           <div>
             <div style={{ color: '#fff', fontWeight: 900, fontSize: 20 }}>Pedido #{pedido.id_venta}</div>
             <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, marginTop: 2 }}>{pedido.fecha_completa} · {pedido.hora}</div>
+            <PedidoFueraDeHorario fechaReal={pedido.fecha_real} style={{ marginTop: 6 }} />
             <div style={{ marginTop: 6 }}>
               <span style={{ background: 'rgba(255,255,255,0.25)', color: '#fff', fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 {pedido.estado}
@@ -203,6 +206,7 @@ function PedidoCard({ pedido, onConfirmar, onVerDetalle }) {
         <div>
           <div style={{ color: '#fff', fontWeight: 800, fontSize: 20 }}>#{pedido.id_venta}</div>
           <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13 }}>{pedido.cliente}</div>
+          <PedidoFueraDeHorario fechaReal={pedido.fecha_real} style={{ marginTop: 4 }} />
         </div>
         <div style={{ background: '#fff', color: '#CA0B0B', padding: '4px 10px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
           {pedido.hora}

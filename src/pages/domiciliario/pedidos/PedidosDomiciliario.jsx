@@ -6,6 +6,7 @@ import * as api from '../../../services/api';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './PedidosDomiciliario.css';
 import { pagoDeVenta, fmtCop } from '../../../utils/pago';
+import PedidoFueraDeHorario from '../../../components/common/PedidoFueraDeHorario';
 
 const COLOR_SALSAS = '#ea580c';
 const parsearSalsas = (raw) => { if (!raw) return []; try { const p = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(p) ? p : []; } catch { return []; } };
@@ -18,6 +19,7 @@ const mapVentaPedido = (v, facturado = false) => {
   const forma_pago = pago.metodo || 'efectivo';
   return {
     id_venta:        v.id_venta,
+    fecha_real:      v.fecha_real || null, // pedido hecho fuera de horario
     hora:            v.fecha ? new Date(v.fecha).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Bogota' }) : '—',
     cliente:         v.nombre_cliente   || v.cliente?.usuario?.nombre || '—',
     telefono:        v.telefono_cliente || v.cliente?.telefono        || '—',
@@ -146,6 +148,7 @@ function ModalDetalle({ pedido, onClose }) {
           <span className="pd-modal-titulo">Pedido #{pedido.id_venta}</span>
           <button className="pd-modal-cerrar" onClick={onClose}>✕</button>
         </div>
+        <PedidoFueraDeHorario fechaReal={pedido.fecha_real} style={{ margin: '0 0 10px' }} />
 
         <div className="pd-modal-grid">
           <div className="pd-modal-item">

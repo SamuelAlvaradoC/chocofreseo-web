@@ -12,6 +12,7 @@ import { contieneEtiquetaHtml, MSG_HTML } from '../../../utils/validarSinHtml';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Perfil.css';
 import { pagoDeVenta, fmtCop } from '../../../utils/pago';
+import { textoPreparacionEnEspera } from '../../../utils/formatHora';
 
 const COLOR_SALSAS       = '#ea580c';
 const MAX_SALSAS_GRATIS  = 2;
@@ -440,8 +441,12 @@ function SeccionHistorial() {
                     <div className="historial-item-der">
                       <span className="historial-total">${Number(v.total).toLocaleString('es-CO')}</span>
                       <span className="historial-estado" style={{ background: est.bg, color: est.color }}>{ESTADO_LABELS[estadoNombre] || estadoNombre}</span>
+                      {/* Pedido hecho fuera de horario: cuándo empieza a prepararse,
+                          en vez del tiempo de entrega */}
                       {(estadoNombre === 'pendiente' || estadoNombre === 'en_proceso') && (
-                        <span style={{ fontSize: 11, color: '#888' }}>⏱️ {tiempoEspera}–{tiempoEspera + 20} min</span>
+                        textoPreparacionEnEspera(v)
+                          ? <span style={{ fontSize: 11, color: '#3730a3', fontWeight: 700 }}>🌙 {textoPreparacionEnEspera(v)}</span>
+                          : <span style={{ fontSize: 11, color: '#888' }}>⏱️ {tiempoEspera}–{tiempoEspera + 20} min</span>
                       )}
                       <button onClick={() => setModalPedido(v)} title="Ver detalle"
                         style={{ background: 'none', border: '1px solid #e5e7eb', borderRadius: 6, padding: '3px 7px', cursor: 'pointer', color: '#555', display: 'flex', alignItems: 'center', lineHeight: 1 }}>
@@ -493,9 +498,15 @@ function SeccionHistorial() {
                 <span style={{ fontSize: 12, color: '#888' }}>{fechaFmt}</span>
               </div>
               {(estadoNombre === 'pendiente' || estadoNombre === 'en_proceso') && (
-                <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#92400e', marginBottom: 12 }}>
-                  ⏱️ Tiempo estimado: {tiempoEspera}–{tiempoEspera + 20} min
-                </div>
+                textoPreparacionEnEspera(v) ? (
+                  <div style={{ background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 8, padding: '8px 12px', fontSize: 13, fontWeight: 700, color: '#3730a3', marginBottom: 12 }}>
+                    🌙 {textoPreparacionEnEspera(v)}
+                  </div>
+                ) : (
+                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#92400e', marginBottom: 12 }}>
+                    ⏱️ Tiempo estimado: {tiempoEspera}–{tiempoEspera + 20} min
+                  </div>
+                )
               )}
               {v.direccion_linea && (
                 <div style={{ fontSize: 12, color: '#888', marginBottom: 12, display: 'flex', gap: 6, alignItems: 'flex-start' }}>

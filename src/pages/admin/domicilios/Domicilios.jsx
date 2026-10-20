@@ -10,6 +10,7 @@ import { nombreConFrutas } from '../../../utils/nombreProducto';
 import './Domicilios.css';
 import { pagoDeVenta, fmtCop } from '../../../utils/pago';
 import { imgOpt } from '../../../utils/cloudinary';
+import PedidoFueraDeHorario from '../../../components/common/PedidoFueraDeHorario';
 
 const COLOR_SALSAS = '#ea580c';
 const parsearSalsas = (raw) => { if (!raw) return []; try { const p = typeof raw === 'string' ? JSON.parse(raw) : raw; return Array.isArray(p) ? p : []; } catch { return []; } };
@@ -34,6 +35,7 @@ const mapVentaDomi = (v) => ({
   monto_transferencia: pagoDeVenta(v).transferencia,
   comprobante:  v.comprobante_url || v.pagos?.[0]?.detallePagos?.find((d) => d.comprobante)?.comprobante || null,
   fecha:        v.fecha ? new Date(v.fecha).toLocaleString('es-CO') : '—',
+  fecha_real:   v.fecha_real || null, // pedido hecho fuera de horario
   observaciones: v.observaciones || '',
   agua_cortesia: !!v.agua_cortesia,
   productos:    (v.detalleVentas || []).map((d) => ({
@@ -147,6 +149,7 @@ function ModalRevision({ open, onClose, onConfirmar, onRechazar, pedido, procesa
             <span className="modal-titulo">Revisar pedido #{pedido.id_venta}</span>
             <button className="modal-cerrar" onClick={() => { reset(); onClose(); }}>✕</button>
           </div>
+          <PedidoFueraDeHorario fechaReal={pedido.fecha_real} style={{ marginBottom: 12 }} />
 
           <p className="form-seccion-titulo">Información del cliente</p>
           <div className="revision-grid">
@@ -378,6 +381,7 @@ export default function Domicilios() {
                   <div>
                     <span className="domi-card-venta">#{d.id_venta}</span>
                     <span className="domi-card-fecha">{d.fecha}</span>
+                    <PedidoFueraDeHorario fechaReal={d.fecha_real} style={{ display: 'flex', marginTop: 4 }} />
                   </div>
                   <span className={`domi-pago-badge ${d.metodo_pago}`}>
                     {d.metodo_pago === 'efectivo' ? <><LogoEfectivo size={12} style={{marginRight:4}}/>Efectivo</> : d.metodo_pago === 'mixto' ? <><LogoEfectivo size={12} style={{marginRight:4}}/>Mixto</> : <><LogoBancolombia size={12} style={{marginRight:4}}/>Transferencia</>}

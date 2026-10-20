@@ -7,6 +7,7 @@ import * as api from '../../../services/api';
 import { nombreConFrutas } from '../../../utils/nombreProducto';
 import '../perfil/Perfil.css';
 import { pagoDeVenta, fmtCop } from '../../../utils/pago';
+import { textoPreparacionEnEspera } from '../../../utils/formatHora';
 
 const COLOR_SALSAS       = '#ea580c';
 const MAX_SALSAS_GRATIS  = 2;
@@ -106,8 +107,12 @@ export default function MisPedidos() {
                           <div className="historial-item-der">
                             <span className="historial-total">${Number(v.total).toLocaleString('es-CO')}</span>
                             <span className="historial-estado" style={{ background: est.bg, color: est.color }}>{ESTADO_LABELS[estadoNombre] || estadoNombre}</span>
+                            {/* Pedido hecho fuera de horario: en vez del tiempo de entrega,
+                                cuándo empieza a prepararse. */}
                             {(estadoNombre === 'pendiente' || estadoNombre === 'en_proceso') && (
-                              <span style={{ fontSize: 11, color: '#888', marginLeft: 6 }}>⏱️ {tiempoEspera}–{tiempoEspera + 20} min</span>
+                              textoPreparacionEnEspera(v)
+                                ? <span style={{ fontSize: 11, color: '#3730a3', fontWeight: 700, marginLeft: 6 }}>🌙 {textoPreparacionEnEspera(v)}</span>
+                                : <span style={{ fontSize: 11, color: '#888', marginLeft: 6 }}>⏱️ {tiempoEspera}–{tiempoEspera + 20} min</span>
                             )}
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"
                               style={{ transform: abierto ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
